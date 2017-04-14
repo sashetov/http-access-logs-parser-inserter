@@ -19,9 +19,7 @@ struct linux_dirent {
 
 #define BUF_SIZE 1024
 
-int
-main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int fd, nread;
     char buf[BUF_SIZE];
     struct linux_dirent *d;
