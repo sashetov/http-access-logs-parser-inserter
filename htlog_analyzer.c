@@ -27,7 +27,7 @@ struct entities {
   int weekday[7];
   int weekdayhour[7][24];
   int monthday[12][31];
-  struct hashtable pages;
+  /*struct hashtable pages;
   struct hashtable user_ips;
   struct hashtable pageviews;
   struct hashtable referers;
@@ -37,8 +37,8 @@ struct entities {
   struct hashtable trails;
   struct hashtable os;
   struct hashtable browsers;
-  char *error;
   */
+  char *error;
 };
 struct logline {
   char *host;
@@ -69,13 +69,8 @@ void entities_reset_combined_maps(struct entities * ent) {
     }
   }
 }
-void entities_ht_init(struct hashtable *ht, int size) {
+void entities_ht_init(int size) {
   (void) hcreate(size);
-  ht_init(ht);
-  ht_set_hash(ht, ht_hash_string);
-  ht_set_key_destructor(ht, ht_destructor_free);
-  ht_set_val_destructor(ht, ht_no_destructor);
-  ht_set_key_compare(ht, ht_compare_string);
 }
 struct entities *entities_new(void) {
   struct entities *ent;
@@ -89,17 +84,7 @@ struct entities *entities_new(void) {
   entities_reset_combined_maps(ent);
   ent->error = NULL;
 
-  entities_ht_init(&ent->pages);
-  entities_ht_init(&ent->user_ips);
-  entities_ht_init(&ent->pageviews);
-  entities_ht_init(&ent->referers);
-  entities_ht_init(&ent->date);
-  entities_ht_init(&ent->month);
-  entities_ht_init(&ent->agents);
-  entities_ht_init(&ent->trails);
-  entities_ht_init(&ent->os);
-  entities_ht_init(&ent->browsers);
-
+  //initialize htables here
   return ent;
 }
 void entities_set_error(struct entities *ent, char *fmt, ...) {
@@ -112,16 +97,8 @@ void entities_set_error(struct entities *ent, char *fmt, ...) {
   ent->error = strdup(buf);
   va_end(ap);
 }
-void entities_reset_hashtables(struct entities *ent) {
-  ht_destroy(&ent->pages);
-  ht_destroy(&ent->pageviews);
-  ht_destroy(&ent->referers);
-  ht_destroy(&ent->date);
-  ht_destroy(&ent->month);
-  ht_destroy(&ent->agents);
-  ht_destroy(&ent->trails);
-  ht_destroy(&ent->os);
-  ht_destroy(&ent->browsers);
+void entities_reset_hashtables() {
+  //free ht in struct entities *ent
 }
 char *entities_get_error(struct entities *ent) {
   if (!ent->error) {
@@ -581,8 +558,8 @@ void print_logline( struct logline * ll ) {
       ll->host, ll->user_hostname, ll->date, ll->hour, 
       ll->timezone, ll->req, ll->ref, ll->agent);
 }
-int stats_counter_incr(struct hashtable *ht, char *key) {
-  char *k;
+int stats_counter_incr(/*struct hashtable *ht, */char *key) {
+/*  char *k;
   unsigned int idx;
   int r;
   long val;
@@ -604,11 +581,12 @@ int stats_counter_incr(struct hashtable *ht, char *key) {
     ht_value(ht, idx) = (void*) val;
     printf();
     return val;
-  }
+  }*/
+  return strlen(key);
 }
-int stats_process_user_ips( struct entities *ent, char *user_ip ) {
+int stats_process_user_ips( /*struct entities *ent, char *user_ip */) {
   int res;
-  res = stats_counter_incr(&ent->user_ips, user_ip);
+  res =0;//res = stats_counter_incr(&ent->user_ips, user_ip);
   if (res == 0) {
     return 1;
   }
@@ -620,7 +598,7 @@ int entities_process_line(struct entities *ent, char *l) {
   if (entities_parse_line(&ll, l) == 0) {
     ent->processed++;
     //print_logline( &ll );
-    if (stats_process_user_ips( ent, ll.user_hostname) ) {
+    if (stats_process_user_ips( /*ent, ll.user_hostname*/) ) {
       goto oom;
     }
     return 0;
@@ -664,20 +642,20 @@ int logs_scan(struct entities *ent, char *filename) {
   ent->endt = time(NULL);
   return 0;
 }
-int print_all_ips( struct entities *ent ){
-  void **table;
-  int ips_len= ht_used(&ent->user_ips);
-  int i;
-  printf("ips_len: %d\n",ips_len);
-  if ((table = ht_get_array(&ent->user_ips)) == NULL) {
+int print_all_ips( /*struct entities *ent*/ ){
+  //void **table;
+  //int ips_len= ht_used(&ent->user_ips);
+  //int i;
+  //printf("ips_len: %d\n",ips_len);
+  /*if ((table = ht_get_array(&ent->user_ips)) == NULL) {
     fprintf(stderr, "Out of memory in print_all_ips()\n");
     return 1;
-  }
-  char* ip;
-  uint32_t ip_n=0;
-  char ip_real[50];
-  qsort(table, ips_len, sizeof(void*)*2, qsort_cmp_long_value);
-  for (i = 0; i < ips_len*2 ; i+=2) {
+  }*/
+  //char* ip;
+  //uint32_t ip_n=0;
+  //char ip_real[50];
+  //qsort(table, ips_len, sizeof(void*)*2, qsort_cmp_long_value);
+  /*for (i = 0; i < ips_len*2 ; i+=2) {
     ip = (char *) table[i];      // key
     unsigned int idx;
     int r = ht_search(&ent->user_ips,ip, &idx);
@@ -688,8 +666,8 @@ int print_all_ips( struct entities *ent ){
     if( ip_n !=0 && ip_n != 1 ){ 
       printf("%lu %u %s %s\n", visits, ip_n, ip, ip_real);
     }
-  }
-  free(table);
+  }*/
+  //free(table);
   return 0;
 }
 int main(int argc, char **argv) {
@@ -708,7 +686,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "%s: %s\n", filename, entities_get_error(ent));
     exit(1);
   }
-  print_all_ips(ent);
+  //print_all_ips(ent);
   entities_free(ent);
   return 0;
 }
