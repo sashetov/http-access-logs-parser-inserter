@@ -8,8 +8,6 @@ static char *data[] = {
   "x-ray", "yankee", "zulu" 
 };
 
-
-
 int main(void) {
   ENTRY e, *ep;
   int i;

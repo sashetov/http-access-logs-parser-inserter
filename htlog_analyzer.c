@@ -672,7 +672,7 @@ int print_all_ips( /*struct entities *ent*/ ){
   return 0;
 }
 int main(int argc, char **argv) {
-  struct entities *ent;
+  /*struct entities *ent;
   char *filename;
   int minargc=2;
   if( argc < minargc ) {
@@ -689,5 +689,6 @@ int main(int argc, char **argv) {
   }
   //print_all_ips(ent);
   entities_free(ent);
-  return 0;
+  return 0; */
+
 }
