@@ -135,6 +135,7 @@ int main(int argc, char **argv) {
   if ( argc < 7 ){
     // hostname user password db_name logs_dir_path num_hostnames
     printf("insufficient args %d < 7\n", argc);
+    printf("%s mysql_hostname mysql_user mysql_password mysql_dbname logs_dir_path \n", argv[0] );
     exit(-1);
   }
   int i;
