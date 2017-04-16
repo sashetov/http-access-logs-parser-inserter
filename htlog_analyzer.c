@@ -11,36 +11,20 @@
 #include <arpa/inet.h>
 #define _GNU_SOURCE
 #include <search.h>
+#include <sys/types.h>
+#include "src/libiberty/hashtab.h"
 
 #define ERROR_MAX          10240
 #define LINE_MAX           1000000
 #define CONFIG_DEBUG       1
 #define CONFIG_STREAM_MODE 0
 #define CONFIG_TIME_DELTA  0
+#define HT_ALLOC_SIZE_MAX  1000000
 
-struct entities {
-  int startt;
-  int endt;
-  int processed;
-  int invalid;
-  int blacklisted;
-  int hour[24];
-  int weekday[7];
-  int weekdayhour[7][24];
-  int monthday[12][31];
-  /*struct hashtable pages;
-  struct hashtable user_ips;
-  struct hashtable pageviews;
-  struct hashtable referers;
-  struct hashtable date;
-  struct hashtable month;
-  struct hashtable agents;
-  struct hashtable trails;
-  struct hashtable os;
-  struct hashtable browsers;
-  */
-  char *error;
-};
+typedef struct node {
+  char  *name;
+  size_t nval;
+} node;
 struct logline {
   char *host;
   char *user_hostname;
@@ -53,42 +37,96 @@ struct logline {
   time_t time;
   struct tm tm;
 };
-void entities_reset_combined_maps(struct entities * ent) {
-  int i, j;
-  for (i = 0; i < 24; i++) {
-    ent->hour[i] = 0;
-    for (j = 0; j < 7; j++){
-      ent->weekdayhour[j][i] = 0;
-    }
+typedef struct entities {
+  int startt;
+  int endt;
+  int processed;
+  int invalid;
+  htab_t browsers;
+  htab_t ips;
+  htab_t pages;
+  htab_t locations;
+  htab_t domains;
+  htab_t users;
+  htab_t oses;
+  htab_t refereres;
+  htab_t search_terms;
+  htab_t trails;
+  char *error;
+} entities;
+
+typedef struct statistics_hourly {
+  int start_hour;
+  int end_hour;  // not inclusive
+}
+
+node *node_init(const char *s) {
+  node *n = malloc(sizeof(node));
+  n->name= (char *) malloc(strlen(s) + 1);
+  strcpy(n->name, s);
+  return n;
+}
+static void node_delete(node *n) {
+  free(n->name);
+  free(n);
+}
+static int nodes_equal(const void *entry, const void *element) {
+  return strcmp(((const node *) entry)->name, ((const node *) element)->name) == 0;
+}
+static void key_del(void *key) {
+  node_delete((node *) key);
+}
+static hashval_t hash(const void *n) {
+  return htab_hash_string(((node *) n)->name);
+}
+size_t get_nval(htab_t table, const char *str) {
+  node *k= node_init(str);
+  node *n= (node *) htab_find(table, k);
+  if (n == NULL) {
+    return -1;
   }
-  for (i = 0; i < 7; i++) {
-    ent->weekday[i] = 0;
+  return n->nval;
+}
+static void add(htab_t table, const char *str, size_t nval) {
+  signed long nval_curr= get_nval(table,str);
+  if( nval_curr > 0 ){
+    nval += nval_curr;
   }
-  for (i = 0; i < 31; i++) {
-    for (j = 0; j < 12; j++) {
-      ent->monthday[j][i] = 0;
-    }
+  node *node = node_init(str);
+  void **slot = htab_find_slot(table, node, INSERT);
+  if (slot != NULL) {
+    node->nval= nval;
+    *slot = node;
   }
 }
-void entities_ht_init(int size) {
-  (void) hcreate(size);
+void htab_t_init(htab_t * table, int size) {
+  if( size < HT_ALLOC_SIZE_MAX ) {
+    table = htab_create_alloc(size, hash, nodes_equal, key_del, calloc, free);
+  }
+  else{
+    table = htab_create_alloc(HT_ALLOC_SIZE_MAX, hash, nodes_equal, key_del, calloc, free);
+  }
 }
-struct entities *entities_new(void) {
-  struct entities *ent;
+entities *entities_new(void) {
+  entities *ent;
   if ((ent = malloc(sizeof(*ent))) == NULL) {
     return NULL;
   }
   ent->startt = ent->endt = time(NULL);
   ent->processed = 0;
   ent->invalid = 0;
-  ent->blacklisted = 0;
-  entities_reset_combined_maps(ent);
   ent->error = NULL;
-
-  //initialize htables here
+  htab_t_init(&ent->pages, HT_ALLOC_SIZE_MAX);
+  htab_t_init(&ent->user_ips, HT_ALLOC_SIZE_MAX);
+  htab_t_init(&ent->pages, HT_ALLOC_SIZE_MAX);
+  htab_t_init(&ent->referers, HT_ALLOC_SIZE_MAX);
+  htab_t_init(&ent->agents, HT_ALLOC_SIZE_MAX);
+  htab_t_init(&ent->os, HT_ALLOC_SIZE_MAX);
+  htab_t_init(&ent->browsers, HT_ALLOC_SIZE_MAX);
+  htab_t_init(&ent->geo, HT_ALLOC_SIZE_MAX);
   return ent;
 }
-void entities_set_error(struct entities *ent, char *fmt, ...) {
+void entities_set_error(entities *ent, char *fmt, ...) {
   va_list ap;
   char buf[ERROR_MAX];
   va_start(ap, fmt);
@@ -101,17 +139,17 @@ void entities_set_error(struct entities *ent, char *fmt, ...) {
 void entities_reset_hashtables() {
   //free ht in struct entities *ent
 }
-char *entities_get_error(struct entities *ent) {
+char *entities_get_error( entities *ent) {
   if (!ent->error) {
     return "No error";
   }
   return ent->error;
 }
-void entities_clear_error(struct entities *ent) {
+void entities_clear_error(entities *ent) {
   free(ent->error);
   ent->error = NULL;
 }
-void entities_free(struct entities *ent) {
+void entities_free(entities *ent) {
   if (!ent) {
     return;
   }
@@ -585,9 +623,9 @@ int stats_counter_incr(/*struct hashtable *ht, */char *key) {
   }*/
   return strlen(key);
 }
-int stats_process_user_ips( /*struct entities *ent, char *user_ip */) {
+int stats_process_user_ips( entities *ent, char *user_ip ) {
   int res;
-  res =0;//res = stats_counter_incr(&ent->user_ips, user_ip);
+  res = stats_counter_incr(&ent->user_ips, user_ip);
   if (res == 0) {
     return 1;
   }
@@ -615,7 +653,7 @@ oom:
   entities_set_error(ent, "Out of memory processing data");
   return 1;
 }
-int logs_scan(struct entities *ent, char *filename) {
+int logs_scan(entities *ent, char *filename) {
   FILE *fp;
   char buf[LINE_MAX];
   int use_stdin = 0;
@@ -643,7 +681,7 @@ int logs_scan(struct entities *ent, char *filename) {
   ent->endt = time(NULL);
   return 0;
 }
-int print_all_ips( /*struct entities *ent*/ ){
+int print_all_ips( entities *ent ){
   //void **table;
   //int ips_len= ht_used(&ent->user_ips);
   //int i;
@@ -671,8 +709,9 @@ int print_all_ips( /*struct entities *ent*/ ){
   //free(table);
   return 0;
 }
+
 int main(int argc, char **argv) {
-  /*struct entities *ent;
+  /*entities *ent;
   char *filename;
   int minargc=2;
   if( argc < minargc ) {
