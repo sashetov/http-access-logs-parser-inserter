@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#define _GNU_SOURCE
 #include <search.h>
 
 #define ERROR_MAX          10240

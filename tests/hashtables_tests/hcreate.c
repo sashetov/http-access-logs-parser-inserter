@@ -1,7 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <search.h>
-static char *data[] = { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel", "india", "juliet", "kilo", "lima", "mike", "november", "oscar", "papa", "quebec", "romeo", "sierra", "tango", "uniform", "victor", "whisky", "x-ray", "yankee", "zulu" };
+static char *data[] = {
+  "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel",
+  "india", "juliet", "kilo", "lima", "mike", "november", "oscar", "papa",
+  "quebec", "romeo", "sierra", "tango", "uniform", "victor", "whisky", 
+  "x-ray", "yankee", "zulu" 
+};
+
+
+
 int main(void) {
   ENTRY e, *ep;
   int i;
