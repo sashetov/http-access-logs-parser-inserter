@@ -1,0 +1,5 @@
+#!/bin/bash
+set -x
+export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig';
+make all
+set +x

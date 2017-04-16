@@ -9,13 +9,14 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-// TODO: rewrite with a quicker hash table and compare
-#include "aht.h"
-#define VI_ERROR_MAX        1024
-#define VI_LINE_MAX         4096
-#define CONFIG_DEBUG        1
-#define CONFIG_STREAM_MODE  0
-#define CONFIG_TIME_DELTA   0
+#include <search.h>
+
+#define ERROR_MAX          10240
+#define LINE_MAX           1000000
+#define CONFIG_DEBUG       1
+#define CONFIG_STREAM_MODE 0
+#define CONFIG_TIME_DELTA  0
+
 struct entities {
   int startt;
   int endt;
@@ -24,8 +25,8 @@ struct entities {
   int blacklisted;
   int hour[24];
   int weekday[7];
-  int weekdayhour[7][24]; /* hour and weekday combined data */
-  int monthday[12][31]; /* month and day combined data */
+  int weekdayhour[7][24];
+  int monthday[12][31];
   struct hashtable pages;
   struct hashtable user_ips;
   struct hashtable pageviews;
@@ -37,6 +38,7 @@ struct entities {
   struct hashtable os;
   struct hashtable browsers;
   char *error;
+  */
 };
 struct logline {
   char *host;
@@ -67,7 +69,8 @@ void entities_reset_combined_maps(struct entities * ent) {
     }
   }
 }
-void entities_ht_init(struct hashtable *ht) {
+void entities_ht_init(struct hashtable *ht, int size) {
+  (void) hcreate(size);
   ht_init(ht);
   ht_set_hash(ht, ht_hash_string);
   ht_set_key_destructor(ht, ht_destructor_free);
@@ -101,10 +104,10 @@ struct entities *entities_new(void) {
 }
 void entities_set_error(struct entities *ent, char *fmt, ...) {
   va_list ap;
-  char buf[VI_ERROR_MAX];
+  char buf[ERROR_MAX];
   va_start(ap, fmt);
-  vsnprintf(buf, VI_ERROR_MAX, fmt, ap);
-  buf[VI_ERROR_MAX-1] = '\0';
+  vsnprintf(buf, ERROR_MAX, fmt, ap);
+  buf[ERROR_MAX-1] = '\0';
   free(ent->error);
   ent->error = strdup(buf);
   va_end(ap);
@@ -397,12 +400,11 @@ uint32_t get_ip_by_dns(char * hostname , char* ip) {
   int i;
   uint32_t ip_n = 0;
   if ( (he = gethostbyname( hostname ) ) == NULL) {
-    herror("gethostbyname");
+    fprintf(stderr, "gethostbyname failed for %s\n", hostname);
     return 1;
   }
   addr_list = (struct in_addr **) he->h_addr_list;
   for(i = 0; addr_list[i] != NULL; i++) {
-    //Return the first one;
     strcpy(ip , inet_ntoa(*addr_list[i]) );
     ip_n = addr_list[i]->s_addr;
     return ip_n;
@@ -600,23 +602,13 @@ int stats_counter_incr(struct hashtable *ht, char *key) {
     val = (long) ht_value(ht, idx);
     val++;
     ht_value(ht, idx) = (void*) val;
+    printf();
     return val;
   }
 }
 int stats_process_user_ips( struct entities *ent, char *user_ip ) {
   int res;
   res = stats_counter_incr(&ent->user_ips, user_ip);
-  /*
-  uint32_t ip_n;
-  char ip[50];
-  char * hostname= "199.16.157.181";
-  // inet_aton stors it host byte order and mysql expects it network byte order
-  ip_n = htonl(get_ip_by_http_socket(hostname, ip));
-  printf("%u %s %s\n", ip_n, ip, hostname);
-  hostname="host-62-24-181-135.as13285.net";
-  ip_n = htonl(get_ip_by_dns(hostname , ip));
-  printf("%u %s %s\n", ip_n, ip, hostname);
-   */
   if (res == 0) {
     return 1;
   }
@@ -624,7 +616,7 @@ int stats_process_user_ips( struct entities *ent, char *user_ip ) {
 }
 int entities_process_line(struct entities *ent, char *l) {
   struct logline ll;
-  char origline[VI_LINE_MAX];
+  char origline[LINE_MAX];
   if (entities_parse_line(&ll, l) == 0) {
     ent->processed++;
     //print_logline( &ll );
@@ -646,7 +638,7 @@ oom:
 }
 int logs_scan(struct entities *ent, char *filename) {
   FILE *fp;
-  char buf[VI_LINE_MAX];
+  char buf[LINE_MAX];
   int use_stdin = 0;
   if (filename[0] == '-' && filename[1] == '\0') {
     if (CONFIG_STREAM_MODE) return 0;
@@ -660,7 +652,7 @@ int logs_scan(struct entities *ent, char *filename) {
     }
   }
   //print_logline_header();
-  while (fgets(buf, VI_LINE_MAX, fp) != NULL) {
+  while (fgets(buf, LINE_MAX, fp) != NULL) {
     if (entities_process_line(ent, buf)) {
       fclose(fp);
       fprintf(stderr, "%s: %s\n", filename, entities_get_error(ent));
@@ -672,7 +664,34 @@ int logs_scan(struct entities *ent, char *filename) {
   ent->endt = time(NULL);
   return 0;
 }
-
+int print_all_ips( struct entities *ent ){
+  void **table;
+  int ips_len= ht_used(&ent->user_ips);
+  int i;
+  printf("ips_len: %d\n",ips_len);
+  if ((table = ht_get_array(&ent->user_ips)) == NULL) {
+    fprintf(stderr, "Out of memory in print_all_ips()\n");
+    return 1;
+  }
+  char* ip;
+  uint32_t ip_n=0;
+  char ip_real[50];
+  qsort(table, ips_len, sizeof(void*)*2, qsort_cmp_long_value);
+  for (i = 0; i < ips_len*2 ; i+=2) {
+    ip = (char *) table[i];      // key
+    unsigned int idx;
+    int r = ht_search(&ent->user_ips,ip, &idx);
+    long visits = (long) ht_value( &ent->user_ips, idx );
+    // inet_aton is in host byte order 
+    // htonl to make it to network byte order for mysql
+    ip_n = htonl(get_ip_by_dns(ip, ip_real));
+    if( ip_n !=0 && ip_n != 1 ){ 
+      printf("%lu %u %s %s\n", visits, ip_n, ip, ip_real);
+    }
+  }
+  free(table);
+  return 0;
+}
 int main(int argc, char **argv) {
   struct entities *ent;
   char *filename;
@@ -689,7 +708,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "%s: %s\n", filename, entities_get_error(ent));
     exit(1);
   }
+  print_all_ips(ent);
   entities_free(ent);
-
   return 0;
 }
