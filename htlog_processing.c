@@ -1,7 +1,7 @@
-#include "parse_h_metrics.h"
-
+#if !defined( __HTTPACCESS_METRICS__ ) || ! defined ( __LOG_LINE__ )
+#include "htlog_processing.h"
 httpaccess_metrics *h_metrics_init(void) {
-  httpaccess_metrics *h_metrics;
+  httpaccess_metrics *_metrics;
   if ((h_metrics = malloc(sizeof(* h_metrics ))) == NULL) {
     return NULL;
   }
@@ -73,7 +73,7 @@ void h_metrics_free(httpaccess_metrics *h_metrics) {
   h_metrics_clear_error(h_metrics);
   free(h_metrics);
 }
-int h_metrics_parse_line(struct logline *ll, char *l) {
+int h_metrics_parse_line(logline *ll, char *l) {
   //domain.tld userhostname.dns.tld - - [03/Apr/2017:00:02:29 +0000] "GET /feed/ HTTP/1.0" 200 55490 "-" "-" 185.41.10.139
   char *user_hostname, *date, *hour, *timezone, *host, *agent, *req, *ref, *p;
   char *agent_start = NULL, *req_end = NULL, *ref_end = NULL;
@@ -238,7 +238,7 @@ int h_metrics_parse_line(struct logline *ll, char *l) {
 void print_logline_header( ) {
   printf ("host|user_hostname|date|hour|timezone|req|ref|agent\n");
 }
-void print_logline( struct logline * ll ) {
+void print_logline( logline * ll ) {
   printf ("%s|%s|%s|%s|%s|%s|%s|%s\n", 
       ll->host, ll->user_hostname, ll->date, ll->hour, 
       ll->timezone, ll->req, ll->ref, ll->agent);
@@ -283,8 +283,8 @@ int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
   }
   return 0;
 }
-int h_metrics_process_line(struct httpaccess_metrics *h_metrics, char *l) {
-  struct logline ll;
+int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
+  logline ll;
   char origline[LINE_MAX];
   if (h_metrics_parse_line(&ll, l) == 0) {
     h_metrics->lines_processed++;
@@ -378,4 +378,16 @@ int print_all_ips( httpaccess_metrics *h_metrics ){
   //free(table);
   return 0;
 }
-
+int scan_file_to_loglines( char* filename  ) {
+  httpaccess_metrics *h_metrics;
+  h_metrics = h_metrics_init();
+  if ( logs_scan( h_metrics, filename ) ) {
+    char *err= h_metrics_get_error( h_metrics );
+    if( err ) {
+      printf(stderr, "%s\n", err);
+      exit(1);
+    }
+  }
+  h_metrics_free(h_metrics);
+}
+#endif

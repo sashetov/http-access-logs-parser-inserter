@@ -23,8 +23,8 @@ mix DERIVED FROM: lookup2.c, by Bob Jenkins, December 1996, Public Domain.  hash
 #include <inttypes.h>
 #endif
 #ifdef HAVE_STDINT_H
-#include <stdint.h>
 #endif
+#include <stdint.h>
 #include <stdio.h>
 #include "libiberty.h"
 #include "ansidecl.h"

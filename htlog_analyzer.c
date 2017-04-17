@@ -9,20 +9,11 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#define _GNU_SOURCE
 #include <search.h>
 #include <sys/types.h>
-#include "hashtab.h"
-#include "ht_nodes.h"
-#define ERROR_MAX          10240
-#define LINE_MAX           1000000
-#define CONFIG_DEBUG       1
-#define CONFIG_STREAM_MODE 0
-#define CONFIG_TIME_DELTA  0
-#define HT_ALLOC_SIZE_MAX  1000000
+#include "htlog_processing.h"
 
 int main(int argc, char **argv) {
-  httpaccess_metrics *h_metrics;
   char *filename;
   int minargc=2;
   if( argc < minargc ) {
@@ -33,13 +24,6 @@ int main(int argc, char **argv) {
   filename = argv[1];
   printf("logfile: %s\n", filename);
   setlocale(LC_ALL, "C");
-  h_metrics = h_metrics_init();
-  if ( logs_scan( h_metrics, filename ) ) {
-    fprintf(stderr, "%s: %s\n", filename, h_metrics_get_error(h_metrics));
-    exit(1);
-  }
-  //print_all_ips(ent);
-  h_metrics_free(h_metrics);
+  scan_file_to_loglines ( filename );
   return 0;
 }
-
