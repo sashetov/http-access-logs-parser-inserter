@@ -1,7 +1,6 @@
 #ifndef ___HT_NODE__
+#include <stdlib.h>
 #include "ht_nodes.h"
-#endif
-
 static hashval_t ht_get_node_hash(const void *n) {
   return htab_hash_string(((node *) n)->name);
 }
@@ -37,7 +36,7 @@ size_t ht_kget_nval(htab_t table, const char *str) {
   }
   return n->nval;
 }
-static void ht_kadd_val_to_k_nval(htab_t table, const char *str, size_t nval) {
+void ht_kadd_val_to_k_nval(htab_t table, const char *str, size_t nval) {
   signed long nval_curr= ht_kget_nval(table,str);
   if( nval_curr > 0 ){
     nval += nval_curr;
@@ -49,3 +48,4 @@ static void ht_kadd_val_to_k_nval(htab_t table, const char *str, size_t nval) {
     *slot = node;
   }
 }
+#endif

@@ -1,24 +1,10 @@
 /* ANSI and traditional C compatability macros Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010, 2013 Free Software Foundation, Inc.  This file is part of the GNU C Library.  This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.  You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
-/* ANSI and traditional C compatibility macros ANSI C is assumed if __STDC__ is #defined.
-Macro    ANSI C definition  Traditional C definition
------    ---- - ----------  ----------- - ----------
-PTR      `void *'    `char *'
-const    not defined    `'
-volatile    not defined    `'
-signed    not defined    `'
-For ease of writing code which uses GCC extensions but needs to be portable to other compilers, we provide the GCC_VERSION macro that simplifies testing __GNUC__ and __GNUC_MINOR__ together, and various wrappers around __attribute__.  Also, __extension__ will be #defined to nothing if it doesn't work.  See below.  */
 #ifndef  _ANSIDECL_H
 #define _ANSIDECL_H  1
 #ifdef __cplusplus
 extern "C" {
 #endif
-  /* Every source file includes this file, so they will all get the switch for lint.  */
   /* LINTLIBRARY */
-  /* Using MACRO(x,y) in cpp #if conditionals does not work with some older preprocessors.  Thus we can't define something like this:
-#define HAVE_GCC_VERSION(MAJOR, MINOR) \
-(__GNUC__ > (MAJOR) || (__GNUC__ == (MAJOR) && __GNUC_MINOR__ >= (MINOR)))
-and then test "#if HAVE_GCC_VERSION(2,7)".
-So instead we use the macro below and test it against specific values.  */
   /* This macro simplifies testing whether we are using gcc, and if it is of a particular minimum version. (Both major & minor numbers are significant.)  This macro will evaluate to 0 if we are not using gcc at all.  */
 #ifndef GCC_VERSION
 #define GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)

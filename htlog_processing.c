@@ -1,7 +1,7 @@
 #if !defined( __HTTPACCESS_METRICS__ ) || ! defined ( __LOG_LINE__ )
 #include "htlog_processing.h"
 httpaccess_metrics *h_metrics_init(void) {
-  httpaccess_metrics *_metrics;
+  httpaccess_metrics *h_metrics;
   if ((h_metrics = malloc(sizeof(* h_metrics ))) == NULL) {
     return NULL;
   }
@@ -121,13 +121,7 @@ int h_metrics_parse_line(logline *ll, char *l) {
     }
   }
   //REQ
-  if ((req = strstr(l, "\"GET")) != NULL ||
-      (req = strstr(l, "\"POST")) != NULL ||
-      (req = strstr(l, "\"HEAD")) != NULL ||
-      (req = strstr(l, "\"get")) != NULL ||
-      (req = strstr(l, "\"post")) != NULL ||
-      (req = strstr(l, "\"head")) != NULL)
-  {
+  if ((req = strstr(l, "\"GET")) != NULL || (req = strstr(l, "\"POST")) != NULL || (req = strstr(l, "\"HEAD")) != NULL || (req = strstr(l, "\"get")) != NULL || (req = strstr(l, "\"post")) != NULL || (req = strstr(l, "\"head")) != NULL) {
     req++;
   }
   else {
@@ -243,53 +237,44 @@ void print_logline( logline * ll ) {
       ll->host, ll->user_hostname, ll->date, ll->hour, 
       ll->timezone, ll->req, ll->ref, ll->agent);
 }
-int stats_counter_incr(struct htab_t *ht, char *key) {
+int stats_counter_incr( htab_t *ht, char *key ) {
   char *k;
   unsigned int idx;
   int r;
   long val;
   const PTR el;
-  add_(ht,key,1);
+  ht_kadd_val_to_k_nval( ht, key, (void*) 1);
   node *kn= node_init(key);
   node *n = (node *)htab_find(ht, kn);
   if( n != NULL ){
     n->nval++;
   }
-  else 
-  if (r == HT_NOTFOUND) {
-    k = strdup(key);
-    if (k == NULL) {
-      return 0;
-    }
-    if ( ht_add( ht, k, (void*) 1 ) != HT_OK ) {
-      free(k);
-      return 0;
-    }
-    return 1;
+  else {
+    n = kn;
+    free(k);
   }
- //else {
- //  val = (long) ht_value(ht, idx);
- //  val++;
- //  ht_value(ht, idx) = (void*) val;
- //  printf();
- //  return val;
- //}
-  return strlen(key);
+  return n->nval;
 }
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
-  res = stats_counter_incr( &h_metrics->client_ips, user_ip);
+  int res = stats_counter_incr( &h_metrics->client_ips, user_ip);
   if (res == 0) {
     return 1;
   }
   return 0;
 }
+#include <stdio.h>
+#ifndef __uint32_t_defined
+#include <stddef.h>
+#define __uint32_t_defined
+#endif
+#include <string.h>
 int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
   logline ll;
   char origline[LINE_MAX];
   if (h_metrics_parse_line(&ll, l) == 0) {
     h_metrics->lines_processed++;
     print_logline( &ll );
-    if (stats_process_user_ips( /*h_metrics, ll.user_hostname*/) ) {
+    if (stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
       goto oom;
     }
     return 0;
@@ -297,12 +282,12 @@ int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
   else {
     h_metrics->lines_failed++;
     if (CONFIG_DEBUG) {
-      fprintf(stderr, "Invalid line: %s\n", origline);
+      fprintf( stderr, "Invalid line: %s\n", origline);
     }
     return 0;
   }
 oom:
-  h_metrics_set_error(ent, "Out of memory processing data");
+  h_metrics_set_error(h_metrics, "Out of memory processing data");
   return 1;
 }
 int logs_scan(httpaccess_metrics *h_metrics, char *filename) {
@@ -317,23 +302,27 @@ int logs_scan(httpaccess_metrics *h_metrics, char *filename) {
   }
   else {
     if ((fp = fopen(filename, "r")) == NULL) {
+      int errno;
       h_metrics_set_error(h_metrics, "Unable to open '%s': '%s'", filename, strerror(errno));
       return 1;
     }
   }
   //print_logline_header();
   while (fgets(buf, LINE_MAX, fp) != NULL) {
-    if (h_metrics_process_line(ent, buf)) {
+    if (h_metrics_process_line(h_metrics, buf)) {
       fclose(fp);
-      fprintf(stderr, "%s: %s\n", filename, h_metrics_get_error(ent));
+      fprintf(stderr, "%s: %s\n", filename, h_metrics_get_error(h_metrics));
       return 1;
     }
   }
-  if (!use_stdin)
+  if (!use_stdin) {
     fclose(fp);
-  h_metrics->endt = time(NULL);
+  }
+  h_metrics->et = time(NULL);
   return 0;
 }
+#include <arpa/inet.h>
+#include <netdb.h>
 uint32_t get_ip_by_dns(char * hostname , char* ip) {
   struct hostent *he;
   struct in_addr **addr_list;

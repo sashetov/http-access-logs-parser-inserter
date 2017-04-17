@@ -4,6 +4,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+#include <string.h>
+#include <time.h>
+#include <stdarg.h>
+#include <ctype.h>
+#include <sys/types.h>
 #include "ansidecl.h"
 #ifndef GTY
 #define GTY(X)

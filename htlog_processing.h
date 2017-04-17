@@ -1,9 +1,6 @@
-#define ERROR_MAX          10240
-#define LINE_MAX           1000000
-#define CONFIG_DEBUG       1
-#define CONFIG_STREAM_MODE 0
-#define CONFIG_TIME_DELTA  0
-#define HT_ALLOC_SIZE_MAX  1000000
+#ifndef ___HT_NODE__
+#include "ht_nodes.h"
+#endif
 #ifndef __HASHTAB_H__
 #include "hashtab.h"
 #endif
@@ -40,12 +37,9 @@ char *h_metrics_get_error( httpaccess_metrics *h_metrics );
 void h_metrics_clear_error( httpaccess_metrics *h_metrics);
 void h_metrics_free( httpaccess_metrics *h_metrics);
 int h_metrics_process_line( httpaccess_metrics *h_metrics, char *l); 
-int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip );
 int logs_scan( httpaccess_metrics *h_metrics, char *filename);
 int print_all_ips( httpaccess_metrics *h_metrics );
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip );
-int h_metrics_process_line( httpaccess_metrics *h_metrics, char *l);
-int logs_scan( httpaccess_metrics *h_metrics, char *filename);
 int print_all_ips( httpaccess_metrics *h_metrics );
 #endif
 #ifndef __LOG_LINE__
@@ -62,8 +56,10 @@ typedef struct logline {
   struct tm tm;
 } logline;
 #define __LOG_LINE__
+#include <stddef.h> //uint32_t
+#include <stdint.h> //uint32_t
 void print_logline_header( );
-int h_metrics_parse_line( logline *ll, char *l);
+int hg_metrics_parse_line( logline *ll, char *l);
 void print_logline( logline * ll );
 int stats_counter_incr( htab_t *ht, char *key);
 uint32_t get_ip_by_dns( char * hostname , char* ip);
