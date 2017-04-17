@@ -9,7 +9,7 @@ htlog_analyzer.o: hashtab.c ht_nodes.c htlog_processing.c htlog_analyzer.c
 	$(CC) -c   $(HASHTAB_CFLAGS) $(CFLAGS) $(DEBUG) hashtab.c ht_nodes.c htlog_processing.c htlog_analyzer.c
 
 test_progs:
-	$(MAKE) -C tests/ ALL
+	$(MAKE) -C tests/ all
 
 DUMP_CPP_VARS:
 	gcc -dM -E - < /dev/null
