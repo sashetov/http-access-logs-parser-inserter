@@ -30,8 +30,7 @@ So instead we use the macro below and test it against specific values.  */
 #undef const
 #undef volatile
 #undef signed
-  /* inline requires special treatment; it's in C99, and GCC >=2.7 supports it too, but it's not in C89.  */
-#undef inline
+#undef inline /* inline requires special treatment; it's in C99, and GCC >=2.7 supports it too, but it's not in C89.  */
 #if __STDC_VERSION__ >= 199901L || defined(__cplusplus) || (defined(__SUNPRO_C) && defined(__C99FEATURES__))
   /* it's a keyword */
 #else
