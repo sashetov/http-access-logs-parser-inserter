@@ -12,6 +12,6 @@ test_progs:
 dump_cpp_vars:
 	gcc -dM -E - < /dev/null
 clean_local:
-	rm -rf *.o htlog_analyzer
+	rm -rf *.o htlog_analyzer cloudstats
 clean: clean_local
 	$(MAKE) -C tests/ clean

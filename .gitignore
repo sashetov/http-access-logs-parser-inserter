@@ -12,3 +12,4 @@ tests/mysql_client_tests/mysql_version
 tests/pthread_tests/pthread_read_n_files
 tests/pthread_tests/pthreads_read_lines
 make.err.log
+cloudstats
