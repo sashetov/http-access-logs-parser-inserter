@@ -65,11 +65,11 @@ void h_metrics_clear_error(httpaccess_metrics *h_metrics) {
   free(h_metrics->error);
   h_metrics->error = NULL;
 }
-void h_metrics_free(httpaccess_metrics *h_metrics) {
+void h_metrics_free( httpaccess_metrics *h_metrics ) {
   if (!h_metrics) {
     return;
   }
-  h_metrics_reset_hashtables(h_metrics);
+  h_metrics_reset_hashtables( h_metrics);
   h_metrics_clear_error(h_metrics);
   free(h_metrics);
 }

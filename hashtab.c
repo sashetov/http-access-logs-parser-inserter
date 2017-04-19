@@ -219,10 +219,13 @@ void htab_empty (htab_t htab) {
   size_t size = htab_size (htab);
   PTR *entries = htab->entries;
   int i;
-  if (htab->del_f)
-    for (i = size - 1; i >= 0; i--)
-      if (entries[i] != HTAB_EMPTY_ENTRY && entries[i] != HTAB_DELETED_ENTRY)
+  if (htab->del_f){
+    for (i = size - 1; i >= 0; i--){
+      if (entries[i] != HTAB_EMPTY_ENTRY && entries[i] != HTAB_DELETED_ENTRY) {
         (*htab->del_f) (entries[i]);
+      }
+    }
+  }
   /* Instead of clearing megabyte, downsize the table.  */
   if (size > 1024*1024 / sizeof (PTR)) {
     int nindex = higher_prime_index (1024 / sizeof (PTR));

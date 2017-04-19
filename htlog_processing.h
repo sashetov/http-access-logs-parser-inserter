@@ -55,6 +55,8 @@ typedef struct logline {
   time_t time;
   struct tm tm;
 } logline;
+#define LINE_MAX  1000000
+#define ERROR_MAX 10240
 #define __LOG_LINE__
 #include <stddef.h> //uint32_t
 #include <stdint.h> //uint32_t

@@ -10,7 +10,7 @@ node *node_init(const char *s) {
   strcpy(n->name, s);
   return n;
 }
-void ht_init(htab_t *table, int size) {
+void ht_init( htab_t *table, int size) {
   if( size < HT_ALLOC_SIZE_MAX ) {
     table = htab_create_alloc(size, ht_get_node_hash, nodes_equal, key_del, calloc, free);
   }

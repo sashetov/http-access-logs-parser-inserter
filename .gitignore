@@ -2,6 +2,7 @@
 .*.sw*
 *.o
 .*.o
+*.vim
 htlog_analyzer
 tests/dirents_stat_mv_tests/get_dents
 tests/dirents_stat_mv_tests/move_files
