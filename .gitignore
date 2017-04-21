@@ -6,6 +6,7 @@
 htlog_analyzer
 tests/dirents_stat_mv_tests/get_dents
 tests/dirents_stat_mv_tests/move_files
+tests/hashtables_tests/hashlibi
 tests/hashtables_tests/hcreate
 tests/mysql_client_tests/mysql_query_did
 tests/mysql_client_tests/mysql_version
