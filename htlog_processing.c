@@ -1,31 +1,29 @@
 #if !defined( __HTTPACCESS_METRICS__ ) || ! defined ( __LOG_LINE__ )
 #include "htlog_processing.h"
-httpaccess_metrics *h_metrics_init(void) {
-  httpaccess_metrics *h_metrics;
+void h_metrics_init( httpaccess_metrics* h_metrics ) {
   if ((h_metrics = malloc(sizeof(* h_metrics ))) == NULL) {
-    return NULL;
+    return ;
   }
   h_metrics->error = NULL;
   h_metrics->st= h_metrics->et = time(NULL);
   h_metrics->lines_processed= 0;
   h_metrics->lines_failed   = 0;
-  ht_init(&h_metrics->per_hour_distinct_did_access_count__hits, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->client_ips, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->client_geo_location, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->per_hour_distinct_did_cip_access_count__visits, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->client_ua_str, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->client_browser_vers, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->client_oses_vers, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->client_platform, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->page_paths, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->per_hour_distinct_did_pid_cip_access_count__pageviews, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->tvectors_inner, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->per_hour_tvectors_inner, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->referer_urls, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->search_qstr, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->tvectors_incoming, HT_ALLOC_SIZE_MAX);
-  ht_init(&h_metrics->per_hour_tvectors_inc, HT_ALLOC_SIZE_MAX);
-  return h_metrics;
+  ht_init(&h_metrics->per_hour_distinct_did_access_count__hits, HT_ALLOC_SIZE_DEFAULT );
+  ht_init(&h_metrics->client_ips, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->client_geo_location, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->per_hour_distinct_did_cip_access_count__visits, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->client_ua_str, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->client_browser_vers, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->client_oses_vers, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->client_platform, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->page_paths, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->per_hour_distinct_did_pid_cip_access_count__pageviews, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->tvectors_inner, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->per_hour_tvectors_inner, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->referer_urls, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->search_qstr, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->tvectors_incoming, HT_ALLOC_SIZE_DEFAULT);
+  ht_init(&h_metrics->per_hour_tvectors_inc, HT_ALLOC_SIZE_DEFAULT);
 }
 void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {
   va_list ap;
@@ -274,7 +272,7 @@ int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
   if (h_metrics_parse_line(&ll, l) == 0) {
     h_metrics->lines_processed++;
     print_logline( &ll );
-    if (stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
+   if (stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
       goto oom;
     }
     return 0;
@@ -369,11 +367,11 @@ int print_all_ips( httpaccess_metrics *h_metrics ){
 }
 int scan_file_to_loglines( char* filename  ) {
   httpaccess_metrics *h_metrics;
-  h_metrics = h_metrics_init();
+  h_metrics_init( h_metrics );
   if ( logs_scan( h_metrics, filename ) ) {
     char *err= h_metrics_get_error( h_metrics );
     if( err ) {
-      printf(stderr, "%s\n", err);
+      fprintf(stderr, "%s\n", err);
       exit(1);
     }
   }

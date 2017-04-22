@@ -1,4 +1,8 @@
-#ifndef ___HT_NODE__
+#define LINE_MAX                100
+#define CONFIG_STREAM_MODE      0
+#define CONFIG_TIME_DELTA       0
+#define CONFIG_DEBUG            1
+#ifndef __HT_NODE__
 #include "ht_nodes.h"
 #endif
 #ifndef __HASHTAB_H__
@@ -31,7 +35,7 @@ typedef struct httpaccess_metrics {
   htab_t per_hour_tvectors_inc;
 } httpaccess_metrics;
 #define __HTTPACCESS_METRICS__
-httpaccess_metrics *h_metrics_init(void);
+void h_metrics_init( httpaccess_metrics *h_metrics);
 void h_metrics_reset_hashtables( httpaccess_metrics *h_metrics);
 char *h_metrics_get_error( httpaccess_metrics *h_metrics );
 void h_metrics_clear_error( httpaccess_metrics *h_metrics);
@@ -55,8 +59,6 @@ typedef struct logline {
   time_t time;
   struct tm tm;
 } logline;
-#define LINE_MAX  1000000
-#define ERROR_MAX 10240
 #define __LOG_LINE__
 #include <stddef.h> //uint32_t
 #include <stdint.h> //uint32_t

@@ -14,3 +14,4 @@ tests/pthread_tests/pthread_read_n_files
 tests/pthread_tests/pthreads_read_lines
 make.err.log
 cloudstats
+logfile

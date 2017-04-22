@@ -1,5 +1,6 @@
 DEBUG=-g
-CFLAGS=-O2 -Wall -W -fno-strict-aliasing -fno-omit-frame-pointer -v
+#CFLAGS=-O2 -Wall -W -fno-strict-aliasing -fno-omit-frame-pointer -v
+CFLAGS=-O0 -Wall -W -fno-strict-aliasing -fno-omit-frame-pointer -v
 HASHTAB_CFLAGS=-DHAVE_MALLOC_H -DHAVE_STDINT_H -DHAVE_STDLIB_H -DHAVE_STRING_H 
 
 all: dump_cpp_vars clean test_progs cloudstats

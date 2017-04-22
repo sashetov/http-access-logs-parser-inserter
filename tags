@@ -1,0 +1,283 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ACONCAT	libiberty.h	64;"	d
+ARG_UNUSED	ansidecl.h	79;"	d
+ARG_UNUSED	ansidecl.h	81;"	d
+ARRAY_SIZE	libiberty.h	260;"	d
+ASTRDUP	libiberty.h	267;"	d
+ASTRDUP	libiberty.h	281;"	d
+ATTRIBUTE_ALIGNED_ALIGNOF	ansidecl.h	155;"	d
+ATTRIBUTE_ALIGNED_ALIGNOF	ansidecl.h	157;"	d
+ATTRIBUTE_COLD	ansidecl.h	167;"	d
+ATTRIBUTE_COLD	ansidecl.h	169;"	d
+ATTRIBUTE_FPTR_PRINTF	ansidecl.h	122;"	d
+ATTRIBUTE_FPTR_PRINTF	ansidecl.h	124;"	d
+ATTRIBUTE_FPTR_PRINTF_1	ansidecl.h	126;"	d
+ATTRIBUTE_FPTR_PRINTF_2	ansidecl.h	127;"	d
+ATTRIBUTE_FPTR_PRINTF_3	ansidecl.h	128;"	d
+ATTRIBUTE_FPTR_PRINTF_4	ansidecl.h	129;"	d
+ATTRIBUTE_FPTR_PRINTF_5	ansidecl.h	130;"	d
+ATTRIBUTE_HOT	ansidecl.h	174;"	d
+ATTRIBUTE_HOT	ansidecl.h	176;"	d
+ATTRIBUTE_MALLOC	ansidecl.h	48;"	d
+ATTRIBUTE_MALLOC	ansidecl.h	50;"	d
+ATTRIBUTE_NONNULL	ansidecl.h	89;"	d
+ATTRIBUTE_NONNULL	ansidecl.h	91;"	d
+ATTRIBUTE_NORETURN	ansidecl.h	84;"	d
+ATTRIBUTE_NULL_PRINTF	ansidecl.h	135;"	d
+ATTRIBUTE_NULL_PRINTF	ansidecl.h	137;"	d
+ATTRIBUTE_NULL_PRINTF_1	ansidecl.h	139;"	d
+ATTRIBUTE_NULL_PRINTF_2	ansidecl.h	140;"	d
+ATTRIBUTE_NULL_PRINTF_3	ansidecl.h	141;"	d
+ATTRIBUTE_NULL_PRINTF_4	ansidecl.h	142;"	d
+ATTRIBUTE_NULL_PRINTF_5	ansidecl.h	143;"	d
+ATTRIBUTE_PACKED	ansidecl.h	162;"	d
+ATTRIBUTE_PRINTF	ansidecl.h	112;"	d
+ATTRIBUTE_PRINTF_1	ansidecl.h	113;"	d
+ATTRIBUTE_PRINTF_2	ansidecl.h	114;"	d
+ATTRIBUTE_PRINTF_3	ansidecl.h	115;"	d
+ATTRIBUTE_PRINTF_4	ansidecl.h	116;"	d
+ATTRIBUTE_PRINTF_5	ansidecl.h	117;"	d
+ATTRIBUTE_PURE	ansidecl.h	105;"	d
+ATTRIBUTE_PURE	ansidecl.h	107;"	d
+ATTRIBUTE_RETURNS_NONNULL	ansidecl.h	97;"	d
+ATTRIBUTE_RETURNS_NONNULL	ansidecl.h	99;"	d
+ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern char *choose_temp_base (void) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL;$/;"	v
+ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern char *xstrdup (const char *) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL; $/;"	v
+ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern char *xstrndup (const char *, size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL; $/;"	v
+ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern void *xcalloc (size_t, size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL;$/;"	v
+ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern void *xmalloc (size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL; $/;"	v
+ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern void *xmemdup (const void *, size_t, size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL;$/;"	v
+ATTRIBUTE_SENTINEL	ansidecl.h	148;"	d
+ATTRIBUTE_SENTINEL	ansidecl.h	150;"	d
+ATTRIBUTE_SENTINEL	libiberty.h	/^  extern char *concat (const char *, ...) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL ATTRIBUTE_SENTINEL;$/;"	v
+ATTRIBUTE_SENTINEL	libiberty.h	/^  extern char *concat_copy2 (const char *, ...) ATTRIBUTE_RETURNS_NONNULL ATTRIBUTE_SENTINEL;$/;"	v
+ATTRIBUTE_SENTINEL	libiberty.h	/^  extern char *reconcat (char *, const char *, ...) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL ATTRIBUTE_SENTINEL;$/;"	v
+ATTRIBUTE_UNUSED	ansidecl.h	72;"	d
+ATTRIBUTE_UNUSED	ansidecl.h	74;"	d
+ATTRIBUTE_UNUSED_LABEL	ansidecl.h	57;"	d
+ATTRIBUTE_UNUSED_LABEL	ansidecl.h	59;"	d
+ATTRIBUTE_UNUSED_LABEL	ansidecl.h	63;"	d
+ATTRIBUTE_UNUSED_LABEL	ansidecl.h	65;"	d
+CHAR_BIT	hashtab.c	29;"	d	file:
+CONFIG_DEBUG	htlog_processing.h	4;"	d
+CONFIG_STREAM_MODE	htlog_processing.h	2;"	d
+CONFIG_TIME_DELTA	htlog_processing.h	3;"	d
+C_ALLOCA	libiberty.h	266;"	d
+C_ALLOCA	libiberty.h	276;"	d
+C_ALLOCA	libiberty.h	277;"	d
+ENUM_BITFIELD	ansidecl.h	191;"	d
+ENUM_BITFIELD	ansidecl.h	193;"	d
+ENUM_BITFIELD	ansidecl.h	195;"	d
+ERROR_MAX	ht_nodes.h	1;"	d
+EXPORTED_CONST	ansidecl.h	185;"	d
+EXPORTED_CONST	ansidecl.h	187;"	d
+GCC_VERSION	ansidecl.h	10;"	d
+GTY	hashtab.h	14;"	d
+HTAB_DELETED_ENTRY	hashtab.h	26;"	d
+HTAB_EMPTY_ENTRY	hashtab.h	25;"	d
+HT_ALLOC_SIZE_DEFAULT	ht_nodes.h	3;"	d
+HT_ALLOC_SIZE_MAX	ht_nodes.h	2;"	d
+INSERT	hashtab.h	/^  enum insert_option {NO_INSERT, INSERT};$/;"	e	enum:insert_option
+LIBIBERTY_H	libiberty.h	3;"	d
+LINE_MAX	htlog_processing.h	1;"	d
+NO_INSERT	hashtab.h	/^  enum insert_option {NO_INSERT, INSERT};$/;"	e	enum:insert_option
+PEXECUTE_FIRST	libiberty.h	227;"	d
+PEXECUTE_LAST	libiberty.h	228;"	d
+PEXECUTE_ONE	libiberty.h	229;"	d
+PEXECUTE_SEARCH	libiberty.h	230;"	d
+PEXECUTE_VERBOSE	libiberty.h	231;"	d
+PEX_BINARY_ERROR	libiberty.h	198;"	d
+PEX_BINARY_INPUT	libiberty.h	192;"	d
+PEX_BINARY_OUTPUT	libiberty.h	194;"	d
+PEX_LAST	libiberty.h	184;"	d
+PEX_RECORD_TIMES	libiberty.h	175;"	d
+PEX_SAVE_TEMPS	libiberty.h	179;"	d
+PEX_SEARCH	libiberty.h	186;"	d
+PEX_STDERR_TO_PIPE	libiberty.h	196;"	d
+PEX_STDERR_TO_STDOUT	libiberty.h	190;"	d
+PEX_SUFFIX	libiberty.h	188;"	d
+PEX_USE_PIPES	libiberty.h	177;"	d
+PTR	ansidecl.h	15;"	d
+PTR	ansidecl.h	30;"	d
+USE_C_ALLOCA	libiberty.h	274;"	d
+USE_C_ALLOCA	libiberty.h	275;"	d
+XALLOCA	libiberty.h	142;"	d
+XALLOCAVAR	libiberty.h	155;"	d
+XALLOCAVEC	libiberty.h	148;"	d
+XCNEW	libiberty.h	144;"	d
+XCNEWVAR	libiberty.h	157;"	d
+XCNEWVEC	libiberty.h	150;"	d
+XDELETE	libiberty.h	146;"	d
+XDELETEVEC	libiberty.h	153;"	d
+XDUP	libiberty.h	145;"	d
+XDUPVAR	libiberty.h	158;"	d
+XDUPVEC	libiberty.h	151;"	d
+XNEW	libiberty.h	143;"	d
+XNEWVAR	libiberty.h	156;"	d
+XNEWVEC	libiberty.h	149;"	d
+XOBFINISH	libiberty.h	164;"	d
+XOBNEW	libiberty.h	161;"	d
+XOBNEWVAR	libiberty.h	163;"	d
+XOBNEWVEC	libiberty.h	162;"	d
+XRESIZEVAR	libiberty.h	159;"	d
+XRESIZEVEC	libiberty.h	152;"	d
+_ANSIDECL_H	ansidecl.h	3;"	d
+__HASHTAB_H__	hashtab.h	3;"	d
+__HTTPACCESS_METRICS__	htlog_processing.h	37;"	d
+__HT_NODE__	ht_nodes.h	11;"	d
+__LOG_LINE__	htlog_processing.h	62;"	d
+__attribute__	ansidecl.h	43;"	d
+__extension__	ansidecl.h	181;"	d
+__uint32_t_defined	htlog_processing.c	266;"	d	file:
+_hex_array_size	libiberty.h	166;"	d
+_hex_bad	libiberty.h	167;"	d
+agent	htlog_processing.h	/^  char *agent;$/;"	m	struct:logline
+alloca	libiberty.h	263;"	d
+alloca	libiberty.h	265;"	d
+alloca	libiberty.h	273;"	d
+basename	libiberty.h	40;"	d
+client_browser_vers	htlog_processing.h	/^  htab_t client_browser_vers;$/;"	m	struct:httpaccess_metrics
+client_geo_location	htlog_processing.h	/^  htab_t client_geo_location;$/;"	m	struct:httpaccess_metrics
+client_ips	htlog_processing.h	/^  htab_t client_ips;$/;"	m	struct:httpaccess_metrics
+client_oses_vers	htlog_processing.h	/^  htab_t client_oses_vers;$/;"	m	struct:httpaccess_metrics
+client_platform	htlog_processing.h	/^  htab_t client_platform;$/;"	m	struct:httpaccess_metrics
+client_ua_str	htlog_processing.h	/^  htab_t client_ua_str;$/;"	m	struct:httpaccess_metrics
+const	ansidecl.h	16;"	d
+const	ansidecl.h	32;"	d
+const	ansidecl.h	36;"	d
+date	htlog_processing.h	/^  char *date;$/;"	m	struct:logline
+eq_pointer	hashtab.c	/^static int eq_pointer (const PTR p1, const PTR p2) {$/;"	f	file:
+error	htlog_processing.h	/^  char *error;$/;"	m	struct:httpaccess_metrics
+et	htlog_processing.h	/^  int et; \/\/ latest timestamp in log$/;"	m	struct:httpaccess_metrics
+find_empty_slot_for_expand	hashtab.c	/^static PTR * find_empty_slot_for_expand (htab_t htab, hashval_t hash) {$/;"	f	file:
+get_ip_by_dns	htlog_processing.c	/^uint32_t get_ip_by_dns(char * hostname , char* ip) {$/;"	f
+h_metrics_clear_error	htlog_processing.c	/^void h_metrics_clear_error(httpaccess_metrics *h_metrics) {$/;"	f
+h_metrics_free	htlog_processing.c	/^void h_metrics_free( httpaccess_metrics *h_metrics ) {$/;"	f
+h_metrics_get_error	htlog_processing.c	/^char *h_metrics_get_error( httpaccess_metrics *h_metrics) {$/;"	f
+h_metrics_init	htlog_processing.c	/^void h_metrics_init( httpaccess_metrics* h_metrics ) {$/;"	f
+h_metrics_parse_line	htlog_processing.c	/^int h_metrics_parse_line(logline *ll, char *l) {$/;"	f
+h_metrics_process_line	htlog_processing.c	/^int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {$/;"	f
+h_metrics_reset_hashtables	htlog_processing.c	/^void h_metrics_reset_hashtables(httpaccess_metrics *h_metrics) {$/;"	f
+h_metrics_set_error	htlog_processing.c	/^void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {$/;"	f
+hash_pointer	hashtab.c	/^static hashval_t hash_pointer (const PTR p) {$/;"	f	file:
+hashval_t	hashtab.h	/^  typedef unsigned int hashval_t;$/;"	t
+hex_p	libiberty.h	170;"	d
+hex_value	libiberty.h	172;"	d
+higher_prime_index	hashtab.c	/^static unsigned int higher_prime_index (unsigned long n) {$/;"	f	file:
+host	htlog_processing.h	/^  char *host;$/;"	m	struct:logline
+hour	htlog_processing.h	/^  char *hour;$/;"	m	struct:logline
+ht_get_node_hash	ht_nodes.c	/^static hashval_t ht_get_node_hash(const void *n) {$/;"	f	file:
+ht_init	ht_nodes.c	/^void ht_init( htab_t * table, size_t size ) {$/;"	f
+ht_kadd_val_to_k_nval	ht_nodes.c	/^void ht_kadd_val_to_k_nval(htab_t table, const char *str, size_t nval) {$/;"	f
+ht_kget_nval	ht_nodes.c	/^size_t ht_kget_nval(htab_t table, const char *str) {$/;"	f
+htab_alloc	hashtab.h	/^  typedef void *(*htab_alloc) (size_t, size_t);$/;"	t
+htab_alloc_with_arg	hashtab.h	/^  typedef void *(*htab_alloc_with_arg) (void *, size_t, size_t);$/;"	t
+htab_clear_slot	hashtab.c	/^void htab_clear_slot (htab_t htab, PTR *slot) {$/;"	f
+htab_collisions	hashtab.c	/^double htab_collisions (htab_t htab) {$/;"	f
+htab_create	hashtab.c	/^htab_t htab_create (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f) {$/;"	f
+htab_create	hashtab.c	192;"	d	file:
+htab_create_alloc	hashtab.c	/^htab_t htab_create_alloc (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f, htab_alloc alloc_f, htab_free free_f) {$/;"	f
+htab_create_alloc_ex	hashtab.c	/^htab_t htab_create_alloc_ex (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f, void *alloc_arg, htab_alloc_with_arg alloc_f, htab_free_with_arg free_f) {$/;"	f
+htab_create_typed_alloc	hashtab.c	/^htab_t htab_create_typed_alloc (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f, htab_alloc alloc_tab_f, htab_alloc alloc_f, htab_free free_f) {$/;"	f
+htab_del	hashtab.h	/^  typedef void (*htab_del) (void *);$/;"	t
+htab_delete	hashtab.c	/^void htab_delete (htab_t htab) {$/;"	f
+htab_elements	hashtab.c	/^size_t (htab_elements) (htab_t htab) {$/;"	f
+htab_elements	hashtab.c	104;"	d	file:
+htab_empty	hashtab.c	/^void htab_empty (htab_t htab) {$/;"	f
+htab_eq	hashtab.h	/^  typedef int (*htab_eq) (const void *, const void *);$/;"	t
+htab_eq_pointer	hashtab.c	/^htab_eq htab_eq_pointer = eq_pointer;$/;"	v
+htab_expand	hashtab.c	/^static int htab_expand (htab_t htab) {$/;"	f	file:
+htab_find	hashtab.c	/^PTR htab_find (htab_t htab, const PTR element) {$/;"	f
+htab_find_slot	hashtab.c	/^PTR * htab_find_slot (htab_t htab, const PTR element, enum insert_option insert) {$/;"	f
+htab_find_slot_with_hash	hashtab.c	/^PTR * htab_find_slot_with_hash (htab_t htab, const PTR element, hashval_t hash, enum insert_option insert) {$/;"	f
+htab_find_with_hash	hashtab.c	/^PTR htab_find_with_hash (htab_t htab, const PTR element, hashval_t hash) {$/;"	f
+htab_free	hashtab.h	/^  typedef void (*htab_free) (void *);$/;"	t
+htab_free_with_arg	hashtab.h	/^  typedef void (*htab_free_with_arg) (void *, void *);$/;"	t
+htab_hash	hashtab.h	/^  typedef hashval_t (*htab_hash) (const void *);$/;"	t
+htab_hash_pointer	hashtab.c	/^htab_hash htab_hash_pointer = hash_pointer;$/;"	v
+htab_hash_string	hashtab.c	/^hashval_t htab_hash_string (const PTR p) {$/;"	f
+htab_mod	hashtab.c	/^static inline hashval_t htab_mod (hashval_t hash, htab_t htab) {$/;"	f	file:
+htab_mod_1	hashtab.c	/^static inline hashval_t htab_mod_1 (hashval_t x, hashval_t y, hashval_t inv, int shift) {$/;"	f	file:
+htab_mod_m2	hashtab.c	/^static inline hashval_t htab_mod_m2 (hashval_t hash, htab_t htab) {$/;"	f	file:
+htab_remove_elt	hashtab.c	/^void htab_remove_elt (htab_t htab, PTR element) {$/;"	f
+htab_remove_elt_with_hash	hashtab.c	/^void htab_remove_elt_with_hash (htab_t htab, PTR element, hashval_t hash) {$/;"	f
+htab_set_functions_ex	hashtab.c	/^void htab_set_functions_ex (htab_t htab, htab_hash hash_f, htab_eq eq_f, htab_del del_f, PTR alloc_arg, htab_alloc_with_arg alloc_f, htab_free_with_arg free_f) {$/;"	f
+htab_size	hashtab.c	/^size_t (htab_size) (htab_t htab) {$/;"	f
+htab_size	hashtab.c	100;"	d	file:
+htab_t	hashtab.h	/^  typedef struct htab *htab_t;$/;"	t	typeref:struct:htab
+htab_trav	hashtab.h	/^  typedef int (*htab_trav) (void **, void *);$/;"	t
+htab_traverse	hashtab.c	/^void htab_traverse (htab_t htab, htab_trav callback, PTR info) {$/;"	f
+htab_traverse_noresize	hashtab.c	/^void htab_traverse_noresize (htab_t htab, htab_trav callback, PTR info) {$/;"	f
+htab_try_create	hashtab.c	/^htab_t htab_try_create (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f) {$/;"	f
+httpaccess_metrics	htlog_processing.h	/^typedef struct httpaccess_metrics {$/;"	s
+httpaccess_metrics	htlog_processing.h	/^} httpaccess_metrics;$/;"	t	typeref:struct:httpaccess_metrics
+inline	ansidecl.h	19;"	d
+inline	ansidecl.h	24;"	d
+inline	ansidecl.h	26;"	d
+inline	ansidecl.h	35;"	d
+inline	ansidecl.h	39;"	d
+insert_option	hashtab.h	/^  enum insert_option {NO_INSERT, INSERT};$/;"	g
+inv	hashtab.c	/^  hashval_t inv;$/;"	m	struct:prime_ent	file:
+inv_m2	hashtab.c	/^  hashval_t inv_m2;  \/* inverse of prime-2 *\/$/;"	m	struct:prime_ent	file:
+iterative_hash	hashtab.c	/^hashval_t iterative_hash (const PTR k_in \/* the key *\/, register size_t  length \/* the length of the key *\/, register hashval_t initval \/* the previous hash, or an arbitrary value *\/) {$/;"	f
+iterative_hash_object	hashtab.h	70;"	d
+key_del	ht_nodes.c	/^static void key_del(void *key) {$/;"	f	file:
+lines_failed	htlog_processing.h	/^  int lines_failed;$/;"	m	struct:httpaccess_metrics
+lines_processed	htlog_processing.h	/^  int lines_processed;$/;"	m	struct:httpaccess_metrics
+logline	htlog_processing.h	/^typedef struct logline {$/;"	s
+logline	htlog_processing.h	/^} logline;$/;"	t	typeref:struct:logline
+logs_scan	htlog_processing.c	/^int logs_scan(httpaccess_metrics *h_metrics, char *filename) {$/;"	f
+main	htlog_analyzer.c	/^int main(int argc, char **argv) {$/;"	f
+mix	hashtab.c	446;"	d	file:
+name	ht_nodes.h	/^  char  *name;$/;"	m	struct:node
+node	ht_nodes.h	/^typedef struct node {$/;"	s
+node	ht_nodes.h	/^} node;$/;"	t	typeref:struct:node
+node_delete	ht_nodes.c	/^static void node_delete(node *n) {$/;"	f	file:
+node_init	ht_nodes.c	/^node *node_init(const char *s) {$/;"	f
+nodes_equal	ht_nodes.c	/^int nodes_equal(const void *entry, const void *element) {$/;"	f
+nval	ht_nodes.h	/^  size_t nval;$/;"	m	struct:node
+page_paths	htlog_processing.h	/^  htab_t page_paths;$/;"	m	struct:httpaccess_metrics
+per_hour_distinct_did_access_count__hits	htlog_processing.h	/^  htab_t per_hour_distinct_did_access_count__hits;$/;"	m	struct:httpaccess_metrics
+per_hour_distinct_did_cip_access_count__visits	htlog_processing.h	/^  htab_t per_hour_distinct_did_cip_access_count__visits;$/;"	m	struct:httpaccess_metrics
+per_hour_distinct_did_pid_cip_access_count__pageviews	htlog_processing.h	/^  htab_t per_hour_distinct_did_pid_cip_access_count__pageviews;$/;"	m	struct:httpaccess_metrics
+per_hour_tvectors_inc	htlog_processing.h	/^  htab_t per_hour_tvectors_inc;$/;"	m	struct:httpaccess_metrics
+per_hour_tvectors_inner	htlog_processing.h	/^  htab_t per_hour_tvectors_inner;$/;"	m	struct:httpaccess_metrics
+pex_time	libiberty.h	/^  struct pex_time {$/;"	s
+prime	hashtab.c	/^  hashval_t prime;$/;"	m	struct:prime_ent	file:
+prime_ent	hashtab.c	/^struct prime_ent {$/;"	s	file:
+prime_tab	hashtab.c	/^static struct prime_ent const prime_tab[] = {$/;"	v	file:
+print_all_ips	htlog_processing.c	/^int print_all_ips( httpaccess_metrics *h_metrics ){$/;"	f
+print_logline	htlog_processing.c	/^void print_logline( logline * ll ) {$/;"	f
+print_logline_header	htlog_processing.c	/^void print_logline_header( ) {$/;"	f
+real_did	htlog_processing.h	/^  int real_did;$/;"	m	struct:httpaccess_metrics
+ref	htlog_processing.h	/^  char *ref;$/;"	m	struct:logline
+referer_urls	htlog_processing.h	/^  htab_t referer_urls;$/;"	m	struct:httpaccess_metrics
+req	htlog_processing.h	/^  char *req;$/;"	m	struct:logline
+scan_file_to_loglines	htlog_processing.c	/^int scan_file_to_loglines( char* filename  ) {$/;"	f
+search_qstr	htlog_processing.h	/^  htab_t search_qstr;$/;"	m	struct:httpaccess_metrics
+shift	hashtab.c	/^  hashval_t shift;$/;"	m	struct:prime_ent	file:
+signed	ansidecl.h	18;"	d
+signed	ansidecl.h	34;"	d
+signed	ansidecl.h	38;"	d
+st	htlog_processing.h	/^  int st; \/\/ earliest timestamp in log$/;"	m	struct:httpaccess_metrics
+stats_counter_incr	htlog_processing.c	/^int stats_counter_incr( htab_t *ht, char *key ) {$/;"	f
+stats_process_user_ips	htlog_processing.c	/^int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){$/;"	f
+system_microseconds	libiberty.h	/^    unsigned long system_microseconds;$/;"	m	struct:pex_time
+system_seconds	libiberty.h	/^    unsigned long system_seconds;$/;"	m	struct:pex_time
+time	htlog_processing.h	/^  time_t time;$/;"	m	struct:logline
+timezone	htlog_processing.h	/^  char *timezone;$/;"	m	struct:logline
+tm	htlog_processing.h	/^  struct tm tm;$/;"	m	struct:logline	typeref:struct:logline::tm
+tvectors_incoming	htlog_processing.h	/^  htab_t tvectors_incoming;$/;"	m	struct:httpaccess_metrics
+tvectors_inner	htlog_processing.h	/^  htab_t tvectors_inner;$/;"	m	struct:httpaccess_metrics
+uid	htlog_processing.h	/^  int uid;$/;"	m	struct:httpaccess_metrics
+user_hostname	htlog_processing.h	/^  char *user_hostname;$/;"	m	struct:logline
+user_microseconds	libiberty.h	/^    unsigned long user_microseconds;$/;"	m	struct:pex_time
+user_seconds	libiberty.h	/^    unsigned long user_seconds;$/;"	m	struct:pex_time
+volatile	ansidecl.h	17;"	d
+volatile	ansidecl.h	33;"	d
+volatile	ansidecl.h	37;"	d

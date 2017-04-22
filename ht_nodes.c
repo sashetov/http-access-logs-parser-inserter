@@ -1,4 +1,4 @@
-#ifndef ___HT_NODE__
+#ifndef __HT_NODE__
 #include <stdlib.h>
 #include "ht_nodes.h"
 static hashval_t ht_get_node_hash(const void *n) {
@@ -10,15 +10,15 @@ node *node_init(const char *s) {
   strcpy(n->name, s);
   return n;
 }
-void ht_init( htab_t *table, int size) {
+void ht_init( htab_t * table, size_t size ) {
   if( size < HT_ALLOC_SIZE_MAX ) {
-    table = htab_create_alloc(size, ht_get_node_hash, nodes_equal, key_del, calloc, free);
+    table = htab_create_alloc(size,              ht_get_node_hash, nodes_equal, key_del, calloc, free);
   }
   else{
     table = htab_create_alloc(HT_ALLOC_SIZE_MAX, ht_get_node_hash, nodes_equal, key_del, calloc, free);
   }
 }
-static int nodes_equal(const void *entry, const void *element) {
+int nodes_equal(const void *entry, const void *element) {
   return strcmp(((const node *) entry)->name, ((const node *) element)->name) == 0;
 }
 static void node_delete(node *n) {
