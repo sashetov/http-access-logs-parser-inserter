@@ -613,12 +613,10 @@ linked_list_t * ht_get_all_keys(hashtable_t *table) {
 linked_list_t * ht_get_all_values(hashtable_t *table) {
   linked_list_t *output = list_create();
   list_set_free_value_callback(output, (free_value_callback_t)free);
-
   MUTEX_LOCK(table->iterator_lock);
   ht_items_list_t *list = NULL;
   TAILQ_FOREACH(list, &table->iterator_list->head, iterator_next) {
     SPIN_LOCK(list->lock);
-
     ht_item_t *item = NULL;
     TAILQ_FOREACH(item, &list->head, next) {
       hashtable_value_t *v = malloc(sizeof(hashtable_value_t));
@@ -634,7 +632,6 @@ linked_list_t * ht_get_all_values(hashtable_t *table) {
       v->klen = item->klen;
       list_push_value(output, v);
     }
-
     SPIN_UNLOCK(list->lock);
   }
   MUTEX_UNLOCK(table->iterator_lock);

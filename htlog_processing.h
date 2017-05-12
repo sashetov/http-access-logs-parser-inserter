@@ -35,7 +35,7 @@ typedef struct httpaccess_metrics {
   hashtable_t * per_hour_tvectors_inc;
 } httpaccess_metrics;
 #define __HTTPACCESS_METRICS__
-httpaccess_metrics * h_metrics_init( int real_did, int uid );
+httpaccess_metrics* h_metrics_init( int real_did, int uid );
 httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics );
 char *h_metrics_get_error( httpaccess_metrics *h_metrics );
 void h_metrics_clear_error( httpaccess_metrics *h_metrics);

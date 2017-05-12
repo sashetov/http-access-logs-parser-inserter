@@ -50,7 +50,6 @@ httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) 
   free( h_metrics->search_qstr);
   free( h_metrics->tvectors_incoming);
   free( h_metrics->per_hour_tvectors_inc);
-
   return h_metrics;
 }
 void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {
@@ -277,11 +276,11 @@ int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
 int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
   logline ll;
   if (h_metrics_parse_line(&ll, l) == 0) {
-    print_logline( &ll );
-    h_metrics->lines_processed++;
-    if (stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
+    //print_logline( &ll );
+    if ( stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
       goto oom;
     }
+    h_metrics->lines_processed++;
     return 0;
   }
   else {
@@ -324,6 +323,9 @@ int logs_scan(httpaccess_metrics *h_metrics, char *filename) {
     fclose(fp);
   }
   h_metrics->et = time(NULL);
+  linked_list_t * uniq_ips = ht_get_all_keys(h_metrics->client_ips);
+  int c = list_count(uniq_ips);
+  printf("%d\n",c);
   return 0;
 }
 #include <arpa/inet.h>
@@ -354,6 +356,6 @@ int scan_file_to_loglines( char* filename  ) {
       exit(1);
     }
   }
-  h_metrics_free(h_metrics);
+  h_metrics_free( h_metrics );
 }
 #endif
