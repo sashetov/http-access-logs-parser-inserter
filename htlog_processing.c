@@ -15,41 +15,41 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   h_metrics->st= h_metrics->et = time(NULL);
   h_metrics->lines_processed= 0;
   h_metrics->lines_failed   = 0;
-  h_metrics->per_hour_distinct_did_access_count__hits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->hits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_ips = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_geo_location = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->per_hour_distinct_did_cip_access_count__visits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->visits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_ua_str = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_browser_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_oses_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_platform = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->page_paths = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->per_hour_distinct_did_pid_cip_access_count__pageviews = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->pageviews= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->tvectors_inner = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->per_hour_tvectors_inner = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->tvectors_inner_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->referer_urls = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->search_qstr = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->tvectors_incoming = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->per_hour_tvectors_inc = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->tvectors_inc_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   return h_metrics;
 }
 httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) {
-  free( h_metrics->per_hour_distinct_did_access_count__hits);
+  free( h_metrics->hits);
   free( h_metrics->client_ips);
   free( h_metrics->client_geo_location);
-  free( h_metrics->per_hour_distinct_did_cip_access_count__visits);
+  free( h_metrics->visits);
   free( h_metrics->client_ua_str);
   free( h_metrics->client_browser_vers);
   free( h_metrics->client_oses_vers);
   free( h_metrics->client_platform);
   free( h_metrics->page_paths);
-  free( h_metrics->per_hour_distinct_did_pid_cip_access_count__pageviews);
+  free( h_metrics->pageviews);
   free( h_metrics->tvectors_inner);
-  free( h_metrics->per_hour_tvectors_inner);
+  free( h_metrics->tvectors_inner_per_hour);
   free( h_metrics->referer_urls);
   free( h_metrics->search_qstr);
   free( h_metrics->tvectors_incoming);
-  free( h_metrics->per_hour_tvectors_inc);
+  free( h_metrics->tvectors_inc_per_hour);
   return h_metrics;
 }
 void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {
@@ -265,6 +265,30 @@ int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
   if (res == 0) {
     return 1;
   }
+  return 0;
+}
+int stats_process_geo_location( httpaccess_metrics *h_metrics, char *user_ip ){
+  return 0;
+}
+int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
+  return 0;
+}
+int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
+  return 0;
+}
+int stats_process_referer_and_sqs( httpaccess_metrics *h_metrics, char *ref_str ){
+  return 0;
+}
+int stats_process_visits( httpaccess_metrics *h_metrics ){
+  return 0;
+}
+int stats_process_pageviews( httpaccess_metrics *h_metrics ){
+  return 0;
+}
+int stats_process_tvectors( httpaccess_metrics *h_metrics ){
+  return 0;
+}
+int stats_process_tvectors_per_hour( httpaccess_metrics *h_metrics ){
   return 0;
 }
 #include <stdio.h>
