@@ -1,12 +1,4 @@
-/**
- * @file   hashtable.h
- * @author Andrea Guzzo
- * @date   22/09/2013
- * @brief  Fast thread-safe hashtable implementation
- * @note   In case of failures reported from the pthread interface
- *         abort() will be called. Callers can catch SIGABRT if more
- *         actions need to be taken.
- */
+// @file   hashtable.h @author Andrea Guzzo @date   22/09/2013 @brief  Fast thread-safe hashtable implementation @note   In case of failures reported from the pthread interface abort() will be called. Callers can catch SIGABRT if more actions need to be taken.  
 #ifndef HL_HASHTABLE_H
 #define HL_HASHTABLE_H
 #ifdef __cplusplus
