@@ -5,9 +5,6 @@
 #ifndef __HT_NODE__
 #include "ht_nodes.h"
 #endif
-#ifndef __HASHTAB_H__
-#include "hashtab.h"
-#endif
 #ifndef __HASHTABLE_H__
 #include "hashtable.h"
 #endif
@@ -39,15 +36,13 @@ typedef struct httpaccess_metrics {
 } httpaccess_metrics;
 #define __HTTPACCESS_METRICS__
 httpaccess_metrics * h_metrics_init( int real_did, int uid );
-void h_metrics_reset_hashtables( httpaccess_metrics *h_metrics);
+httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics );
 char *h_metrics_get_error( httpaccess_metrics *h_metrics );
 void h_metrics_clear_error( httpaccess_metrics *h_metrics);
 void h_metrics_free( httpaccess_metrics *h_metrics);
 int h_metrics_process_line( httpaccess_metrics *h_metrics, char *l); 
 int logs_scan( httpaccess_metrics *h_metrics, char *filename);
-int print_all_ips( httpaccess_metrics *h_metrics );
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip );
-int print_all_ips( httpaccess_metrics *h_metrics );
 #endif
 #ifndef __LOG_LINE__
 typedef struct logline {
@@ -66,7 +61,7 @@ typedef struct logline {
 #include <stddef.h> //uint32_t
 #include <stdint.h> //uint32_t
 void print_logline_header( );
-int hg_metrics_parse_line( logline *ll, char *l);
+int h_metrics_parse_line( logline *ll, char *l);
 void print_logline( logline * ll );
 int stats_counter_incr( hashtable_t *table, char *key);
 uint32_t get_ip_by_dns( char * hostname , char* ip);

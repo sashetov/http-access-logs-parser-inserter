@@ -2,6 +2,7 @@
 #include <locale.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <time.h>
 #include "htlog_processing.h"
 int main(int argc, char **argv) {
   char *filename;

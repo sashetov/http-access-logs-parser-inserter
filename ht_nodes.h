@@ -12,14 +12,9 @@ typedef struct node {
 node        *node_init ( const char *s, int val );
 static int  nodes_equal( const void *entry, const void *element );
 static void node_delete( node *n );
-#ifndef __HASHTAB_H__
-#include "hashtab.h"
-#endif
 #ifndef __HASHTABLE_H__
 #include "hashtable.h"
 #endif
-static hashval_t ht_get_node_hash( const void *n );
-void node_ht_init( htab_t *table, size_t size );
 static void key_del( void *key );
 size_t ht_kget_nval( hashtable_t *table, const char *str );
 void ht_kadd_val_to_k_nval( hashtable_t * table, const char *str, int val);

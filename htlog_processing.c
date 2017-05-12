@@ -1,4 +1,8 @@
 #if !defined( __HTTPACCESS_METRICS__ ) || ! defined ( __LOG_LINE__ )
+#include <stdarg.h>
+#ifndef _TIME_H
+#include <time.h>
+#endif
 #include "htlog_processing.h"
 httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   httpaccess_metrics *h_metrics;
@@ -29,6 +33,26 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   h_metrics->per_hour_tvectors_inc = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   return h_metrics;
 }
+httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) {
+  free( h_metrics->per_hour_distinct_did_access_count__hits);
+  free( h_metrics->client_ips);
+  free( h_metrics->client_geo_location);
+  free( h_metrics->per_hour_distinct_did_cip_access_count__visits);
+  free( h_metrics->client_ua_str);
+  free( h_metrics->client_browser_vers);
+  free( h_metrics->client_oses_vers);
+  free( h_metrics->client_platform);
+  free( h_metrics->page_paths);
+  free( h_metrics->per_hour_distinct_did_pid_cip_access_count__pageviews);
+  free( h_metrics->tvectors_inner);
+  free( h_metrics->per_hour_tvectors_inner);
+  free( h_metrics->referer_urls);
+  free( h_metrics->search_qstr);
+  free( h_metrics->tvectors_incoming);
+  free( h_metrics->per_hour_tvectors_inc);
+
+  return h_metrics;
+}
 void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {
   va_list ap;
   char buf[ERROR_MAX];
@@ -38,24 +62,6 @@ void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {
   free(h_metrics->error);
   h_metrics->error = strdup(buf);
   va_end(ap);
-}
-void h_metrics_reset_hashtables(httpaccess_metrics *h_metrics) {
-  htab_empty(h_metrics->per_hour_distinct_did_access_count__hits);
-  htab_empty(h_metrics->client_ips);
-  htab_empty(h_metrics->client_geo_location);
-  htab_empty(h_metrics->per_hour_distinct_did_cip_access_count__visits);
-  htab_empty(h_metrics->client_ua_str);
-  htab_empty(h_metrics->client_browser_vers);
-  htab_empty(h_metrics->client_oses_vers);
-  htab_empty(h_metrics->client_platform);
-  htab_empty(h_metrics->page_paths);
-  htab_empty(h_metrics->per_hour_distinct_did_pid_cip_access_count__pageviews);
-  htab_empty(h_metrics->tvectors_inner);
-  htab_empty(h_metrics->per_hour_tvectors_inner);
-  htab_empty(h_metrics->referer_urls);
-  htab_empty(h_metrics->search_qstr);
-  htab_empty(h_metrics->tvectors_incoming);
-  htab_empty(h_metrics->per_hour_tvectors_inc);
 }
 char *h_metrics_get_error( httpaccess_metrics *h_metrics) {
   if (!h_metrics->error) {
@@ -71,9 +77,9 @@ void h_metrics_free( httpaccess_metrics *h_metrics ) {
   if (!h_metrics) {
     return;
   }
-  h_metrics_reset_hashtables( h_metrics);
-  h_metrics_clear_error(h_metrics);
-  free(h_metrics);
+  h_metrics_reset_hashtables( h_metrics );
+  h_metrics_clear_error( h_metrics );
+  free( h_metrics );
 }
 int h_metrics_parse_line(logline *ll, char *l) {
   //domain.tld userhostname.dns.tld - - [03/Apr/2017:00:02:29 +0000] "GET /feed/ HTTP/1.0" 200 55490 "-" "-" 185.41.10.139
@@ -243,14 +249,14 @@ int stats_counter_incr( hashtable_t *table, char* key ) {
   int val=1;
   if (! ht_exists(table, key, strlen(key) + 1 ) ) {
     node *n = node_init( key, 1 );
-    ht_set( table, key, strlen(key)+1, n, sizeof(node) );
+    ht_set(table, key, strlen(key)+1, n, sizeof(node *) );
     free(n);
   }
   else {
-    node *n = (node *) ht_get( table, key, strlen( key )+1, sizeof( node ) );
+    node *n = (node *) ht_get_copy( table, key, strlen( key )+1, sizeof(node *) );
     n->nval++;
     val = n->nval;
-    ht_set(table, key, strlen(key)+1, n, sizeof(node));
+    ht_set(table, key, strlen( key ) + 1, n, sizeof(node *));
     free(n);
   }
   return val;
@@ -338,33 +344,6 @@ uint32_t get_ip_by_dns(char * hostname , char* ip) {
     return ip_n;
   }
   return 1;
-}
-int print_all_ips( httpaccess_metrics *h_metrics ){
-  //int ips_len= ht_used(&h_metrics->user_ips);
-  //int i;
-  //printf("ips_len: %d\n",ips_len);
-  /*if ((table = ht_get_array(&h_metrics->user_ips)) == NULL) {
-    fprintf(stderr, "Out of memory in print_all_ips()\n");
-    return 1;
-  }*/
-  //char* ip;
-  //uint32_t ip_n=0;
-  //char ip_real[50];
-  //qsort(table, ips_len, sizeof(void*)*2, qsort_cmp_long_value);
-  /*for (i = 0; i < ips_len*2 ; i+=2) {
-    ip = (char *) table[i];      // key
-    unsigned int idx;
-    int r = ht_search(&h_metrics->user_ips,ip, &idx);
-    long visits = (long) ht_value( &h_metrics->user_ips, idx );
-    // inet_aton is in host byte order 
-    // htonl to make it to network byte order for mysql
-    ip_n = htonl(get_ip_by_dns(ip, ip_real));
-    if( ip_n !=0 && ip_n != 1 ){ 
-      printf("%lu %u %s %s\n", visits, ip_n, ip, ip_real);
-    }
-  }*/
-  //free(table);
-  return 0;
 }
 int scan_file_to_loglines( char* filename  ) {
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );

@@ -4,280 +4,408 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-ACONCAT	libiberty.h	64;"	d
-ARG_UNUSED	ansidecl.h	79;"	d
-ARG_UNUSED	ansidecl.h	81;"	d
-ARRAY_SIZE	libiberty.h	260;"	d
-ASTRDUP	libiberty.h	267;"	d
-ASTRDUP	libiberty.h	281;"	d
-ATTRIBUTE_ALIGNED_ALIGNOF	ansidecl.h	155;"	d
-ATTRIBUTE_ALIGNED_ALIGNOF	ansidecl.h	157;"	d
-ATTRIBUTE_COLD	ansidecl.h	167;"	d
-ATTRIBUTE_COLD	ansidecl.h	169;"	d
-ATTRIBUTE_FPTR_PRINTF	ansidecl.h	122;"	d
-ATTRIBUTE_FPTR_PRINTF	ansidecl.h	124;"	d
-ATTRIBUTE_FPTR_PRINTF_1	ansidecl.h	126;"	d
-ATTRIBUTE_FPTR_PRINTF_2	ansidecl.h	127;"	d
-ATTRIBUTE_FPTR_PRINTF_3	ansidecl.h	128;"	d
-ATTRIBUTE_FPTR_PRINTF_4	ansidecl.h	129;"	d
-ATTRIBUTE_FPTR_PRINTF_5	ansidecl.h	130;"	d
-ATTRIBUTE_HOT	ansidecl.h	174;"	d
-ATTRIBUTE_HOT	ansidecl.h	176;"	d
-ATTRIBUTE_MALLOC	ansidecl.h	48;"	d
-ATTRIBUTE_MALLOC	ansidecl.h	50;"	d
-ATTRIBUTE_NONNULL	ansidecl.h	89;"	d
-ATTRIBUTE_NONNULL	ansidecl.h	91;"	d
-ATTRIBUTE_NORETURN	ansidecl.h	84;"	d
-ATTRIBUTE_NULL_PRINTF	ansidecl.h	135;"	d
-ATTRIBUTE_NULL_PRINTF	ansidecl.h	137;"	d
-ATTRIBUTE_NULL_PRINTF_1	ansidecl.h	139;"	d
-ATTRIBUTE_NULL_PRINTF_2	ansidecl.h	140;"	d
-ATTRIBUTE_NULL_PRINTF_3	ansidecl.h	141;"	d
-ATTRIBUTE_NULL_PRINTF_4	ansidecl.h	142;"	d
-ATTRIBUTE_NULL_PRINTF_5	ansidecl.h	143;"	d
-ATTRIBUTE_PACKED	ansidecl.h	162;"	d
-ATTRIBUTE_PRINTF	ansidecl.h	112;"	d
-ATTRIBUTE_PRINTF_1	ansidecl.h	113;"	d
-ATTRIBUTE_PRINTF_2	ansidecl.h	114;"	d
-ATTRIBUTE_PRINTF_3	ansidecl.h	115;"	d
-ATTRIBUTE_PRINTF_4	ansidecl.h	116;"	d
-ATTRIBUTE_PRINTF_5	ansidecl.h	117;"	d
-ATTRIBUTE_PURE	ansidecl.h	105;"	d
-ATTRIBUTE_PURE	ansidecl.h	107;"	d
-ATTRIBUTE_RETURNS_NONNULL	ansidecl.h	97;"	d
-ATTRIBUTE_RETURNS_NONNULL	ansidecl.h	99;"	d
-ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern char *choose_temp_base (void) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL;$/;"	v
-ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern char *xstrdup (const char *) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL; $/;"	v
-ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern char *xstrndup (const char *, size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL; $/;"	v
-ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern void *xcalloc (size_t, size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL;$/;"	v
-ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern void *xmalloc (size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL; $/;"	v
-ATTRIBUTE_RETURNS_NONNULL	libiberty.h	/^  extern void *xmemdup (const void *, size_t, size_t) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL;$/;"	v
-ATTRIBUTE_SENTINEL	ansidecl.h	148;"	d
-ATTRIBUTE_SENTINEL	ansidecl.h	150;"	d
-ATTRIBUTE_SENTINEL	libiberty.h	/^  extern char *concat (const char *, ...) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL ATTRIBUTE_SENTINEL;$/;"	v
-ATTRIBUTE_SENTINEL	libiberty.h	/^  extern char *concat_copy2 (const char *, ...) ATTRIBUTE_RETURNS_NONNULL ATTRIBUTE_SENTINEL;$/;"	v
-ATTRIBUTE_SENTINEL	libiberty.h	/^  extern char *reconcat (char *, const char *, ...) ATTRIBUTE_MALLOC ATTRIBUTE_RETURNS_NONNULL ATTRIBUTE_SENTINEL;$/;"	v
-ATTRIBUTE_UNUSED	ansidecl.h	72;"	d
-ATTRIBUTE_UNUSED	ansidecl.h	74;"	d
-ATTRIBUTE_UNUSED_LABEL	ansidecl.h	57;"	d
-ATTRIBUTE_UNUSED_LABEL	ansidecl.h	59;"	d
-ATTRIBUTE_UNUSED_LABEL	ansidecl.h	63;"	d
-ATTRIBUTE_UNUSED_LABEL	ansidecl.h	65;"	d
-CHAR_BIT	hashtab.c	29;"	d	file:
+ATOMIC_CAS	atomic_defs.h	9;"	d
+ATOMIC_CAS_RETURN	atomic_defs.h	10;"	d
+ATOMIC_DECREASE	atomic_defs.h	8;"	d
+ATOMIC_DECREMENT	atomic_defs.h	6;"	d
+ATOMIC_INCREASE	atomic_defs.h	7;"	d
+ATOMIC_INCREMENT	atomic_defs.h	5;"	d
+ATOMIC_READ	atomic_defs.h	4;"	d
+ATOMIC_SET	atomic_defs.h	12;"	d
+ATOMIC_SET_IF	atomic_defs.h	19;"	d
 CONFIG_DEBUG	htlog_processing.h	4;"	d
 CONFIG_STREAM_MODE	htlog_processing.h	2;"	d
 CONFIG_TIME_DELTA	htlog_processing.h	3;"	d
-C_ALLOCA	libiberty.h	266;"	d
-C_ALLOCA	libiberty.h	276;"	d
-C_ALLOCA	libiberty.h	277;"	d
-ENUM_BITFIELD	ansidecl.h	191;"	d
-ENUM_BITFIELD	ansidecl.h	193;"	d
-ENUM_BITFIELD	ansidecl.h	195;"	d
 ERROR_MAX	ht_nodes.h	1;"	d
-EXPORTED_CONST	ansidecl.h	185;"	d
-EXPORTED_CONST	ansidecl.h	187;"	d
-GCC_VERSION	ansidecl.h	10;"	d
-GTY	hashtab.h	14;"	d
-HTAB_DELETED_ENTRY	hashtab.h	26;"	d
-HTAB_EMPTY_ENTRY	hashtab.h	25;"	d
+HL_ATOMIC_DEFS_H	atomic_defs.h	2;"	d
+HL_HASHTABLE_H	hashtable.h	11;"	d
+HL_LINKLIST_H	linklist.h	11;"	d
+HL_SYS_QUEUE_H	bsd_queue.h	34;"	d
 HT_ALLOC_SIZE_DEFAULT	ht_nodes.h	3;"	d
 HT_ALLOC_SIZE_MAX	ht_nodes.h	2;"	d
-INSERT	hashtab.h	/^  enum insert_option {NO_INSERT, INSERT};$/;"	e	enum:insert_option
-LIBIBERTY_H	libiberty.h	3;"	d
+HT_ITERATOR_CONTINUE	hashtable.h	/^    HT_ITERATOR_CONTINUE = 1,$/;"	e	enum:__anon1
+HT_ITERATOR_REMOVE	hashtable.h	/^    HT_ITERATOR_REMOVE = -1,$/;"	e	enum:__anon1
+HT_ITERATOR_REMOVE_AND_STOP	hashtable.h	/^    HT_ITERATOR_REMOVE_AND_STOP = -2$/;"	e	enum:__anon1
+HT_ITERATOR_STOP	hashtable.h	/^    HT_ITERATOR_STOP = 0,$/;"	e	enum:__anon1
+HT_KEY_EQUALS	hashtable.c	12;"	d	file:
+HT_SIZE_MIN	hashtable.h	32;"	d
+HT_STATUS_CLEAR	hashtable.c	/^    HT_STATUS_CLEAR = 0,$/;"	e	enum:__anon3	file:
+HT_STATUS_GROW	hashtable.c	/^    HT_STATUS_GROW  = 2,$/;"	e	enum:__anon3	file:
+HT_STATUS_IDLE	hashtable.c	/^    HT_STATUS_IDLE  = 3,$/;"	e	enum:__anon3	file:
+HT_STATUS_READ	hashtable.c	/^    HT_STATUS_READ  = 4$/;"	e	enum:__anon3	file:
+HT_STATUS_WRITE	hashtable.c	/^    HT_STATUS_WRITE = 1,$/;"	e	enum:__anon3	file:
 LINE_MAX	htlog_processing.h	1;"	d
-NO_INSERT	hashtab.h	/^  enum insert_option {NO_INSERT, INSERT};$/;"	e	enum:insert_option
-PEXECUTE_FIRST	libiberty.h	227;"	d
-PEXECUTE_LAST	libiberty.h	228;"	d
-PEXECUTE_ONE	libiberty.h	229;"	d
-PEXECUTE_SEARCH	libiberty.h	230;"	d
-PEXECUTE_VERBOSE	libiberty.h	231;"	d
-PEX_BINARY_ERROR	libiberty.h	198;"	d
-PEX_BINARY_INPUT	libiberty.h	192;"	d
-PEX_BINARY_OUTPUT	libiberty.h	194;"	d
-PEX_LAST	libiberty.h	184;"	d
-PEX_RECORD_TIMES	libiberty.h	175;"	d
-PEX_SAVE_TEMPS	libiberty.h	179;"	d
-PEX_SEARCH	libiberty.h	186;"	d
-PEX_STDERR_TO_PIPE	libiberty.h	196;"	d
-PEX_STDERR_TO_STDOUT	libiberty.h	190;"	d
-PEX_SUFFIX	libiberty.h	188;"	d
-PEX_USE_PIPES	libiberty.h	177;"	d
-PTR	ansidecl.h	15;"	d
-PTR	ansidecl.h	30;"	d
-USE_C_ALLOCA	libiberty.h	274;"	d
-USE_C_ALLOCA	libiberty.h	275;"	d
-XALLOCA	libiberty.h	142;"	d
-XALLOCAVAR	libiberty.h	155;"	d
-XALLOCAVEC	libiberty.h	148;"	d
-XCNEW	libiberty.h	144;"	d
-XCNEWVAR	libiberty.h	157;"	d
-XCNEWVEC	libiberty.h	150;"	d
-XDELETE	libiberty.h	146;"	d
-XDELETEVEC	libiberty.h	153;"	d
-XDUP	libiberty.h	145;"	d
-XDUPVAR	libiberty.h	158;"	d
-XDUPVEC	libiberty.h	151;"	d
-XNEW	libiberty.h	143;"	d
-XNEWVAR	libiberty.h	156;"	d
-XNEWVEC	libiberty.h	149;"	d
-XOBFINISH	libiberty.h	164;"	d
-XOBNEW	libiberty.h	161;"	d
-XOBNEWVAR	libiberty.h	163;"	d
-XOBNEWVEC	libiberty.h	162;"	d
-XRESIZEVAR	libiberty.h	159;"	d
-XRESIZEVEC	libiberty.h	152;"	d
-_ANSIDECL_H	ansidecl.h	3;"	d
-__HASHTAB_H__	hashtab.h	3;"	d
+LIST_EMPTY	bsd_queue.h	332;"	d
+LIST_ENTRY	bsd_queue.h	322;"	d
+LIST_FIRST	bsd_queue.h	334;"	d
+LIST_FOREACH	bsd_queue.h	336;"	d
+LIST_FOREACH_SAFE	bsd_queue.h	341;"	d
+LIST_HEAD	bsd_queue.h	314;"	d
+LIST_HEAD_INITIALIZER	bsd_queue.h	319;"	d
+LIST_INIT	bsd_queue.h	346;"	d
+LIST_INSERT_AFTER	bsd_queue.h	350;"	d
+LIST_INSERT_BEFORE	bsd_queue.h	358;"	d
+LIST_INSERT_HEAD	bsd_queue.h	365;"	d
+LIST_NEXT	bsd_queue.h	372;"	d
+LIST_REMOVE	bsd_queue.h	374;"	d
+MUTEX_DESTROY	atomic_defs.h	36;"	d
+MUTEX_DESTROY	atomic_defs.h	52;"	d
+MUTEX_INIT	atomic_defs.h	35;"	d
+MUTEX_INIT	atomic_defs.h	51;"	d
+MUTEX_LOCK	atomic_defs.h	37;"	d
+MUTEX_LOCK	atomic_defs.h	53;"	d
+MUTEX_UNLOCK	atomic_defs.h	38;"	d
+MUTEX_UNLOCK	atomic_defs.h	54;"	d
+QMD_TRACE_ELEM	bsd_queue.h	127;"	d
+QMD_TRACE_ELEM	bsd_queue.h	135;"	d
+QMD_TRACE_HEAD	bsd_queue.h	120;"	d
+QMD_TRACE_HEAD	bsd_queue.h	136;"	d
+QUEUE_MACRO_DEBUG	bsd_queue.h	107;"	d
+SLIST_EMPTY	bsd_queue.h	160;"	d
+SLIST_ENTRY	bsd_queue.h	152;"	d
+SLIST_FIRST	bsd_queue.h	162;"	d
+SLIST_FOREACH	bsd_queue.h	164;"	d
+SLIST_FOREACH_PREVPTR	bsd_queue.h	174;"	d
+SLIST_FOREACH_SAFE	bsd_queue.h	169;"	d
+SLIST_HEAD	bsd_queue.h	144;"	d
+SLIST_HEAD_INITIALIZER	bsd_queue.h	149;"	d
+SLIST_INIT	bsd_queue.h	179;"	d
+SLIST_INSERT_AFTER	bsd_queue.h	183;"	d
+SLIST_INSERT_HEAD	bsd_queue.h	188;"	d
+SLIST_NEXT	bsd_queue.h	193;"	d
+SLIST_REMOVE	bsd_queue.h	195;"	d
+SLIST_REMOVE_HEAD	bsd_queue.h	208;"	d
+SPIN_DESTROY	atomic_defs.h	41;"	d
+SPIN_DESTROY	atomic_defs.h	46;"	d
+SPIN_DESTROY	atomic_defs.h	56;"	d
+SPIN_INIT	atomic_defs.h	40;"	d
+SPIN_INIT	atomic_defs.h	45;"	d
+SPIN_INIT	atomic_defs.h	55;"	d
+SPIN_LOCK	atomic_defs.h	42;"	d
+SPIN_LOCK	atomic_defs.h	47;"	d
+SPIN_LOCK	atomic_defs.h	57;"	d
+SPIN_UNLOCK	atomic_defs.h	43;"	d
+SPIN_UNLOCK	atomic_defs.h	48;"	d
+SPIN_UNLOCK	atomic_defs.h	58;"	d
+STAILQ_CONCAT	bsd_queue.h	232;"	d
+STAILQ_EMPTY	bsd_queue.h	240;"	d
+STAILQ_ENTRY	bsd_queue.h	224;"	d
+STAILQ_FIRST	bsd_queue.h	242;"	d
+STAILQ_FOREACH	bsd_queue.h	244;"	d
+STAILQ_FOREACH_SAFE	bsd_queue.h	250;"	d
+STAILQ_HEAD	bsd_queue.h	215;"	d
+STAILQ_HEAD_INITIALIZER	bsd_queue.h	221;"	d
+STAILQ_INIT	bsd_queue.h	255;"	d
+STAILQ_INSERT_AFTER	bsd_queue.h	260;"	d
+STAILQ_INSERT_HEAD	bsd_queue.h	266;"	d
+STAILQ_INSERT_TAIL	bsd_queue.h	272;"	d
+STAILQ_LAST	bsd_queue.h	278;"	d
+STAILQ_NEXT	bsd_queue.h	284;"	d
+STAILQ_REMOVE	bsd_queue.h	286;"	d
+STAILQ_REMOVE_HEAD	bsd_queue.h	300;"	d
+STAILQ_REMOVE_HEAD_UNTIL	bsd_queue.h	306;"	d
+TAILQ_CONCAT	bsd_queue.h	404;"	d
+TAILQ_EMPTY	bsd_queue.h	415;"	d
+TAILQ_ENTRY	bsd_queue.h	394;"	d
+TAILQ_FIRST	bsd_queue.h	417;"	d
+TAILQ_FOREACH	bsd_queue.h	419;"	d
+TAILQ_FOREACH_REVERSE	bsd_queue.h	429;"	d
+TAILQ_FOREACH_REVERSE_SAFE	bsd_queue.h	434;"	d
+TAILQ_FOREACH_SAFE	bsd_queue.h	424;"	d
+TAILQ_HEAD	bsd_queue.h	384;"	d
+TAILQ_HEAD_INITIALIZER	bsd_queue.h	391;"	d
+TAILQ_INIT	bsd_queue.h	439;"	d
+TAILQ_INSERT_AFTER	bsd_queue.h	445;"	d
+TAILQ_INSERT_BEFORE	bsd_queue.h	459;"	d
+TAILQ_INSERT_HEAD	bsd_queue.h	468;"	d
+TAILQ_INSERT_TAIL	bsd_queue.h	480;"	d
+TAILQ_LAST	bsd_queue.h	489;"	d
+TAILQ_NEXT	bsd_queue.h	492;"	d
+TAILQ_PREV	bsd_queue.h	494;"	d
+TAILQ_REMOVE	bsd_queue.h	497;"	d
+TRACEBUF	bsd_queue.h	117;"	d
+TRACEBUF	bsd_queue.h	137;"	d
+TRASHIT	bsd_queue.h	118;"	d
+TRASHIT	bsd_queue.h	138;"	d
+TV_TYPE_BINARY	linklist.h	247;"	d
+TV_TYPE_LIST	linklist.h	248;"	d
+TV_TYPE_STRING	linklist.h	246;"	d
 __HTTPACCESS_METRICS__	htlog_processing.h	37;"	d
 __HT_NODE__	ht_nodes.h	11;"	d
-__LOG_LINE__	htlog_processing.h	62;"	d
-__attribute__	ansidecl.h	43;"	d
-__extension__	ansidecl.h	181;"	d
-__uint32_t_defined	htlog_processing.c	266;"	d	file:
-_hex_array_size	libiberty.h	166;"	d
-_hex_bad	libiberty.h	167;"	d
+__LOG_LINE__	htlog_processing.h	60;"	d
+__POSIX_C_SOURCE	atomic_defs.h	28;"	d
+__uint32_t_defined	htlog_processing.c	268;"	d	file:
+_hashtable_key_s	hashtable.h	/^typedef struct _hashtable_key_s {$/;"	s
+_hashtable_s	hashtable.c	/^struct _hashtable_s {$/;"	s	file:
+_hashtable_value_s	hashtable.h	/^typedef struct _hashtable_value_s {$/;"	s
+_ht_collector_arg	hashtable.c	/^typedef struct _ht_collector_arg {$/;"	s	file:
+_ht_item	hashtable.c	/^typedef struct _ht_item {$/;"	s	file:
+_ht_item_list	hashtable.c	/^typedef struct _ht_item_list {$/;"	s	file:
+_ht_iterator_callback	hashtable.c	/^typedef struct _ht_iterator_callback {$/;"	s	file:
+_linked_list_s	linklist.c	/^struct _linked_list_s {$/;"	s	file:
+_list_entry_s	linklist.c	/^typedef struct _list_entry_s {$/;"	s	file:
+_slice_s	linklist.c	/^struct _slice_s {$/;"	s	file:
+_tagged_value_s	linklist.h	/^typedef struct _tagged_value_s {$/;"	s
 agent	htlog_processing.h	/^  char *agent;$/;"	m	struct:logline
-alloca	libiberty.h	263;"	d
-alloca	libiberty.h	265;"	d
-alloca	libiberty.h	273;"	d
-basename	libiberty.h	40;"	d
-client_browser_vers	htlog_processing.h	/^  htab_t client_browser_vers;$/;"	m	struct:httpaccess_metrics
-client_geo_location	htlog_processing.h	/^  htab_t client_geo_location;$/;"	m	struct:httpaccess_metrics
-client_ips	htlog_processing.h	/^  htab_t client_ips;$/;"	m	struct:httpaccess_metrics
-client_oses_vers	htlog_processing.h	/^  htab_t client_oses_vers;$/;"	m	struct:httpaccess_metrics
-client_platform	htlog_processing.h	/^  htab_t client_platform;$/;"	m	struct:httpaccess_metrics
-client_ua_str	htlog_processing.h	/^  htab_t client_ua_str;$/;"	m	struct:httpaccess_metrics
-const	ansidecl.h	16;"	d
-const	ansidecl.h	32;"	d
-const	ansidecl.h	36;"	d
+cb	hashtable.c	/^    int (*cb)();$/;"	m	struct:__anon7	file:
+cb	hashtable.c	/^    int (*cb)();$/;"	m	struct:_ht_iterator_callback	file:
+client_browser_vers	htlog_processing.h	/^  hashtable_t * client_browser_vers;$/;"	m	struct:httpaccess_metrics
+client_geo_location	htlog_processing.h	/^  hashtable_t * client_geo_location;$/;"	m	struct:httpaccess_metrics
+client_ips	htlog_processing.h	/^  hashtable_t * client_ips;$/;"	m	struct:httpaccess_metrics
+client_oses_vers	htlog_processing.h	/^  hashtable_t * client_oses_vers;$/;"	m	struct:httpaccess_metrics
+client_platform	htlog_processing.h	/^  hashtable_t * client_platform;$/;"	m	struct:httpaccess_metrics
+client_ua_str	htlog_processing.h	/^  hashtable_t * client_ua_str;$/;"	m	struct:httpaccess_metrics
+copy	hashtable.c	/^    int copy;$/;"	m	struct:__anon6	file:
+copy_cb	hashtable.c	/^    ht_deep_copy_callback_t copy_cb;$/;"	m	struct:__anon6	file:
+count	hashtable.c	/^    size_t count;$/;"	m	struct:_hashtable_s	file:
+count	hashtable.c	/^    size_t count;$/;"	m	struct:_ht_collector_arg	file:
+count	hashtable.c	/^    size_t count;$/;"	m	struct:_ht_iterator_callback	file:
+create_entry	linklist.c	/^list_entry_t *create_entry()$/;"	f	file:
+cur	linklist.c	/^    list_entry_t *cur;$/;"	m	struct:_linked_list_s	file:
+data	hashtable.c	/^    void    *data;$/;"	m	struct:_ht_item	file:
+data	hashtable.c	/^    void *data;$/;"	m	struct:__anon4	file:
+data	hashtable.c	/^    void *data;$/;"	m	struct:__anon6	file:
+data	hashtable.h	/^    void  *data;$/;"	m	struct:_hashtable_key_s
+data	hashtable.h	/^    void  *data;$/;"	m	struct:_hashtable_value_s
 date	htlog_processing.h	/^  char *date;$/;"	m	struct:logline
-eq_pointer	hashtab.c	/^static int eq_pointer (const PTR p1, const PTR p2) {$/;"	f	file:
+destroy_entry	linklist.c	/^destroy_entry(list_entry_t *entry)$/;"	f	file:
+dlen	hashtable.c	/^    size_t   dlen;$/;"	m	struct:_ht_item	file:
+dlen	hashtable.c	/^    size_t *dlen;$/;"	m	struct:__anon6	file:
+dlen	hashtable.c	/^    size_t dlen;$/;"	m	struct:__anon4	file:
 error	htlog_processing.h	/^  char *error;$/;"	m	struct:httpaccess_metrics
 et	htlog_processing.h	/^  int et; \/\/ latest timestamp in log$/;"	m	struct:httpaccess_metrics
-find_empty_slot_for_expand	hashtab.c	/^static PTR * find_empty_slot_for_expand (htab_t htab, hashval_t hash) {$/;"	f	file:
+fetch_entry	linklist.c	/^list_entry_t *fetch_entry(linked_list_t *list, size_t pos)$/;"	f	file:
+free_item_cb	hashtable.c	/^    ht_free_item_callback_t free_item_cb;$/;"	m	struct:_hashtable_s	file:
+free_key	hashtable.c	/^free_key(hashtable_key_t *key)$/;"	f	file:
+free_value_callback_t	linklist.h	/^typedef void (*free_value_callback_t)(void *v);$/;"	t
+free_value_cb	linklist.c	/^    free_value_callback_t free_value_cb;$/;"	m	struct:_linked_list_s	file:
+get_entry_position	linklist.c	/^get_entry_position(list_entry_t *entry)$/;"	f
 get_ip_by_dns	htlog_processing.c	/^uint32_t get_ip_by_dns(char * hostname , char* ip) {$/;"	f
 h_metrics_clear_error	htlog_processing.c	/^void h_metrics_clear_error(httpaccess_metrics *h_metrics) {$/;"	f
 h_metrics_free	htlog_processing.c	/^void h_metrics_free( httpaccess_metrics *h_metrics ) {$/;"	f
 h_metrics_get_error	htlog_processing.c	/^char *h_metrics_get_error( httpaccess_metrics *h_metrics) {$/;"	f
-h_metrics_init	htlog_processing.c	/^void h_metrics_init( httpaccess_metrics* h_metrics ) {$/;"	f
+h_metrics_init	htlog_processing.c	/^httpaccess_metrics* h_metrics_init( int real_did, int uid ) {$/;"	f
 h_metrics_parse_line	htlog_processing.c	/^int h_metrics_parse_line(logline *ll, char *l) {$/;"	f
 h_metrics_process_line	htlog_processing.c	/^int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {$/;"	f
 h_metrics_reset_hashtables	htlog_processing.c	/^void h_metrics_reset_hashtables(httpaccess_metrics *h_metrics) {$/;"	f
 h_metrics_set_error	htlog_processing.c	/^void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {$/;"	f
-hash_pointer	hashtab.c	/^static hashval_t hash_pointer (const PTR p) {$/;"	f	file:
-hashval_t	hashtab.h	/^  typedef unsigned int hashval_t;$/;"	t
-hex_p	libiberty.h	170;"	d
-hex_value	libiberty.h	172;"	d
-higher_prime_index	hashtab.c	/^static unsigned int higher_prime_index (unsigned long n) {$/;"	f	file:
+hash	hashtable.c	/^    uint32_t hash;$/;"	m	struct:_ht_item	file:
+hashtable_key_t	hashtable.h	/^} hashtable_key_t;$/;"	t	typeref:struct:_hashtable_key_s
+hashtable_t	hashtable.h	/^typedef struct _hashtable_s hashtable_t;$/;"	t	typeref:struct:_hashtable_s
+hashtable_value_t	hashtable.h	/^} hashtable_value_t;$/;"	t	typeref:struct:_hashtable_value_s
+head	linklist.c	/^    list_entry_t *head;$/;"	m	struct:_linked_list_s	file:
 host	htlog_processing.h	/^  char *host;$/;"	m	struct:logline
 hour	htlog_processing.h	/^  char *hour;$/;"	m	struct:logline
-ht_get_node_hash	ht_nodes.c	/^static hashval_t ht_get_node_hash(const void *n) {$/;"	f	file:
-ht_init	ht_nodes.c	/^void ht_init( htab_t * table, size_t size ) {$/;"	f
-ht_kadd_val_to_k_nval	ht_nodes.c	/^void ht_kadd_val_to_k_nval(htab_t table, const char *str, size_t nval) {$/;"	f
-ht_kget_nval	ht_nodes.c	/^size_t ht_kget_nval(htab_t table, const char *str) {$/;"	f
-htab_alloc	hashtab.h	/^  typedef void *(*htab_alloc) (size_t, size_t);$/;"	t
-htab_alloc_with_arg	hashtab.h	/^  typedef void *(*htab_alloc_with_arg) (void *, size_t, size_t);$/;"	t
-htab_clear_slot	hashtab.c	/^void htab_clear_slot (htab_t htab, PTR *slot) {$/;"	f
-htab_collisions	hashtab.c	/^double htab_collisions (htab_t htab) {$/;"	f
-htab_create	hashtab.c	/^htab_t htab_create (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f) {$/;"	f
-htab_create	hashtab.c	192;"	d	file:
-htab_create_alloc	hashtab.c	/^htab_t htab_create_alloc (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f, htab_alloc alloc_f, htab_free free_f) {$/;"	f
-htab_create_alloc_ex	hashtab.c	/^htab_t htab_create_alloc_ex (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f, void *alloc_arg, htab_alloc_with_arg alloc_f, htab_free_with_arg free_f) {$/;"	f
-htab_create_typed_alloc	hashtab.c	/^htab_t htab_create_typed_alloc (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f, htab_alloc alloc_tab_f, htab_alloc alloc_f, htab_free free_f) {$/;"	f
-htab_del	hashtab.h	/^  typedef void (*htab_del) (void *);$/;"	t
-htab_delete	hashtab.c	/^void htab_delete (htab_t htab) {$/;"	f
-htab_elements	hashtab.c	/^size_t (htab_elements) (htab_t htab) {$/;"	f
-htab_elements	hashtab.c	104;"	d	file:
-htab_empty	hashtab.c	/^void htab_empty (htab_t htab) {$/;"	f
-htab_eq	hashtab.h	/^  typedef int (*htab_eq) (const void *, const void *);$/;"	t
-htab_eq_pointer	hashtab.c	/^htab_eq htab_eq_pointer = eq_pointer;$/;"	v
-htab_expand	hashtab.c	/^static int htab_expand (htab_t htab) {$/;"	f	file:
-htab_find	hashtab.c	/^PTR htab_find (htab_t htab, const PTR element) {$/;"	f
-htab_find_slot	hashtab.c	/^PTR * htab_find_slot (htab_t htab, const PTR element, enum insert_option insert) {$/;"	f
-htab_find_slot_with_hash	hashtab.c	/^PTR * htab_find_slot_with_hash (htab_t htab, const PTR element, hashval_t hash, enum insert_option insert) {$/;"	f
-htab_find_with_hash	hashtab.c	/^PTR htab_find_with_hash (htab_t htab, const PTR element, hashval_t hash) {$/;"	f
-htab_free	hashtab.h	/^  typedef void (*htab_free) (void *);$/;"	t
-htab_free_with_arg	hashtab.h	/^  typedef void (*htab_free_with_arg) (void *, void *);$/;"	t
-htab_hash	hashtab.h	/^  typedef hashval_t (*htab_hash) (const void *);$/;"	t
-htab_hash_pointer	hashtab.c	/^htab_hash htab_hash_pointer = hash_pointer;$/;"	v
-htab_hash_string	hashtab.c	/^hashval_t htab_hash_string (const PTR p) {$/;"	f
-htab_mod	hashtab.c	/^static inline hashval_t htab_mod (hashval_t hash, htab_t htab) {$/;"	f	file:
-htab_mod_1	hashtab.c	/^static inline hashval_t htab_mod_1 (hashval_t x, hashval_t y, hashval_t inv, int shift) {$/;"	f	file:
-htab_mod_m2	hashtab.c	/^static inline hashval_t htab_mod_m2 (hashval_t hash, htab_t htab) {$/;"	f	file:
-htab_remove_elt	hashtab.c	/^void htab_remove_elt (htab_t htab, PTR element) {$/;"	f
-htab_remove_elt_with_hash	hashtab.c	/^void htab_remove_elt_with_hash (htab_t htab, PTR element, hashval_t hash) {$/;"	f
-htab_set_functions_ex	hashtab.c	/^void htab_set_functions_ex (htab_t htab, htab_hash hash_f, htab_eq eq_f, htab_del del_f, PTR alloc_arg, htab_alloc_with_arg alloc_f, htab_free_with_arg free_f) {$/;"	f
-htab_size	hashtab.c	/^size_t (htab_size) (htab_t htab) {$/;"	f
-htab_size	hashtab.c	100;"	d	file:
-htab_t	hashtab.h	/^  typedef struct htab *htab_t;$/;"	t	typeref:struct:htab
-htab_trav	hashtab.h	/^  typedef int (*htab_trav) (void **, void *);$/;"	t
-htab_traverse	hashtab.c	/^void htab_traverse (htab_t htab, htab_trav callback, PTR info) {$/;"	f
-htab_traverse_noresize	hashtab.c	/^void htab_traverse_noresize (htab_t htab, htab_trav callback, PTR info) {$/;"	f
-htab_try_create	hashtab.c	/^htab_t htab_try_create (size_t size, htab_hash hash_f, htab_eq eq_f, htab_del del_f) {$/;"	f
+ht_call	hashtable.c	/^ht_call(hashtable_t *table,$/;"	f
+ht_call_internal	hashtable.c	/^ht_call_internal(hashtable_t *table,$/;"	f	file:
+ht_clear	hashtable.c	/^ht_clear(hashtable_t *table)$/;"	f
+ht_collector_arg_t	hashtable.c	/^} ht_collector_arg_t;$/;"	t	typeref:struct:_ht_collector_arg	file:
+ht_count	hashtable.c	/^ht_count(hashtable_t *table)$/;"	f
+ht_create	hashtable.c	/^ht_create(size_t initial_size, size_t max_size, ht_free_item_callback_t cb)$/;"	f
+ht_deep_copy_callback_t	hashtable.h	/^typedef void *(*ht_deep_copy_callback_t)(void *data, size_t dlen, void *user);$/;"	t
+ht_delete	hashtable.c	/^ht_delete (hashtable_t *table,$/;"	f
+ht_delete_helper	hashtable.c	/^ht_delete_helper(hashtable_t *table, void *key __attribute__ ((unused)), size_t klen __attribute__ ((unused)), void **value, size_t *vlen, void *user)$/;"	f	file:
+ht_delete_helper_arg_t	hashtable.c	/^} ht_delete_helper_arg_t;$/;"	t	typeref:struct:__anon5	file:
+ht_delete_if_equals	hashtable.c	/^ht_delete_if_equals(hashtable_t *table, void *key, size_t klen, void *match, size_t match_size)$/;"	f
+ht_delete_internal	hashtable.c	/^ht_delete_internal (hashtable_t *table,$/;"	f	file:
+ht_destroy	hashtable.c	/^ht_destroy(hashtable_t *table)$/;"	f
+ht_exists	hashtable.c	/^ht_exists(hashtable_t *table, void *key, size_t klen)$/;"	f
+ht_foreach_key	hashtable.c	/^ht_foreach_key(hashtable_t *table, ht_key_iterator_callback_t cb, void *user)$/;"	f
+ht_foreach_key_helper	hashtable.c	/^ht_foreach_key_helper(hashtable_t *table, void *key, size_t klen, void *value __attribute__ ((unused)), size_t vlen __attribute__ ((unused)), void *user)$/;"	f	file:
+ht_foreach_pair	hashtable.c	/^ht_foreach_pair(hashtable_t *table, ht_pair_iterator_callback_t cb, void *user)$/;"	f
+ht_foreach_value	hashtable.c	/^ht_foreach_value(hashtable_t *table, ht_value_iterator_callback_t cb, void *user)$/;"	f
+ht_foreach_value_helper	hashtable.c	/^ht_foreach_value_helper(hashtable_t *table, void *key __attribute__ ((unused)), size_t klen __attribute__ ((unused)), void *value, size_t vlen, void *user)$/;"	f	file:
+ht_free_item_callback_t	hashtable.h	/^typedef void (*ht_free_item_callback_t)(void *);$/;"	t
+ht_get	hashtable.c	/^ht_get(hashtable_t *table, void *key, size_t klen, size_t *dlen)$/;"	f
+ht_get_all_keys	hashtable.c	/^ht_get_all_keys(hashtable_t *table)$/;"	f
+ht_get_all_values	hashtable.c	/^ht_get_all_values(hashtable_t *table)$/;"	f
+ht_get_and_set	hashtable.c	/^ht_get_and_set(hashtable_t *table,$/;"	f
+ht_get_copy	hashtable.c	/^ht_get_copy(hashtable_t *table, void *key, size_t klen, size_t *dlen)$/;"	f
+ht_get_deep_copy	hashtable.c	/^ht_get_deep_copy(hashtable_t *table, void *key, size_t klen,$/;"	f
+ht_get_helper	hashtable.c	/^ht_get_helper(hashtable_t *table __attribute__ ((unused)), void *key __attribute__ ((unused)), size_t klen __attribute__ ((unused)), void **value, size_t *vlen, void *user)$/;"	f	file:
+ht_get_helper_arg_t	hashtable.c	/^} ht_get_helper_arg_t;$/;"	t	typeref:struct:__anon6	file:
+ht_get_internal	hashtable.c	/^ht_get_internal(hashtable_t *table,$/;"	f	file:
+ht_get_list	hashtable.c	/^ht_get_list(hashtable_t *table, uint32_t hash)$/;"	f	file:
+ht_get_or_set	hashtable.c	/^ht_get_or_set(hashtable_t *table,$/;"	f
+ht_grow_table	hashtable.c	/^ht_grow_table(hashtable_t *table)$/;"	f	file:
+ht_hash_one_at_a_time	hashtable.c	/^ht_hash_one_at_a_time(hashtable_t *table, const unsigned char *str, const ssize_t len)$/;"	f	file:
+ht_init	hashtable.c	/^ht_init(hashtable_t *table,$/;"	f
+ht_insert_next_val	ht_nodes.c	/^void ht_insert_next_val( hashtable_t *table, const char *key) {$/;"	f
+ht_item_t	hashtable.c	/^} __attribute__((packed)) ht_item_t;$/;"	t	typeref:struct:_ht_item	file:
+ht_items_list_t	hashtable.c	/^} __attribute__((packed)) ht_items_list_t;$/;"	t	typeref:struct:_ht_item_list	file:
+ht_iterator_arg_t	hashtable.c	/^} ht_iterator_arg_t;$/;"	t	typeref:struct:__anon7	file:
+ht_iterator_callback_t	hashtable.c	/^} ht_iterator_callback_t;$/;"	t	typeref:struct:_ht_iterator_callback	file:
+ht_iterator_list_t	hashtable.c	/^} __attribute__((packed)) ht_iterator_list_t;$/;"	t	typeref:struct:__anon2	file:
+ht_iterator_status_t	hashtable.h	/^} ht_iterator_status_t;$/;"	t	typeref:enum:__anon1
+ht_kadd_val_to_k_nval	ht_nodes.c	/^void ht_kadd_val_to_k_nval(hashtable_t *table, const char *str, int val) {$/;"	f
+ht_key_iterator_callback_t	hashtable.h	/^typedef ht_iterator_status_t (*ht_key_iterator_callback_t)(hashtable_t *table, void *key, size_t klen, void *user);$/;"	t
+ht_kget_nval	ht_nodes.c	/^size_t ht_kget_nval( hashtable_t *table, const char *str ){$/;"	f
+ht_pair_callback_t	hashtable.h	/^typedef int (*ht_pair_callback_t)(hashtable_t *table, void *key, size_t klen, void **value, size_t *vlen, void *user);$/;"	t
+ht_pair_iterator_callback_t	hashtable.h	/^typedef ht_iterator_status_t (*ht_pair_iterator_callback_t)(hashtable_t *table, void *key, size_t klen, void *value, size_t vlen, void *user);$/;"	t
+ht_set	hashtable.c	/^ht_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen)$/;"	f
+ht_set_copy	hashtable.c	/^ht_set_copy(hashtable_t *table,$/;"	f
+ht_set_free_item_callback	hashtable.c	/^ht_set_free_item_callback(hashtable_t *table, ht_free_item_callback_t cb)$/;"	f
+ht_set_if_equals	hashtable.c	/^ht_set_if_equals(hashtable_t *table,$/;"	f
+ht_set_if_equals_helper	hashtable.c	/^ht_set_if_equals_helper(hashtable_t *table, void *key __attribute__ ((unused)), size_t klen __attribute__ ((unused)), void **value, size_t *vlen, void *user)$/;"	f	file:
+ht_set_if_equals_helper_arg_t	hashtable.c	/^} ht_set_if_equals_helper_arg_t;$/;"	t	typeref:struct:__anon4	file:
+ht_set_if_not_exists	hashtable.c	/^ht_set_if_not_exists(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen)$/;"	f
+ht_set_internal	hashtable.c	/^ht_set_internal(hashtable_t *table,$/;"	f	file:
+ht_set_list	hashtable.c	/^ht_set_list(hashtable_t *table, uint32_t hash)$/;"	f	file:
+ht_status_t	hashtable.c	/^} __attribute__((packed)) ht_status_t;$/;"	t	typeref:enum:__anon3	file:
+ht_unset	hashtable.c	/^ht_unset(hashtable_t *table,$/;"	f
+ht_value_iterator_callback_t	hashtable.h	/^typedef ht_iterator_status_t (*ht_value_iterator_callback_t)(hashtable_t *table, void *value, size_t vlen, void *user);$/;"	t
 httpaccess_metrics	htlog_processing.h	/^typedef struct httpaccess_metrics {$/;"	s
 httpaccess_metrics	htlog_processing.h	/^} httpaccess_metrics;$/;"	t	typeref:struct:httpaccess_metrics
-inline	ansidecl.h	19;"	d
-inline	ansidecl.h	24;"	d
-inline	ansidecl.h	26;"	d
-inline	ansidecl.h	35;"	d
-inline	ansidecl.h	39;"	d
-insert_option	hashtab.h	/^  enum insert_option {NO_INSERT, INSERT};$/;"	g
-inv	hashtab.c	/^  hashval_t inv;$/;"	m	struct:prime_ent	file:
-inv_m2	hashtab.c	/^  hashval_t inv_m2;  \/* inverse of prime-2 *\/$/;"	m	struct:prime_ent	file:
-iterative_hash	hashtab.c	/^hashval_t iterative_hash (const PTR k_in \/* the key *\/, register size_t  length \/* the length of the key *\/, register hashval_t initval \/* the previous hash, or an arbitrary value *\/) {$/;"	f
-iterative_hash_object	hashtab.h	70;"	d
-key_del	ht_nodes.c	/^static void key_del(void *key) {$/;"	f	file:
+index	hashtable.c	/^    size_t index;$/;"	m	struct:_ht_item_list	file:
+insert_entry	linklist.c	/^insert_entry(linked_list_t *list, list_entry_t *entry, size_t pos)$/;"	f	file:
+insque	bsd_queue.h	/^insque(void *a, void *b)$/;"	f
+item_handler_t	linklist.h	/^typedef int (*item_handler_t)(void *item, size_t idx, void *user);$/;"	t
+items	hashtable.c	/^    ht_items_list_t **items;$/;"	m	struct:_hashtable_s	file:
+iterator_list	hashtable.c	/^    ht_iterator_list_t *iterator_list;$/;"	m	struct:_hashtable_s	file:
+iterator_lock	hashtable.c	/^    pthread_mutex_t iterator_lock;$/;"	m	struct:_hashtable_s	file:
+kbuf	hashtable.c	/^    char     kbuf[32];$/;"	m	struct:_ht_item	file:
+key	hashtable.c	/^    void    *key;$/;"	m	struct:_ht_item	file:
+key	hashtable.h	/^    void *key;$/;"	m	struct:_hashtable_value_s
+klen	hashtable.c	/^    size_t   klen;$/;"	m	struct:_ht_item	file:
+klen	hashtable.h	/^    size_t klen;$/;"	m	struct:_hashtable_value_s
+lastfile	bsd_queue.h	/^	char * lastfile;$/;"	m	struct:qm_trace
+lastline	bsd_queue.h	/^	int lastline;$/;"	m	struct:qm_trace
+len	hashtable.h	/^    size_t len;$/;"	m	struct:_hashtable_key_s
+len	hashtable.h	/^    size_t len;$/;"	m	struct:_hashtable_value_s
+length	linklist.c	/^    size_t length;$/;"	m	struct:_linked_list_s	file:
+length	linklist.c	/^    size_t length;$/;"	m	struct:_slice_s	file:
 lines_failed	htlog_processing.h	/^  int lines_failed;$/;"	m	struct:httpaccess_metrics
 lines_processed	htlog_processing.h	/^  int lines_processed;$/;"	m	struct:httpaccess_metrics
+linked_list_t	linklist.h	/^typedef struct _linked_list_s linked_list_t;$/;"	t	typeref:struct:_linked_list_s
+list	linklist.c	/^    linked_list_t *list;$/;"	m	struct:_slice_s	file:
+list	linklist.c	/^    struct _linked_list_s *list;$/;"	m	struct:_list_entry_s	typeref:struct:_list_entry_s::_linked_list_s	file:
+list_clear	linklist.c	/^list_clear(linked_list_t *list)$/;"	f
+list_comparator_callback_t	linklist.h	/^typedef int (*list_comparator_callback_t)(void *v1, void *v2);$/;"	t
+list_count	linklist.c	/^list_count(linked_list_t *l)$/;"	f
+list_create	linklist.c	/^list_create()$/;"	f
+list_create_tagged_sublist	linklist.c	/^list_create_tagged_sublist(char *tag, linked_list_t *sublist)$/;"	f
+list_create_tagged_value	linklist.c	/^list_create_tagged_value(char *tag, void *val, size_t vlen)$/;"	f
+list_create_tagged_value_nocopy	linklist.c	/^list_create_tagged_value_nocopy(char *tag, void *val)$/;"	f
+list_destroy	linklist.c	/^list_destroy(linked_list_t *list)$/;"	f
+list_destroy_tagged_value	linklist.c	/^list_destroy_tagged_value(tagged_value_t *tval)$/;"	f
+list_destroy_tagged_value_internal	linklist.c	/^list_destroy_tagged_value_internal(tagged_value_t *tval, void (*free_cb)(void *v))$/;"	f	file:
+list_entry_t	linklist.c	/^} list_entry_t;$/;"	t	typeref:struct:_list_entry_s	file:
+list_fetch_tagged_value	linklist.c	/^list_fetch_tagged_value(linked_list_t *list, size_t pos)$/;"	f
+list_fetch_value	linklist.c	/^list_fetch_value(linked_list_t *list, size_t pos)$/;"	f
+list_foreach_value	linklist.c	/^list_foreach_value(linked_list_t *list, int (*item_handler)(void *item, size_t idx, void *user), void *user)$/;"	f
+list_get_tagged_value	linklist.c	/^list_get_tagged_value(linked_list_t *list, char *tag)$/;"	f
+list_get_tagged_values	linklist.c	/^list_get_tagged_values(linked_list_t *list, char *tag, linked_list_t *values)$/;"	f
+list_init	linklist.c	/^list_init(linked_list_t *list __attribute__ ((unused)))$/;"	f
+list_insert_tagged_value	linklist.c	/^list_insert_tagged_value(linked_list_t *list, tagged_value_t *tval, size_t pos)$/;"	f
+list_insert_value	linklist.c	/^list_insert_value(linked_list_t *list, void *val, size_t pos)$/;"	f
+list_lock	linklist.c	/^list_lock(linked_list_t *list __attribute__ ((unused)))$/;"	f
+list_move_value	linklist.c	/^list_move_value(linked_list_t *list, size_t srcPos, size_t dstPos)$/;"	f
+list_pick_tagged_value	linklist.c	/^list_pick_tagged_value(linked_list_t *list, size_t pos)$/;"	f
+list_pick_value	linklist.c	/^list_pick_value(linked_list_t *list, size_t pos)$/;"	f
+list_pop_tagged_value	linklist.c	/^list_pop_tagged_value(linked_list_t *list)$/;"	f
+list_pop_value	linklist.c	/^list_pop_value(linked_list_t *list)$/;"	f
+list_push_tagged_value	linklist.c	/^list_push_tagged_value(linked_list_t *list, tagged_value_t *tval)$/;"	f
+list_push_value	linklist.c	/^list_push_value(linked_list_t *list, void *val)$/;"	f
+list_quick_sort	linklist.c	/^list_quick_sort(list_entry_t *head,$/;"	f	file:
+list_set_free_value_callback	linklist.c	/^list_set_free_value_callback(linked_list_t *list, free_value_callback_t free_value_cb)$/;"	f
+list_set_tagged_value	linklist.c	/^list_set_tagged_value(linked_list_t *list, char *tag, void *value, size_t len, int copy)$/;"	f
+list_set_value	linklist.c	/^list_set_value(linked_list_t *list, size_t pos, void *newval)$/;"	f
+list_shift_value	linklist.c	/^list_shift_value(linked_list_t *list)$/;"	f
+list_sort	linklist.c	/^list_sort(linked_list_t *list, list_comparator_callback_t comparator)$/;"	f
+list_subst_value	linklist.c	/^list_subst_value(linked_list_t *list, size_t pos, void *newval)$/;"	f
+list_swap_values	linklist.c	/^list_swap_values(linked_list_t *list,  size_t pos1, size_t pos2)$/;"	f
+list_unlock	linklist.c	/^list_unlock(linked_list_t *list __attribute__ ((unused)))$/;"	f
+list_unshift_tagged_value	linklist.c	/^list_unshift_tagged_value(linked_list_t *list, tagged_value_t *tval)$/;"	f
+list_unshift_value	linklist.c	/^list_unshift_value(linked_list_t *list, void *val)$/;"	f
+lock	hashtable.c	/^    OSSpinLock lock;$/;"	m	struct:_ht_item_list	file:
+lock	hashtable.c	/^    pthread_spinlock_t lock;$/;"	m	struct:_ht_item_list	file:
+lock	linklist.c	/^    pthread_mutex_t lock;$/;"	m	struct:_linked_list_s	file:
 logline	htlog_processing.h	/^typedef struct logline {$/;"	s
 logline	htlog_processing.h	/^} logline;$/;"	t	typeref:struct:logline
 logs_scan	htlog_processing.c	/^int logs_scan(httpaccess_metrics *h_metrics, char *filename) {$/;"	f
 main	htlog_analyzer.c	/^int main(int argc, char **argv) {$/;"	f
-mix	hashtab.c	446;"	d	file:
+match	hashtable.c	/^    void *match;$/;"	m	struct:__anon4	file:
+match	hashtable.c	/^    void *match;$/;"	m	struct:__anon5	file:
+match_size	hashtable.c	/^    size_t match_size;$/;"	m	struct:__anon4	file:
+match_size	hashtable.c	/^    size_t match_size;$/;"	m	struct:__anon5	file:
+matched	hashtable.c	/^    int matched;$/;"	m	struct:__anon4	file:
+max_size	hashtable.c	/^    size_t max_size;$/;"	m	struct:_hashtable_s	file:
+move_entry	linklist.c	/^move_entry(linked_list_t *list, size_t srcPos, size_t dstPos)$/;"	f	file:
 name	ht_nodes.h	/^  char  *name;$/;"	m	struct:node
+next	linklist.c	/^    struct _list_entry_s *next;$/;"	m	struct:_list_entry_s	typeref:struct:_list_entry_s::_list_entry_s	file:
 node	ht_nodes.h	/^typedef struct node {$/;"	s
 node	ht_nodes.h	/^} node;$/;"	t	typeref:struct:node
-node_delete	ht_nodes.c	/^static void node_delete(node *n) {$/;"	f	file:
-node_init	ht_nodes.c	/^node *node_init(const char *s) {$/;"	f
-nodes_equal	ht_nodes.c	/^int nodes_equal(const void *entry, const void *element) {$/;"	f
+node_init	ht_nodes.c	/^node *node_init(const char *s, int val ) {$/;"	f
 nval	ht_nodes.h	/^  size_t nval;$/;"	m	struct:node
-page_paths	htlog_processing.h	/^  htab_t page_paths;$/;"	m	struct:httpaccess_metrics
-per_hour_distinct_did_access_count__hits	htlog_processing.h	/^  htab_t per_hour_distinct_did_access_count__hits;$/;"	m	struct:httpaccess_metrics
-per_hour_distinct_did_cip_access_count__visits	htlog_processing.h	/^  htab_t per_hour_distinct_did_cip_access_count__visits;$/;"	m	struct:httpaccess_metrics
-per_hour_distinct_did_pid_cip_access_count__pageviews	htlog_processing.h	/^  htab_t per_hour_distinct_did_pid_cip_access_count__pageviews;$/;"	m	struct:httpaccess_metrics
-per_hour_tvectors_inc	htlog_processing.h	/^  htab_t per_hour_tvectors_inc;$/;"	m	struct:httpaccess_metrics
-per_hour_tvectors_inner	htlog_processing.h	/^  htab_t per_hour_tvectors_inner;$/;"	m	struct:httpaccess_metrics
-pex_time	libiberty.h	/^  struct pex_time {$/;"	s
-prime	hashtab.c	/^  hashval_t prime;$/;"	m	struct:prime_ent	file:
-prime_ent	hashtab.c	/^struct prime_ent {$/;"	s	file:
-prime_tab	hashtab.c	/^static struct prime_ent const prime_tab[] = {$/;"	v	file:
-print_all_ips	htlog_processing.c	/^int print_all_ips( httpaccess_metrics *h_metrics ){$/;"	f
+offset	linklist.c	/^    size_t offset;$/;"	m	struct:_slice_s	file:
+output	hashtable.c	/^    linked_list_t *output;$/;"	m	struct:_ht_collector_arg	file:
+page_paths	htlog_processing.h	/^  hashtable_t * page_paths;$/;"	m	struct:httpaccess_metrics
+per_hour_distinct_did_access_count__hits	htlog_processing.h	/^  hashtable_t * per_hour_distinct_did_access_count__hits;$/;"	m	struct:httpaccess_metrics
+per_hour_distinct_did_cip_access_count__visits	htlog_processing.h	/^  hashtable_t * per_hour_distinct_did_cip_access_count__visits;$/;"	m	struct:httpaccess_metrics
+per_hour_distinct_did_pid_cip_access_count__pageviews	htlog_processing.h	/^  hashtable_t * per_hour_distinct_did_pid_cip_access_count__pageviews;$/;"	m	struct:httpaccess_metrics
+per_hour_tvectors_inc	htlog_processing.h	/^  hashtable_t * per_hour_tvectors_inc;$/;"	m	struct:httpaccess_metrics
+per_hour_tvectors_inner	htlog_processing.h	/^  hashtable_t * per_hour_tvectors_inner;$/;"	m	struct:httpaccess_metrics
+pick_entry	linklist.c	/^list_entry_t *pick_entry(linked_list_t *list, size_t pos)$/;"	f	file:
+pop_entry	linklist.c	/^list_entry_t *pop_entry(linked_list_t *list)$/;"	f	file:
+pos	linklist.c	/^    size_t  pos;$/;"	m	struct:_linked_list_s	file:
+prev	linklist.c	/^    struct _list_entry_s *prev;$/;"	m	struct:_list_entry_s	typeref:struct:_list_entry_s::_list_entry_s	file:
+prev_data	hashtable.c	/^    void **prev_data;$/;"	m	struct:__anon4	file:
+prev_data	hashtable.c	/^    void **prev_data;$/;"	m	struct:__anon5	file:
+prev_len	hashtable.c	/^    size_t *prev_len;$/;"	m	struct:__anon4	file:
+prev_len	hashtable.c	/^    size_t *prev_len;$/;"	m	struct:__anon5	file:
+prevfile	bsd_queue.h	/^	char * prevfile;$/;"	m	struct:qm_trace
+prevline	bsd_queue.h	/^	int prevline;$/;"	m	struct:qm_trace
 print_logline	htlog_processing.c	/^void print_logline( logline * ll ) {$/;"	f
 print_logline_header	htlog_processing.c	/^void print_logline_header( ) {$/;"	f
+push_entry	linklist.c	/^push_entry(linked_list_t *list, list_entry_t *entry)$/;"	f	file:
+qh_link	bsd_queue.h	/^	struct quehead *qh_link;$/;"	m	struct:quehead	typeref:struct:quehead::quehead
+qh_rlink	bsd_queue.h	/^	struct quehead *qh_rlink;$/;"	m	struct:quehead	typeref:struct:quehead::quehead
+qm_trace	bsd_queue.h	/^struct qm_trace {$/;"	s
+quehead	bsd_queue.h	/^struct quehead {$/;"	s
 real_did	htlog_processing.h	/^  int real_did;$/;"	m	struct:httpaccess_metrics
 ref	htlog_processing.h	/^  char *ref;$/;"	m	struct:logline
-referer_urls	htlog_processing.h	/^  htab_t referer_urls;$/;"	m	struct:httpaccess_metrics
+refcnt	linklist.c	/^    int refcnt;$/;"	m	struct:_linked_list_s	file:
+referer_urls	htlog_processing.h	/^  hashtable_t * referer_urls;$/;"	m	struct:httpaccess_metrics
+remove_entry	linklist.c	/^list_entry_t *remove_entry(linked_list_t *list, size_t pos)$/;"	f	file:
+remque	bsd_queue.h	/^remque(void *a)$/;"	f
 req	htlog_processing.h	/^  char *req;$/;"	m	struct:logline
 scan_file_to_loglines	htlog_processing.c	/^int scan_file_to_loglines( char* filename  ) {$/;"	f
-search_qstr	htlog_processing.h	/^  htab_t search_qstr;$/;"	m	struct:httpaccess_metrics
-shift	hashtab.c	/^  hashval_t shift;$/;"	m	struct:prime_ent	file:
-signed	ansidecl.h	18;"	d
-signed	ansidecl.h	34;"	d
-signed	ansidecl.h	38;"	d
+search_qstr	htlog_processing.h	/^  hashtable_t * search_qstr;$/;"	m	struct:httpaccess_metrics
+seed	hashtable.c	/^    uint32_t seed;$/;"	m	struct:_hashtable_s	file:
+shift_entry	linklist.c	/^list_entry_t *shift_entry(linked_list_t *list)$/;"	f	file:
+shift_tagged_value	linklist.c	/^shift_tagged_value(linked_list_t *list)$/;"	f
+size	hashtable.c	/^    size_t size;$/;"	m	struct:_hashtable_s	file:
+slice_create	linklist.c	/^slice_create(linked_list_t *list, size_t offset, size_t length)$/;"	f
+slice_destroy	linklist.c	/^slice_destroy(slice_t *slice)$/;"	f
+slice_foreach_value	linklist.c	/^slice_foreach_value(slice_t *slice, int (*item_handler)(void *item, size_t idx, void *user), void *user)$/;"	f
+slice_t	linklist.h	/^typedef struct  _slice_s slice_t;$/;"	t	typeref:struct:_slice_s
+slices	linklist.c	/^    list_entry_t *slices;$/;"	m	struct:_linked_list_s	file:
 st	htlog_processing.h	/^  int st; \/\/ earliest timestamp in log$/;"	m	struct:httpaccess_metrics
-stats_counter_incr	htlog_processing.c	/^int stats_counter_incr( htab_t *ht, char *key ) {$/;"	f
+stats_counter_incr	htlog_processing.c	/^int stats_counter_incr( hashtable_t *table, char* key ) {$/;"	f
 stats_process_user_ips	htlog_processing.c	/^int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){$/;"	f
-system_microseconds	libiberty.h	/^    unsigned long system_microseconds;$/;"	m	struct:pex_time
-system_seconds	libiberty.h	/^    unsigned long system_seconds;$/;"	m	struct:pex_time
+status	hashtable.c	/^    ht_status_t status;$/;"	m	struct:_hashtable_s	file:
+subst_entry	linklist.c	/^list_entry_t *subst_entry(linked_list_t *list, size_t pos, list_entry_t *entry)$/;"	f	file:
+swap_entries	linklist.c	/^swap_entries(linked_list_t *list, size_t pos1, size_t pos2)$/;"	f	file:
+swap_entry_node_val	linklist.c	/^swap_entry_node_val(list_entry_t *p1, list_entry_t *p2)$/;"	f	file:
+table	hashtable.c	/^    hashtable_t *table;$/;"	m	struct:_ht_iterator_callback	file:
+tag	linklist.h	/^    char *tag;$/;"	m	struct:_tagged_value_s
+tagged	linklist.c	/^    int tagged;$/;"	m	struct:_list_entry_s	file:
+tagged_value_t	linklist.h	/^} tagged_value_t;$/;"	t	typeref:struct:_tagged_value_s
+tail	linklist.c	/^    list_entry_t *tail;$/;"	m	struct:_linked_list_s	file:
 time	htlog_processing.h	/^  time_t time;$/;"	m	struct:logline
 timezone	htlog_processing.h	/^  char *timezone;$/;"	m	struct:logline
 tm	htlog_processing.h	/^  struct tm tm;$/;"	m	struct:logline	typeref:struct:logline::tm
-tvectors_incoming	htlog_processing.h	/^  htab_t tvectors_incoming;$/;"	m	struct:httpaccess_metrics
-tvectors_inner	htlog_processing.h	/^  htab_t tvectors_inner;$/;"	m	struct:httpaccess_metrics
+tvectors_incoming	htlog_processing.h	/^  hashtable_t * tvectors_incoming;$/;"	m	struct:httpaccess_metrics
+tvectors_inner	htlog_processing.h	/^  hashtable_t * tvectors_inner;$/;"	m	struct:httpaccess_metrics
+type	linklist.h	/^    char type;$/;"	m	struct:_tagged_value_s
 uid	htlog_processing.h	/^  int uid;$/;"	m	struct:httpaccess_metrics
+unset	hashtable.c	/^    int  unset;$/;"	m	struct:__anon5	file:
+unshift_entry	linklist.c	/^unshift_entry(linked_list_t *list, list_entry_t *entry)$/;"	f	file:
+user	hashtable.c	/^    void *user;$/;"	m	struct:__anon6	file:
+user	hashtable.c	/^    void *user;$/;"	m	struct:__anon7	file:
+user	hashtable.c	/^    void *user;$/;"	m	struct:_ht_iterator_callback	file:
 user_hostname	htlog_processing.h	/^  char *user_hostname;$/;"	m	struct:logline
-user_microseconds	libiberty.h	/^    unsigned long user_microseconds;$/;"	m	struct:pex_time
-user_seconds	libiberty.h	/^    unsigned long user_seconds;$/;"	m	struct:pex_time
-volatile	ansidecl.h	17;"	d
-volatile	ansidecl.h	33;"	d
-volatile	ansidecl.h	37;"	d
+value	linklist.c	/^    void *value;$/;"	m	struct:_list_entry_s	file:
+value	linklist.h	/^    void *value;$/;"	m	struct:_tagged_value_s
+vlen	hashtable.h	/^    size_t vlen;$/;"	m	struct:_hashtable_key_s
+vlen	linklist.h	/^    size_t vlen;$/;"	m	struct:_tagged_value_s
