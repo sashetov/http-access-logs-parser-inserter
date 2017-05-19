@@ -61,7 +61,7 @@ int list_swap_values(linked_list_t *list, size_t pos1, size_t pos2);
 typedef int (*item_handler_t)(void *item, size_t idx, void *user);
 //list iterator. This iterator can be used for both Tag-based and Value-based lists.  If tagged, items can simply be casted to a tagged_value_t pointer.  @return The number of items visited during the iteration 
 int list_foreach_value(linked_list_t *list, item_handler_t item_handler, void *user);
- //@brief Tagged Value This structure represent a tagged_value_t and is the main datatype you will have to handle when workin with the tagged-based api.  If user extract such structure from the list (removing it from the list) then he MUST release its resources trough a call to destroy_tagged_value when finished using it.  If a new tagged_value must be created and inserted in a list, then list_create_tagged_value() should be used to allocate resources and obtain a pointer to a tagged_value_t structure.  
+//@brief Tagged Value This structure represent a tagged_value_t and is the main datatype you will have to handle when workin with the tagged-based api.  If user extract such structure from the list (removing it from the list) then he MUST release its resources trough a call to destroy_tagged_value when finished using it.  If a new tagged_value must be created and inserted in a list, then list_create_tagged_value() should be used to allocate resources and obtain a pointer to a tagged_value_t structure.  
 typedef struct _tagged_value_s {
     char *tag;
     void *value;

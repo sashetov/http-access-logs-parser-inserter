@@ -81,7 +81,6 @@ void h_metrics_free( httpaccess_metrics *h_metrics ) {
   free( h_metrics );
 }
 int h_metrics_parse_line(logline *ll, char *l) {
-  //domain.tld userhostname.dns.tld - - [03/Apr/2017:00:02:29 +0000] "GET /feed/ HTTP/1.0" 200 55490 "-" "-" 185.41.10.139
   char *user_hostname, *date, *hour, *timezone, *host, *agent, *req, *ref, *p;
   char *agent_start = NULL, *req_end = NULL, *ref_end = NULL;
   int agent_without_parens = 0;
@@ -279,6 +278,9 @@ int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
 int stats_process_referer_and_sqs( httpaccess_metrics *h_metrics, char *ref_str ){
   return 0;
 }
+int stats_process_hits( httpaccess_metrics *h_metrics ){
+  return 0;
+}
 int stats_process_visits( httpaccess_metrics *h_metrics ){
   return 0;
 }
@@ -286,9 +288,6 @@ int stats_process_pageviews( httpaccess_metrics *h_metrics ){
   return 0;
 }
 int stats_process_tvectors( httpaccess_metrics *h_metrics ){
-  return 0;
-}
-int stats_process_tvectors_per_hour( httpaccess_metrics *h_metrics ){
   return 0;
 }
 #include <stdio.h>
@@ -302,6 +301,30 @@ int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
   if (h_metrics_parse_line(&ll, l) == 0) {
     //print_logline( &ll );
     if ( stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
+      goto oom;
+    }
+    if ( stats_process_geo_location( h_metrics, ll.user_hostname ) ) {
+      goto oom;
+    }
+    if ( stats_process_ua( h_metrics, ll.agent ) ) {
+      goto oom;
+    }
+    if ( stats_process_page_paths( h_metrics, ll.req ) ) {
+      goto oom;
+    }
+    if ( stats_process_referer_and_sqs( h_metrics, ll.ref ) ) {
+      goto oom;
+    }
+    if ( stats_process_hits( h_metrics ) ) {
+      goto oom;
+    }
+    if ( stats_process_visits( h_metrics ) ) {
+      goto oom;
+    }
+    if ( stats_process_pageviews( h_metrics ) ) {
+      goto oom;
+    }
+    if ( stats_process_tvectors( h_metrics ) ) {
       goto oom;
     }
     h_metrics->lines_processed++;

@@ -47,10 +47,10 @@ int stats_process_geo_location( httpaccess_metrics *h_metrics, char *user_ip );
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str );
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path );
 int stats_process_referer_and_sqs( httpaccess_metrics *h_metrics, char *ref_str );
+int stats_process_hits( httpaccess_metrics *h_metrics );
 int stats_process_visits( httpaccess_metrics *h_metrics );
 int stats_process_pageviews( httpaccess_metrics *h_metrics );
 int stats_process_tvectors( httpaccess_metrics *h_metrics );
-int stats_process_tvectors_per_hour( httpaccess_metrics *h_metrics );
 #endif
 #ifndef __LOG_LINE__
 typedef struct logline {
