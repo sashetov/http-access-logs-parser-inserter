@@ -13,7 +13,7 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   h_metrics->uid = uid;
   h_metrics->error = NULL;
   h_metrics->st= h_metrics->et = time(NULL);
-  h_metrics->lines_processed= 0;
+ h_metrics->lines_processed= 0;
   h_metrics->lines_failed   = 0;
   h_metrics->hits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_ips = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
@@ -394,7 +394,7 @@ uint32_t get_ip_by_dns(char * hostname , char* ip) {
   }
   return 1;
 }
-int scan_file_to_loglines( char* filename  ) {
+int scan_file_to_loglines( char* filename ) {
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );
   if ( logs_scan( h_metrics, filename ) ) {
     char *err= h_metrics_get_error( h_metrics );
