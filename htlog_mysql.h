@@ -24,6 +24,7 @@ struct mysql_domain_resultset* get_real_did_results( MYSQL * con, int possible_d
 int get_did_for_domain_name( MYSQL* con, char * domain_name );
 struct mysql_domain_resultset * get_real_domain_results ( char * domain_name );
 int get_real_did( char * domain_name );
+void print_metric_node_details ( node * n );
 int insert_h_metrics(httpaccess_metrics *h_metrics);
-int iterate_all_linklist_nodes( linked_list_t* linkedl );
+int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(node *) );
 #endif

@@ -79,23 +79,31 @@ int get_real_did( char * domain_name ) {
   struct mysql_domain_resultset * drs = get_real_domain_results( domain_name );
   return drs->did;
 }
+void print_metric_node_details ( node * n ) {
+  printf( "%s %d\n", n->name, n->nval );
+}
+void print_ip_node_details( node *n ) {
+  char * ip = n->name;
+  char * country_name = (char *) get_geoip_country(0, ip);
+  printf( "%s %s %d\n", country_name,  n->name, n->nval );
+}
 int insert_h_metrics( httpaccess_metrics *h_metrics ) {
   linked_list_t* uniq_ips = ht_get_all_keys(h_metrics->client_ips);
-  iterate_all_linklist_nodes( uniq_ips );
+  //iterate_all_linklist_nodes( uniq_ips, print_metric_node_details );
+  iterate_all_linklist_nodes( uniq_ips, print_ip_node_details );
   return 0;
 }
-
-int iterate_all_linklist_nodes( linked_list_t* linkedl ){
+int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(node *) ){
   int c = list_count(linkedl);
   list_entry_t* head = linkedl->head;
   list_entry_t* tail = linkedl->tail;
   list_entry_t* next = head->next;
   node * n = (node *) next->value;
   while( next != tail ){
-    printf( "%s %d\n", n->name, n->nval );
     next = next->next;
     n = (node *) next->value;
+    cb(n);
   }
-  printf( "%s %d\n", n->name, n->nval );
+  cb(n);
 };
 #endif
