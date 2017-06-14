@@ -10,13 +10,9 @@ typedef struct node {
 } node;
 #define __HT_NODE__
 node        *node_init ( const char *s, int val );
-static int  nodes_equal( const void *entry, const void *element );
-static void node_delete( node *n );
 #ifndef __HASHTABLE_H__
 #include "hashtable.h"
 #endif
-static void key_del( void *key );
 size_t ht_kget_nval( hashtable_t *table, const char *str );
 void ht_kadd_val_to_k_nval( hashtable_t * table, const char *str, int val);
-void ht_insert_next_val( hashtable_t *table, const char *srt );
 #endif

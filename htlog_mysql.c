@@ -68,12 +68,34 @@ int get_did_for_domain_name( MYSQL* con, char * domain_name ) {
   mysql_close(con);
   return did;
 }
-struct mysql_domain_resultset * get_domain_results ( char * domain_name ){
+struct mysql_domain_resultset * get_real_domain_results ( char * domain_name ){
   MYSQL *con = get_my_conn( MY_DB_SELECTS_HOST, MY_USERNAME, MY_PASSWORD,
                             MY_DB_SELECTS_DBNAME, MY_DB_SELECTS_PORT );
   int possible_did = get_did_for_domain_name( con, domain_name );
   struct mysql_domain_resultset * res = get_real_did_results( con, possible_did );
   return res;
 }
+int get_real_did( char * domain_name ) {
+  struct mysql_domain_resultset * drs = get_real_domain_results( domain_name );
+  return drs->did;
+}
+int insert_h_metrics( httpaccess_metrics *h_metrics ) {
+  linked_list_t* uniq_ips = ht_get_all_keys(h_metrics->client_ips);
+  iterate_all_linklist_nodes( uniq_ips );
+  return 0;
+}
 
+int iterate_all_linklist_nodes( linked_list_t* linkedl ){
+  int c = list_count(linkedl);
+  list_entry_t* head = linkedl->head;
+  list_entry_t* tail = linkedl->tail;
+  list_entry_t* next = head->next;
+  node * n = (node *) next->value;
+  while( next != tail ){
+    printf( "%s %d\n", n->name, n->nval );
+    next = next->next;
+    n = (node *) next->value;
+  }
+  printf( "%s %d\n", n->name, n->nval );
+};
 #endif

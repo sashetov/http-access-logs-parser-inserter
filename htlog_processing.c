@@ -370,9 +370,6 @@ int logs_scan(httpaccess_metrics *h_metrics, char *filename) {
     fclose(fp);
   }
   h_metrics->et = time(NULL);
-  linked_list_t * uniq_ips = ht_get_all_keys(h_metrics->client_ips);
-  int c = list_count(uniq_ips);
-  printf("%d\n",c);
   return 0;
 }
 #include <arpa/inet.h>
@@ -394,7 +391,7 @@ uint32_t get_ip_by_dns(char * hostname , char* ip) {
   }
   return 1;
 }
-int scan_file_to_loglines( char* filename ) {
+int process_logfile( char* filename ) {
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );
   if ( logs_scan( h_metrics, filename ) ) {
     char *err= h_metrics_get_error( h_metrics );
@@ -403,6 +400,7 @@ int scan_file_to_loglines( char* filename ) {
       exit(1);
     }
   }
+  insert_h_metrics( h_metrics );
   h_metrics_free( h_metrics );
 }
 #endif

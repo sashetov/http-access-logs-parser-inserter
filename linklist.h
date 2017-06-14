@@ -17,7 +17,26 @@ extern "C" {
 typedef void (*free_value_callback_t)(void *v);
 typedef int (*list_comparator_callback_t)(void *v1, void *v2);
 // @brief Opaque structure representing the actual linked list descriptor
-typedef struct _linked_list_s linked_list_t;
+typedef struct _list_entry_s {
+  struct _linked_list_s *list;
+  struct _list_entry_s *prev;
+  struct _list_entry_s *next;
+  void *value;
+  int tagged;
+} list_entry_t;
+typedef struct _linked_list_s {
+  list_entry_t *head;
+  list_entry_t *tail;
+  list_entry_t *cur;
+  size_t  pos;
+  size_t length;
+#ifdef THREAD_SAFE
+  pthread_mutex_t lock;
+#endif
+  free_value_callback_t free_value_cb;
+  int refcnt;
+  list_entry_t *slices;
+} linked_list_t;
 // @brief Create a new list @return a newly allocated and initialized list
 linked_list_t *list_create();
 //@brief Initialize a pre-allocated list This function can be used to initialize a statically defined list @return 0 on success; -1 otherwise

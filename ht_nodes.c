@@ -32,6 +32,4 @@ void ht_kadd_val_to_k_nval(hashtable_t *table, const char *str, int val) {
     free(n);
   }
 }
-void ht_insert_next_val( hashtable_t *table, const char *key) { 
-}
 #endif

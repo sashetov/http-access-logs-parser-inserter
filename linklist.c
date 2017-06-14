@@ -5,26 +5,6 @@
 #include <errno.h>
 #include "linklist.h"
 #include "atomic_defs.h"
-typedef struct _list_entry_s {
-  struct _linked_list_s *list;
-  struct _list_entry_s *prev;
-  struct _list_entry_s *next;
-  void *value;
-  int tagged;
-} list_entry_t;
-struct _linked_list_s {
-  list_entry_t *head;
-  list_entry_t *tail;
-  list_entry_t *cur;
-  size_t  pos;
-  size_t length;
-#ifdef THREAD_SAFE
-  pthread_mutex_t lock;
-#endif
-  free_value_callback_t free_value_cb;
-  int refcnt;
-  list_entry_t *slices;
-};
 struct _slice_s {
   linked_list_t *list;
   size_t offset;

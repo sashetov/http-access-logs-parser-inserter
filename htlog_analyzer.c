@@ -15,6 +15,6 @@ int main(int argc, char **argv) {
   filename = argv[1];
   printf("logfile: %s\n", filename);
   setlocale(LC_ALL, "C");
-  scan_file_to_loglines ( filename );
+  process_logfile( filename );
   return 0;
 }

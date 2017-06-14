@@ -8,7 +8,7 @@ all: dump_cpp_vars clean test_progs cloudstats tags
 cloudstats: clean_local htlog_analyzer.o
 	$(CC) -o cloudstats linklist.o hashtable.o ht_nodes.o htlog_processing.o htlog_mysql.o htlog_analyzer.o $(MYSQLC_LDFLAGS)
 htlog_analyzer.o:
-	$(CC) -c $(CFLAGS) $(MYSQLC_CFLAGS) $(DEBUG) hashtable.c linklist.c ht_nodes.c htlog_processing.c htlog_mysql.c htlog_analyzer.c
+	$(CC) -c $(CFLAGS) $(MYSQLC_CFLAGS) $(DEBUG)  linklist.c hashtable.c ht_nodes.c htlog_processing.c htlog_mysql.c htlog_analyzer.c
 test_progs:
 	$(MAKE) -C tests/ all
 dump_cpp_vars:

@@ -73,5 +73,5 @@ int h_metrics_parse_line( logline *ll, char *l);
 void print_logline( logline * ll );
 int stats_counter_incr( hashtable_t *table, char *key);
 uint32_t get_ip_by_dns( char * hostname , char* ip);
-int scan_file_to_loglines( char* filename  );
+int process_logfile( char* filename  );
 #endif

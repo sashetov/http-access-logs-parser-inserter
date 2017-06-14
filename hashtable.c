@@ -146,8 +146,8 @@ void ht_destroy(hashtable_t *table) {
   free(table);
 }
 static inline void ht_grow_table(hashtable_t *table) {
-  // if we are not able to change the status now, let's return.  ht_grow_table() will be called again next time a new key has been set
-  if (!ATOMIC_CAS(table->status, HT_STATUS_IDLE, HT_STATUS_GROW))
+// if we are not able to change the status now, let's return.  ht_grow_table() will be called again next time a new key has been set
+if (!ATOMIC_CAS(table->status, HT_STATUS_IDLE, HT_STATUS_GROW))
     return;
   // extra check if the table has been already updated by another thread in the meanwhile
   if (table->max_size && ATOMIC_READ(table->size) >= table->max_size) {
