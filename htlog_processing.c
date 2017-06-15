@@ -379,7 +379,7 @@ uint32_t get_ip_by_dns(char * hostname , char* ip) {
   struct in_addr **addr_list;
   int i;
   uint32_t ip_n = 0;
-  if ( (he = gethostbyname( hostname ) ) == NULL) {
+  if ( hostname && (he = gethostbyname( hostname ) ) == NULL) {
     fprintf(stderr, "gethostbyname failed for %s\n", hostname);
     return 1;
   }
@@ -390,6 +390,38 @@ uint32_t get_ip_by_dns(char * hostname , char* ip) {
     return ip_n;
   }
   return 1;
+}
+unsigned long get_numeric_ip(char* addr) {
+  unsigned long c, octet, t;
+  unsigned long ipnum;
+  int i = 3;
+  octet = ipnum = 0;
+  while ((c = *addr++)) {
+    if (c == '.') {
+      if (octet > 255) {
+        return 0;
+      }
+      ipnum <<= 8;
+      ipnum += octet;
+      i--;
+      octet = 0;
+    } else {
+      t = octet;
+      octet <<= 3;
+      octet += t;
+      octet += t;
+      c -= '0';
+      if (c > 9) {
+        return 0;
+      }
+      octet += c;
+    }
+  }
+  if ((octet > 255) || (i != 0)) {
+    return 0;
+  }
+  ipnum <<= 8;
+  return ipnum + octet;
 }
 int process_logfile( char* filename ) {
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );

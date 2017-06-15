@@ -85,25 +85,49 @@ void print_metric_node_details ( node * n ) {
 void print_ip_node_details( node *n ) {
   char * ip = n->name;
   char * country_name = (char *) get_geoip_country(0, ip);
-  printf( "%s %s %d\n", country_name,  n->name, n->nval );
+  unsigned long n_ip = get_numeric_ip(ip);
+  printf( "%s %s %d %lu \n", country_name,  n->name, n->nval, n_ip );
+}
+void print_ip_sql( void * arg ){
+  sql_node_t * sqln = (sql_node_t *)arg;
+  char * ip = sqln->n->name;
+  unsigned long n_ip = get_numeric_ip(ip);
+  char * numstr_template = "%lu,";
+  size_t len = strlen(sqln->sql);
+  char * ipnum = malloc( snprintf(NULL, 0, numstr_template, n_ip) + 1 );
+  sprintf( ipnum, numstr_template, n_ip );
+  sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, ipnum) + 1 );
+  sprintf( sqln->sql,"%s%s", sqln->sql, ipnum);
 }
 int insert_h_metrics( httpaccess_metrics *h_metrics ) {
   linked_list_t* uniq_ips = ht_get_all_keys(h_metrics->client_ips);
-  //iterate_all_linklist_nodes( uniq_ips, print_metric_node_details );
-  iterate_all_linklist_nodes( uniq_ips, print_ip_node_details );
+  char * sql_prefix = "INSERT INTO statistics_entities.ips(ipv4) VALUES (";
+  char * sql_suffix = ");";
+  sql_node_t * sql_n = (sql_node_t *) malloc( sizeof(sql_node_t) );
+  sql_n->n = (node *) malloc(sizeof(node));
+  sql_n->sql =  (char*) malloc(strlen(sql_prefix));
+  strcpy( sql_n->sql, sql_prefix );
+  iterate_all_linklist_nodes( uniq_ips, print_ip_sql, (void *) sql_n );
+  size_t len = strlen(sql_n->sql);
+  //chop off the last char
+  sql_n->sql[strlen(sql_n->sql)-1] = '\0';
+  sql_n->sql= (char *)realloc( sql_n->sql, strlen(sql_n->sql) + 2 + 1 );
+  sprintf( sql_n->sql,"%s%s", sql_n->sql, ");");
+  printf("%s \n", sql_n->sql );
   return 0;
 }
-int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(node *) ){
+int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg ){
   int c = list_count(linkedl);
   list_entry_t* head = linkedl->head;
   list_entry_t* tail = linkedl->tail;
   list_entry_t* next = head->next;
-  node * n = (node *) next->value;
+  sql_node_t* sqln   = (sql_node_t *) arg;
+  sqln->n            = (node *) next->value;
   while( next != tail ){
+    cb((void*) sqln );
     next = next->next;
-    n = (node *) next->value;
-    cb(n);
+    sqln->n = (node *) next->value;
   }
-  cb(n);
+  cb((void*) sqln );
 };
 #endif
