@@ -29,13 +29,13 @@ void finish_with_error( MYSQL *con ) {
   mysql_close(con);
   exit(1);
 }
-MYSQL * get_my_conn( char *my_hostname, char *my_user, char * my_password, char * my_db  ){
+MYSQL * get_my_conn( char *my_hostname, char *my_user, char *my_password, char * my_db, int my_port  ){
   MYSQL *con = mysql_init(NULL);
   if (con == NULL) {
     fprintf(stderr, "mysql_init() failed\n");
     exit(1);
   }
-  if (mysql_real_connect(con, my_hostname, my_user, my_password, my_db, 0, NULL, 0) == NULL) {
+  if (mysql_real_connect(con, my_hostname, my_user, my_password, my_db, my_port, NULL, 0) == NULL) {
     finish_with_error(con);
   }
   return con;
@@ -130,41 +130,46 @@ char ** get_n_hostnames_from_dir( int n, char * logs_dir_full_path, char ** host
   }
   return hostnames;
 }
-
 int main(int argc, char **argv) {
   if ( argc < 7 ){
     // hostname user password db_name logs_dir_path num_hostnames
     printf("insufficient args %d < 7\n", argc);
-    printf("%s mysql_hostname mysql_user mysql_password mysql_dbname logs_dir_path \n", argv[0] );
+    printf("%s mysql_hostname mysql_port mysql_user mysql_password mysql_dbname domain_name\n", argv[0] );
     exit(-1);
   }
   int i;
   char * mysql_hostname = argv[1];
-  char * mysql_user     = argv[2];
-  char * mysql_password = argv[3];
-  char * mysql_dbname   = argv[4];
-  char * logs_dir_path  = argv[5];
-  int n = atoi(argv[6]);
+  char * mysql_port     = argv[2];
+  char * mysql_user     = argv[3];
+  char * mysql_password = argv[4];
+  char * mysql_dbname   = argv[5];
+  //char * logs_dir_path  = argv[6];
+  char * hostname = argv[6];
+  //int n = atoi(argv[7]);
   int max_hostname_len=256;
-  printf("%s %s %s %s %s %d\n", mysql_hostname, mysql_user, mysql_password, mysql_dbname, logs_dir_path, n );
-  char* hostnames[n];
+  //printf("%s %s %s %s %s %d\n", mysql_hostname, mysql_port, mysql_user, mysql_password, mysql_dbname, logs_dir_path, n );
+  printf("%s %s %s %s %s %s\n", mysql_hostname, mysql_port,  mysql_user, mysql_password, mysql_dbname, hostname );
+  //char* hostnames[n];
   // preallocate space for strings
-  for( i = 0; i < n; i++ ){
-    hostnames[i] = malloc( max_hostname_len * sizeof *hostnames[i] );
-  }
-  MYSQL * conn;
-  get_n_hostnames_from_dir( n, logs_dir_path, hostnames );
+  //for( i = 0; i < n; i++ ){
+  //  hostnames[i] = malloc( max_hostname_len * sizeof *hostnames[i] );
+  //}
+  //get_n_hostnames_from_dir( n, logs_dir_path, hostnames );
   int possible_did;
   struct mysql_resultset * my_results;
-  conn = get_my_conn(mysql_hostname, mysql_user, mysql_password, mysql_dbname );
+  int port = (int)strtol( mysql_port, NULL, 0 );
+  MYSQL * conn = get_my_conn( mysql_hostname, mysql_user, mysql_password, mysql_dbname, port );
   printf("%s %s %s\n","domain_name", "did", "uid");
-  for( i =0; i< n; i++) {
-    //conn = get_my_conn(mysql_hostname, mysql_user, mysql_password, mysql_dbname );
-    possible_did = get_did_for_domain_name(conn, hostnames[i]);
-    //conn = get_my_conn(mysql_hostname, mysql_user, mysql_password, mysql_dbname );
-    my_results = get_real_did_results( conn, possible_did );
-    printf("%s %d %d\n",hostnames[i], (* my_results).did, (* my_results).uid);
-  }
+  possible_did = get_did_for_domain_name( conn, hostname );
+  my_results = get_real_did_results( conn, possible_did );
+  printf("%s %d %d\n",hostname, (* my_results).did, (* my_results).uid);
+  //for( i =0; i< n; i++) {
+  //  //conn = get_my_conn(mysql_hostname, mysql_user, mysql_password, mysql_dbname );
+  //  possible_did = get_did_for_domain_name(conn, hostnames[i]);
+  //  //conn = get_my_conn(mysql_hostname, mysql_user, mysql_password, mysql_dbname );
+  //  my_results = get_real_did_results( conn, possible_did );
+  //  printf("%s %d %d\n",hostnames[i], (* my_results).did, (* my_results).uid);
+  //}
   mysql_close(conn);
   exit(0);
 }

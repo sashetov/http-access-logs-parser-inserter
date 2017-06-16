@@ -17,7 +17,7 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   h_metrics->lines_failed   = 0;
   h_metrics->hits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_ips = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_geo_location = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_geo_locations = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->visits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_ua_str = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_browser_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
@@ -36,7 +36,7 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
 httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) {
   free( h_metrics->hits);
   free( h_metrics->client_ips);
-  free( h_metrics->client_geo_location);
+  free( h_metrics->client_geo_locations);
   free( h_metrics->visits);
   free( h_metrics->client_ua_str);
   free( h_metrics->client_browser_vers);
@@ -266,7 +266,12 @@ int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
   }
   return 0;
 }
-int stats_process_geo_location( httpaccess_metrics *h_metrics, char *user_ip ){
+int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
+  char * country_name = (char *) get_geoip_country(0, user_ip);
+  int res = stats_counter_incr( h_metrics->client_geo_locations, country_name);
+  if (res == 0) {
+    return 1;
+  }
   return 0;
 }
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
@@ -303,7 +308,7 @@ int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
     if ( stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
       goto oom;
     }
-    if ( stats_process_geo_location( h_metrics, ll.user_hostname ) ) {
+    if ( stats_process_geo_locations( h_metrics, ll.user_hostname ) ) {
       goto oom;
     }
     if ( stats_process_ua( h_metrics, ll.agent ) ) {
@@ -425,6 +430,10 @@ unsigned long get_numeric_ip(char* addr) {
 }
 int process_logfile( char* filename ) {
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );
+  char * hostname = "atthematch.com";
+  mysql_domain_resultset_t * drs = get_real_did_uid( hostname );
+  h_metrics->real_did = drs->did;
+  h_metrics->uid      = drs->uid;
   if ( logs_scan( h_metrics, filename ) ) {
     char *err= h_metrics_get_error( h_metrics );
     if( err ) {

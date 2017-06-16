@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS httpstats_vu;
-CREATE DATABASE httpstats_domains;
-USE httpstats_domains;
+DROP DATABASE IF EXISTS httpstats_jobs;
+CREATE DATABASE httpstats_jobs;
+USE httpstats_jobs;
 SET GLOBAL innodb_file_per_table=1;
 SET GLOBAL innodb_file_format=Barracuda;
 SET GLOBAL innodb_compression_level=9;

@@ -16,8 +16,31 @@ MYSQL * get_my_conn( char *my_hostname, char *my_user, char *my_password, char *
   }
   return con;
 }
-struct mysql_domain_resultset* get_real_did_results( MYSQL * con, int possible_did ) {
-  struct mysql_domain_resultset * results  =  malloc(sizeof(struct mysql_domain_resultset ));
+int get_did_for_domain_name( MYSQL * con,  char * domain_name ) {
+  char * query_possible_id = "SELECT did FROM domains WHERE domain_name=\"%s\" LIMIT 1;";
+  char * query = malloc(snprintf(NULL, 0, query_possible_id, domain_name ) + 1);
+  sprintf(query, query_possible_id, domain_name );
+  if (mysql_query(con, query)){
+    finish_with_error(con);
+  }
+  MYSQL_RES *result = mysql_store_result(con);
+  if (result == NULL) {
+    finish_with_error(con);
+  }
+  int num_fields = mysql_num_fields(result);
+  int did;
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result))) { 
+    did = atoi(row[0]? row[0] : "0");
+    //only first is needed
+    break;
+  }
+  mysql_free_result(result);
+  //mysql_close(con);
+  return did;
+}
+mysql_domain_resultset_t * get_real_did_uid_from_possible( MYSQL * con, int possible_did ) {
+  mysql_domain_resultset_t *results =  malloc(sizeof(mysql_domain_resultset_t));
   char * query_real_did = "SELECT d1.did, d1.uid, d1.domain_name FROM domains d1 JOIN domains d2 on d1.did=d2.alias_of WHERE d1.alias_of=0 AND d1.did=%d OR d2.did=%d;";
   char * query = malloc(snprintf(NULL, 0, query_real_did, possible_did, possible_did ) + 1);
   sprintf(query, query_real_did, possible_did, possible_did );
@@ -42,53 +65,19 @@ struct mysql_domain_resultset* get_real_did_results( MYSQL * con, int possible_d
   (* results).did          = did;
   (* results).uid          = uid;
   mysql_free_result(result);
-  //mysql_close(con);
   return results;
 }
-int get_did_for_domain_name( MYSQL* con, char * domain_name ) {
-  char * query_possible_id = "SELECT did FROM domains WHERE domain_name=\"%s\" LIMIT 1;";
-  char * query = malloc(snprintf(NULL, 0, query_possible_id, domain_name ) + 1);
-  sprintf(query, query_possible_id, domain_name );
-  if (mysql_query(con, query)){
-    finish_with_error(con);
-  }
-  MYSQL_RES *result = mysql_store_result(con);
-  if (result == NULL) {
-    finish_with_error(con);
-  }
-  int num_fields = mysql_num_fields(result);
-  int did;
-  MYSQL_ROW row;
-  while ((row = mysql_fetch_row(result))) { 
-    did = atoi(row[0]? row[0] : "0");
-    //only first is needed
-    break;
-  }
-  mysql_free_result(result);
-  mysql_close(con);
-  return did;
-}
-struct mysql_domain_resultset * get_real_domain_results ( char * domain_name ){
-  MYSQL *con = get_my_conn( MY_DB_SELECTS_HOST, MY_USERNAME, MY_PASSWORD,
-                            MY_DB_SELECTS_DBNAME, MY_DB_SELECTS_PORT );
-  int possible_did = get_did_for_domain_name( con, domain_name );
-  struct mysql_domain_resultset * res = get_real_did_results( con, possible_did );
-  return res;
-}
-int get_real_did( char * domain_name ) {
-  struct mysql_domain_resultset * drs = get_real_domain_results( domain_name );
-  return drs->did;
+mysql_domain_resultset_t * get_real_did_uid( char * domain_name ) {
+  MYSQL * conn = get_my_conn( MY_DB_SELECTS_HOST, MY_USERNAME, MY_PASSWORD, MY_DB_SELECTS_DBNAME, MY_DB_SELECTS_PORT );
+  int possible_did = get_did_for_domain_name( conn, domain_name );
+  mysql_domain_resultset_t * drs = get_real_did_uid_from_possible( conn, possible_did );
+  mysql_close(conn);
+  return drs;
 }
 void print_metric_node_details ( node * n ) {
   printf( "%s %d\n", n->name, n->nval );
 }
-void print_ip_node_details( node *n ) {
-  char * ip = n->name;
-  char * country_name = (char *) get_geoip_country(0, ip);
-  unsigned long n_ip = get_numeric_ip(ip);
-  printf( "%s %s %d %lu \n", country_name,  n->name, n->nval, n_ip );
-}
-void print_ip_sql( void * arg ){
+void build_ips_sql( void * arg ){
   sql_node_t * sqln = (sql_node_t *)arg;
   char * ip = sqln->n->name;
   unsigned long n_ip = get_numeric_ip(ip);
@@ -99,21 +88,52 @@ void print_ip_sql( void * arg ){
   sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, ipnum) + 1 );
   sprintf( sqln->sql,"%s%s", sqln->sql, ipnum);
 }
-int insert_h_metrics( httpaccess_metrics *h_metrics ) {
+void build_locations_sql( void * arg ){
+  sql_node_t * sqln = (sql_node_t *)arg;
+  char * country = sqln->n->name;
+  char * template= "\"%s\",";
+  size_t len = strlen(sqln->sql);
+  char * country_quoted= malloc( snprintf(NULL, 0, template, country) + 1 );
+  sprintf( country_quoted, template, country );
+  sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, country_quoted) + 1 );
+  sprintf( sqln->sql,"%s%s", sqln->sql, country_quoted );
+}
+sql_node_t * get_ips_insert_sql( httpaccess_metrics* h_metrics ){
   linked_list_t* uniq_ips = ht_get_all_keys(h_metrics->client_ips);
-  char * sql_prefix = "INSERT INTO statistics_entities.ips(ipv4) VALUES (";
+  char * sql_prefix = "INSERT INTO httpstats_clients.ips(ipv4) VALUES (";
   char * sql_suffix = ");";
-  sql_node_t * sql_n = (sql_node_t *) malloc( sizeof(sql_node_t) );
-  sql_n->n = (node *) malloc(sizeof(node));
-  sql_n->sql =  (char*) malloc(strlen(sql_prefix));
-  strcpy( sql_n->sql, sql_prefix );
-  iterate_all_linklist_nodes( uniq_ips, print_ip_sql, (void *) sql_n );
-  size_t len = strlen(sql_n->sql);
+  sql_node_t * ips_sql_n= (sql_node_t *) malloc( sizeof(sql_node_t) );
+  ips_sql_n->n = (node *) malloc(sizeof(node));
+  ips_sql_n->sql =  (char*) malloc(strlen(sql_prefix));
+  strcpy( ips_sql_n->sql, sql_prefix );
+  iterate_all_linklist_nodes( uniq_ips, build_ips_sql, (void *) ips_sql_n );
+  size_t len = strlen(ips_sql_n->sql);
   //chop off the last char
-  sql_n->sql[strlen(sql_n->sql)-1] = '\0';
-  sql_n->sql= (char *)realloc( sql_n->sql, strlen(sql_n->sql) + 2 + 1 );
-  sprintf( sql_n->sql,"%s%s", sql_n->sql, ");");
-  printf("%s \n", sql_n->sql );
+  ips_sql_n->sql[strlen(ips_sql_n->sql)-1] = '\0';
+  ips_sql_n->sql= (char *)realloc( ips_sql_n->sql, strlen(ips_sql_n->sql) + 2 + 1 );
+  sprintf( ips_sql_n->sql,"%s%s", ips_sql_n->sql, ");");
+  return ips_sql_n;
+}
+sql_node_t * get_countries_insert_sql( httpaccess_metrics* h_metrics ){
+  linked_list_t* uniq_locations = ht_get_all_keys(h_metrics->client_geo_locations);
+  char * sql_prefix = "INSERT INTO httpstats_clients.locations(name) VALUES (";
+  char * sql_suffix = ");";
+  sql_node_t * countries_sql_n= (sql_node_t *) malloc( sizeof(sql_node_t) );
+  countries_sql_n->n = (node *) malloc(sizeof(node));
+  countries_sql_n->sql =  (char*) malloc(strlen(sql_prefix));
+  strcpy( countries_sql_n->sql, sql_prefix );
+  iterate_all_linklist_nodes( uniq_locations, build_locations_sql, (void *) countries_sql_n );
+  size_t len = strlen(countries_sql_n->sql);
+  //chop off the last char
+  countries_sql_n->sql[strlen(countries_sql_n->sql)-1] = '\0';
+  countries_sql_n->sql= (char *)realloc( countries_sql_n->sql, strlen(countries_sql_n->sql) + 2 + 1 );
+  sprintf( countries_sql_n->sql,"%s%s", countries_sql_n->sql, ");");
+  return countries_sql_n;
+}
+int insert_h_metrics( httpaccess_metrics *h_metrics ) {
+  sql_node_t * ips_sql_n = get_ips_insert_sql( h_metrics );
+  sql_node_t * countries_sql_n = get_countries_insert_sql( h_metrics );
+  printf("%s\n%s\n", ips_sql_n->sql, countries_sql_n->sql);
   return 0;
 }
 int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg ){

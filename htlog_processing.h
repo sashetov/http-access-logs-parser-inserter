@@ -8,6 +8,9 @@
 #ifndef __HASHTABLE_H__
 #include "hashtable.h"
 #endif
+#ifndef __HTTPACCESS_MYSQL__
+#include "htlog_mysql.h"
+#endif
 #ifndef __HTTPACCESS_METRICS__
 typedef struct httpaccess_metrics {
   int st; // earliest timestamp in log
@@ -19,7 +22,7 @@ typedef struct httpaccess_metrics {
   int lines_processed;
   hashtable_t * hits;               //per hour count for all urls under this did
   hashtable_t * client_ips;
-  hashtable_t * client_geo_location;
+  hashtable_t * client_geo_locations;
   hashtable_t * visits;             //per hour distinct did,ip count
   hashtable_t * client_ua_str;
   hashtable_t * client_browser_vers;
@@ -43,7 +46,7 @@ void h_metrics_free( httpaccess_metrics *h_metrics);
 int h_metrics_process_line( httpaccess_metrics *h_metrics, char *l); 
 int logs_scan( httpaccess_metrics *h_metrics, char *filename);
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip );
-int stats_process_geo_location( httpaccess_metrics *h_metrics, char *user_ip );
+int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip );
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str );
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path );
 int stats_process_referer_and_sqs( httpaccess_metrics *h_metrics, char *ref_str );
