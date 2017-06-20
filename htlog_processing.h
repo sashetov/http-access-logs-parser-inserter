@@ -1,3 +1,6 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define LINE_MAX                1000
 #define CONFIG_STREAM_MODE      0
 #define CONFIG_TIME_DELTA       0
@@ -78,4 +81,7 @@ int stats_counter_incr( hashtable_t *table, char *key);
 uint32_t get_ip_by_dns( char * hostname , char* ip);
 unsigned long get_numeric_ip( char* ip );
 int process_logfile( char* filename  );
+#endif
+#ifdef __cplusplus
+}
 #endif

@@ -1,4 +1,7 @@
 #ifndef __HTLOG_GEOIP__
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdio.h>
 #include "GeoIP.h"
 #include "GeoIPCity.h"
@@ -23,4 +26,7 @@
     } while (0)
 #define __HTLOG_GEOIP__
 char * get_geoip_country( int flags, char *ip_string );
+#ifdef __cplusplus
+}
+#endif
 #endif

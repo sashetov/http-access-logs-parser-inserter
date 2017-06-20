@@ -1,3 +1,6 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define ERROR_MAX               100
 #define HT_ALLOC_SIZE_MAX       4048
 #define HT_ALLOC_SIZE_DEFAULT   1024
@@ -15,4 +18,7 @@ node        *node_init ( const char *s, int val );
 #endif
 size_t ht_kget_nval( hashtable_t *table, const char *str );
 void ht_kadd_val_to_k_nval( hashtable_t * table, const char *str, int val);
+#endif
+#ifdef __cplusplus
+}
 #endif

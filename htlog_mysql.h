@@ -1,4 +1,7 @@
 #ifndef __HTTPACCESS_MYSQL__
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define MY_DB_SELECTS_DBNAME "cluster"
 #define MY_DB_SELECTS_HOST   "185.52.26.79"
 #define MY_DB_SELECTS_PORT   3309
@@ -32,6 +35,10 @@ void print_metric_node_details ( node * n );
 void build_ips_sql( void * arg );
 void build_locations_sql( void * arg );
 sql_node_t * get_ips_insert_sql( httpaccess_metrics* h_metrics );
+sql_node_t * get_countries_insert_sql( httpaccess_metrics* h_metrics );
 int insert_h_metrics(httpaccess_metrics *h_metrics);
 int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg);
+#ifdef __cplusplus
+}
+#endif
 #endif
