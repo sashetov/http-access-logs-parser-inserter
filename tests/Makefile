@@ -6,6 +6,7 @@ subtests:
 	$(MAKE) -C pthread_tests/         all
 	$(MAKE) -C hashtables_tests/      all
 	$(MAKE) -C geoip_tests/           all
+	$(MAKE) -C uap/                   all
 
 clean:
 	$(MAKE) -C dirents_stat_mv_tests clean
@@ -13,3 +14,4 @@ clean:
 	$(MAKE) -C pthread_tests         clean
 	$(MAKE) -C hashtables_tests      clean
 	$(MAKE) -C geoip_tests/          clean
+	$(MAKE) -C uap/                  clean
