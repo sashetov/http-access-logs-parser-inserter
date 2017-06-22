@@ -429,6 +429,7 @@ unsigned long get_numeric_ip(char* addr) {
   return ipnum + octet;
 }
 int process_logfile( char* filename ) {
+  regmatch_t * matches = get_regex_matches("sasheto","as");
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );
   char * hostname = "atthematch.com";
   mysql_domain_resultset_t * drs = get_real_did_uid( hostname );
