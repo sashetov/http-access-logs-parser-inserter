@@ -5,7 +5,9 @@ char * get_geoip_country( int flags, char *ip_string ) {
   GeoIPRecord *gipr = NULL;
   GEOIP_OPEN("GeoLiteCity.dat", flags);
   gipr = GeoIP_record_by_addr(gip, ip_string);
-  char * ip_country = (void *)strdup((char *)gipr->country_name);
+  //char * ip_country = (char *) strdup((char *)gipr->country_name);
+  char ip_country[strlen((char *)gipr->country_name)+1];
+  strcpy(ip_country, (char *)gipr->country_name );
   GeoIPRecord_delete(gipr);
   GeoIP_delete(gip);
   return ip_country;
