@@ -14,10 +14,10 @@ extern "C" {
 #ifndef __HTTPACCESS_MYSQL__
 #include "htlog_mysql.h"
 #endif
+#ifndef __HTTPACCESS_METRICS__
 #ifndef __HTLOG_UAP__
 #include "htlog_uap.h"
 #endif
-#ifndef __HTTPACCESS_METRICS__
 typedef struct httpaccess_metrics {
   int st; // earliest timestamp in log
   int et; // latest timestamp in log

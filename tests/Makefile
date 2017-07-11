@@ -7,6 +7,7 @@ subtests:
 	$(MAKE) -C hashtables_tests/      all
 	$(MAKE) -C geoip_tests/           all
 	$(MAKE) -C uap/                   all
+	$(MAKE) -C combined-c-c++-test/   all
 
 clean:
 	$(MAKE) -C dirents_stat_mv_tests clean
@@ -15,3 +16,4 @@ clean:
 	$(MAKE) -C hashtables_tests      clean
 	$(MAKE) -C geoip_tests/          clean
 	$(MAKE) -C uap/                  clean
+	$(MAKE) -C combined-c-c++-test/  clean

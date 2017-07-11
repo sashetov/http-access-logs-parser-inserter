@@ -4,6 +4,7 @@
 #include <time.h>
 #endif
 #include "htlog_processing.h"
+
 httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   httpaccess_metrics *h_metrics;
   if ((h_metrics = malloc(sizeof( httpaccess_metrics ))) == NULL) {
@@ -429,7 +430,10 @@ unsigned long get_numeric_ip(char* addr) {
   return ipnum + octet;
 }
 int process_logfile( char* filename ) {
-  char *** matches = get_regex_matches( "___ abc123def ___ ghi456 ___","[a-z]*([0-9]+)([a-z]*)", 3, 20 );
+  /*str_container_t *** matches = get_regex_matches(
+      "___ abc123def ___ ghi456 ___",
+      "[a-z]*([0-9]+)([a-z]*)",
+      3, 20 );*/
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );
   char * hostname = "atthematch.com";
   mysql_domain_resultset_t * drs = get_real_did_uid( hostname );

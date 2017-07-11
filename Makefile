@@ -1,6 +1,6 @@
 DEBUG=-g
-#CFLAGS=-O2 -Wall -W -fno-strict-aliasing -fno-omit-frame-pointer -v
-CFLAGS= -Wall -W -fno-strict-aliasing -fno-omit-frame-pointer -v
+CFLAGS=-O2 -Wall -W -fno-strict-aliasing -fno-omit-frame-pointer -v
+#CFLAGS= -Wall -W -fno-strict-aliasing -fno-omit-frame-pointer -v
 export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig'
 MYSQLC_CFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags mysqlclient)
 MYSQLC_LDFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs mysqlclient)
