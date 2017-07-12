@@ -88,6 +88,8 @@ namespace {
     for (auto it = node.begin(); it != node.end(); ++it) {
       const auto key = it->first.as<std::string>();
       const auto value = it->second.as<std::string>();
+      //std::cout<<"key "<<key<<"\n";
+      //std::cout<<"value "<<value<<"\n";
       if (key == "regex") {
         agent_store.regExpr.assign(value, boost::regex::optimize | boost::regex::normal);
       } else if (key == repl) {
@@ -146,35 +148,52 @@ namespace {
     boost::algorithm::trim(ua_property);
     return;
   }
-
+  void print_all_matches( boost::smatch m ){
+    unsigned int i =0;
+    for(i=0; i< m.size(); i++ ){
+      std::cout<<"m["<<i<<"]: "<<m[i]<<"\n";
+    }
+  }
   Device parse_device_impl(const std::string& ua, const UAStore* ua_store) {
     Device device;
 
     for (const auto& d : ua_store->deviceStore) {
       boost::smatch m;
-
       if (boost::regex_search(ua, m, d.regExpr)) {
+        std::cout<<"d.regexp:"<<d.regExpr<<"\n";
+        //print_all_matches(m);
         if (d.replacement.empty() && m.size() > 1) {
           device.family = m[1].str();
+          std::cout<< "device.family = m1"<< device.family << "\n";
         } else {
           device.family = d.replacement;
+          std::cout<< "device.family = device.replacement"<< device.family << "\n";
+          std::cout<<"d.replacementMap.empty? "<< std::boolalpha << d.replacementMap.empty() <<"\n";
           if (!d.replacementMap.empty()) {
             replace_all_placeholders(device.family, m, d.replacementMap);
+            std::cout<<" device.family(replace_all_placeholders) "<< device.family <<"\n";
           }
         }
 
         if (!d.brandReplacement.empty()) {
           device.brand = d.brandReplacement;
+          std::cout<< "device.brand = d.brandReplacement "<< d.brandReplacement<< "\n";
+          std::cout<<"d.replacementMap.empty? "<< std::boolalpha << d.replacementMap.empty() <<"\n";
           if (!d.brandReplacementMap.empty()) {
             replace_all_placeholders(device.brand, m, d.brandReplacementMap);
+            std::cout<<" device.brand(replace_all_placeholders) "<< device.brand <<"\n";
           }
         }
         if (d.modelReplacement.empty() && m.size() > 1) {
           device.model = m[1].str();
+          std::cout<< "device.model = m1 "<< m[1] << "\n";
         } else {
           device.model = d.modelReplacement;
+          std::cout<< "device.model = d.modelReplacement "<< d.modelReplacement << "\n";
+          std::cout<<"d.replacementMap.empty? "<< std::boolalpha << d.replacementMap.empty() <<"\n";
           if (!d.modelReplacementMap.empty()) {
             replace_all_placeholders(device.model, m, d.modelReplacementMap);
+            std::cout<<" device.model(replace_all_placeholders) "<< device.model <<"\n";
           }
         }
         break;
@@ -186,14 +205,22 @@ namespace {
     return device;
   }
 
-  template <class AGENT, class AGENT_STORE>
+  template <class AGENT, class AGENT_STORE >
   void fill_agent(AGENT& agent, const AGENT_STORE& store, const boost::smatch& m, const bool os) {
+    std::cout<<"m.size(): "<<m.size()<<"\n";
     if (m.size() > 1) {
+      std::cout<<"store.replacement.empty "<< std::boolalpha << store.replacement.empty() <<"\n";
       agent.family =
           !store.replacement.empty() ? boost::regex_replace(store.replacement, boost::regex("\\$1"), m[1].str()) : m[1];
+      std::cout<<"store.replacement = "<<store.replacement<<"\n";
+      std::cout<<"m1 = "<<m[1].str()<<"\n";
+      std::cout<<"agent family = "<<agent.family<<"\n";
     } else {
+      std::cout<<"store.replacement.empty "<< std::boolalpha << store.replacement.empty() <<"\n";
       agent.family =
           !store.replacement.empty() ? boost::regex_replace(store.replacement, boost::regex("\\$1"), m[0].str()) : m[0];
+      std::cout<<"store.replacement = "<<store.replacement<<"\n";
+      std::cout<<"m0 = "<<m[0].str()<<"\n";
     }
     boost::algorithm::trim(agent.family);
 
@@ -209,21 +236,28 @@ namespace {
 
     if (!store.majorVersionReplacement.empty()) {
       agent.major = store.majorVersionReplacement;
+      std::cout<<"store.majorVersionReplacement"<< store.majorVersionReplacement <<"\n";
     } else if (m.size() > 2) {
+      std::cout<<"m[2].str() agent.major = m2 = "<< m[2].str() <<"\n";
       agent.major = m[2].str();
     }
     if (!store.minorVersionReplacement.empty()) {
       agent.minor = store.minorVersionReplacement;
+      std::cout<<"store.minorVersionReplacement agent.minor= "<< store.minorVersionReplacement <<"\n";
     } else if (m.size() > 3) {
       agent.minor = m[3].str();
+      std::cout<<"agent.minor m3 "<< m[3] <<"\n";
     }
     if (!store.patchVersionReplacement.empty()) {
       agent.patch = store.patchVersionReplacement;
+      std::cout<<"agent.patch "<< store.patchVersionReplacement <<"\n";
     } else if (m.size() > 4) {
       agent.patch = m[4].str();
+      std::cout<<"agent.patch m4 "<< m[4] <<"\n";
     }
     if (os && m.size() > 5) {
       agent.patch_minor = m[5].str();
+      std::cout<<"agent.patch_minor m5 "<< m[5] <<"\n";
     }
   }
 
@@ -233,6 +267,7 @@ namespace {
     for (const auto& b : ua_store->browserStore) {
       boost::smatch m;
       if (boost::regex_search(ua, m, b.regExpr)) {
+        std::cout<<"b.regexp:"<<b.regExpr<<"\n";
         fill_agent(browser, b, m, false);
         break;
       } else {
@@ -249,6 +284,8 @@ namespace {
     for (const auto& o : ua_store->osStore) {
       boost::smatch m;
       if (boost::regex_search(ua, m, o.regExpr)) {
+        std::cout<<"ua: "<<ua<<"\n";
+        std::cout<<"o.regexp:"<<o.regExpr<<"\n";
         fill_agent(os, o, m, true);
         break;
       } else {

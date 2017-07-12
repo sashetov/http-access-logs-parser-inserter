@@ -276,6 +276,11 @@ int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
   return 0;
 }
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
+  printf( "%s \n", ua_str );
+  int res = stats_counter_incr( h_metrics->client_ua_str, ua_str );
+  if (res == 0) {
+    return 1;
+  }
   return 0;
 }
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
@@ -430,10 +435,6 @@ unsigned long get_numeric_ip(char* addr) {
   return ipnum + octet;
 }
 int process_logfile( char* filename ) {
-  /*str_container_t *** matches = get_regex_matches(
-      "___ abc123def ___ ghi456 ___",
-      "[a-z]*([0-9]+)([a-z]*)",
-      3, 20 );*/
   httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );
   char * hostname = "atthematch.com";
   mysql_domain_resultset_t * drs = get_real_did_uid( hostname );

@@ -3,11 +3,14 @@
 #endif
 str_container_t *** get_regex_matches(
     char * str, char * regex_str, size_t num_groups, size_t max_matches ) {
+  int i=0, j=0, k=0;
   char * cursor = str;
-  str_container_t *** results = init_2d_str_cont(max_matches,num_groups,100);
+  int container_size = (sizeof(str_container_t *));
   regex_t * regex = malloc(sizeof(regex_t));
+  str_container_t *** results = (str_container_t ***)
+    malloc(num_groups * max_matches * container_size);
   regmatch_t group_matches[num_groups];
-  if (regcomp(regex, regex_str, REG_EXTENDED)) {
+  if ( regcomp( regex, regex_str, REG_EXTENDED ) ) {
     printf("Could not compile regular expression.\n");
     exit(1);
   }
@@ -18,6 +21,7 @@ str_container_t *** get_regex_matches(
     }
     unsigned int g = 0;
     unsigned int offset = 0;
+    results[m] = (str_container_t **) malloc( num_groups * container_size );
     for (g = 0; g < num_groups; g++) {
       if (group_matches[g].rm_so == (size_t)-1) {
         break;
@@ -25,6 +29,7 @@ str_container_t *** get_regex_matches(
       if ( !g ) {
         offset = group_matches[g].rm_eo;
       }
+      results[m][g] = (str_container_t *) malloc( container_size );
       char str_copy[strlen(cursor) + 1];
       strcpy( str_copy, cursor );
       str_copy[group_matches[g].rm_eo] = 0;
@@ -37,16 +42,7 @@ str_container_t *** get_regex_matches(
   }
   return results;
 }
-str_container_t *** init_2d_str_cont(int x, int y, int max_str_size){
-  int i =0, j = 0,k =0;
-  int container_size = (sizeof(str_container_t *));
-  str_container_t *** matrix = (str_container_t ***)malloc(x*y*container_size);
-  for( i=0; i<x; i++ ) {
-    matrix[i] = (str_container_t **)malloc(y*container_size);
-    for(j=0; j<y; j++) {
-      matrix[i][j] = (str_container_t *)malloc(container_size);
-      matrix[i][j]->str = malloc( (max_str_size) * sizeof(char) );
-    }
-  }
-  return matrix;
-}
+  /*str_container_t *** matches = get_regex_matches(
+      "___ abc123def ___ ghi456 ___",
+      "[a-z]*([0-9]+)([a-z]*)",
+      3, 20 );*/

@@ -133,7 +133,7 @@ sql_node_t * get_countries_insert_sql( httpaccess_metrics* h_metrics ){
 int insert_h_metrics( httpaccess_metrics *h_metrics ) {
   sql_node_t * ips_sql_n = get_ips_insert_sql( h_metrics );
   sql_node_t * countries_sql_n = get_countries_insert_sql( h_metrics );
-  printf("%s\n%s\n", ips_sql_n->sql, countries_sql_n->sql);
+  //printf("%s\n%s\n", ips_sql_n->sql, countries_sql_n->sql);
   return 0;
 }
 int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg ){
