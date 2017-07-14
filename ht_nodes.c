@@ -5,7 +5,7 @@
 #include "hashtable.h"
 #endif
 node *node_init(const char *s, int val ) {
-  node *n = malloc(sizeof(node));
+  node *n = (node *) malloc(sizeof(node));
   n->name= (char *) malloc(strlen(s) + 1);
   strcpy(n->name, s);
   n->nval = val;

@@ -1,6 +1,6 @@
 #ifndef __HTTPACCESS_MYSQL__
 #ifdef __cplusplus
-extern "C" {
+extern "C++" {
 #endif
 #define MY_DB_SELECTS_DBNAME "cluster"
 #define MY_DB_SELECTS_HOST   "185.52.26.79"

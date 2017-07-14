@@ -4,7 +4,6 @@
 #include <time.h>
 #endif
 #include "htlog_processing.h"
-
 httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   httpaccess_metrics *h_metrics;
   if ((h_metrics = malloc(sizeof( httpaccess_metrics ))) == NULL) {

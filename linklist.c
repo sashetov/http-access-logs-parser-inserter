@@ -52,7 +52,7 @@ void list_destroy(linked_list_t *list) {
   if(list)
   {
     while (list->slices)
-      slice_destroy(list->slices->value);
+      slice_destroy((slice_t *)list->slices->value);
     list_clear(list);
 #ifdef THREAD_SAFE
     MUTEX_DESTROY(list->lock);
@@ -885,7 +885,7 @@ void list_sort(linked_list_t *list, list_comparator_callback_t comparator) {
   MUTEX_UNLOCK(list->lock);
 }
 slice_t * slice_create(linked_list_t *list, size_t offset, size_t length) {
-  slice_t *slice = calloc(1, sizeof(slice_t));
+  slice_t *slice = (slice_t *)calloc(1, sizeof(slice_t));
   slice->list = list;
   slice->offset = offset;
   slice->length = length;

@@ -16,6 +16,5 @@ int main(int argc, char **argv) {
   printf("logfile: %s\n", filename);
   setlocale(LC_ALL, "C");
   process_logfile( filename );
-
   return 0;
 }

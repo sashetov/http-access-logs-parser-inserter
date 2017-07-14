@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 #include <stdlib.h>
+///#include <cstdint>
+#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 #include <sys/types.h>
 #ifdef WIN32
