@@ -18,10 +18,10 @@ htlog_uap.o:
 	$(CXX) -c $(CXXFLAGS) $(DEBUG) htlog_uap.c 
 uap.o:
 	$(CXX) -c $(CXXFLAGS) $(DEBUG) uap.cpp
-linklist.o:
-	$(CC) -c $(CFLAGS) $(DEBUG) linklist.c
 htlog_processing.o:
 	$(CXX) -c $(CXXFLAGS) $(GEOIP_CFLAGS) $(MYSQLC_CFLAGS) $(DEBUG)   htlog_geoip.c htlog_mysql.c htlog_processing.c
+linklist.o:
+	$(CC) -c $(CFLAGS) $(DEBUG) linklist.c
 ht_nodes.o:
 	$(CC) -c $(CFLAGS) $(DEBUG) ht_nodes.c
 hashtable.o:

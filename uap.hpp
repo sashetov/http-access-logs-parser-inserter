@@ -46,14 +46,12 @@ extern "C" typedef struct ua_device {
   char * brand;
 } ua_device_t;
 extern "C" typedef struct ua {
-  ua_device_t device;
-  ua_agent_t os;
-  ua_agent_t browser;
+  ua_device_t * device;
+  ua_agent_t * os;
+  ua_agent_t * browser;
 } ua_t;
-extern "C" void * uap_parser_create();
-extern "C" char * to_cstr( std::string str);
-extern "C" ua_agent_t convert_to_cagent( Agent agent );
-extern "C" ua_device_t convert_to_cdevice( Device device );
-extern "C" ua_t convert_to_cua( UserAgent ua );
+void to_cstr( std::string from, char * &to );
+ua_agent_t * convert_to_cagent( Agent agent );
+ua_device_t * convert_to_cdevice( Device device );
 extern "C" ua_t * parse_to_c_ua( char * uastr );
 #endif

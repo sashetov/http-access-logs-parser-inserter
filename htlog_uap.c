@@ -5,10 +5,10 @@ str_container_t *** get_regex_matches(
     char * str, char * regex_str, size_t num_groups, size_t max_matches ) {
   int i=0, j=0, k=0;
   char * cursor = str;
-  int container_size = (sizeof(str_container_t *));
+  int container_size = (sizeof(str_container_t));
   regex_t * regex = (regex_t *)malloc(sizeof(regex_t));
-  str_container_t *** results = (str_container_t ***)
-    malloc(num_groups * max_matches * container_size);
+  str_container_t *** results =
+    (str_container_t ***) malloc(num_groups * max_matches * container_size);
   regmatch_t group_matches[num_groups];
   if ( regcomp( regex, regex_str, REG_EXTENDED ) ) {
     printf("Could not compile regular expression.\n");
@@ -41,9 +41,5 @@ str_container_t *** get_regex_matches(
     cursor += offset;
   }
   return results;
-}
-ua_t * parse_user_agent( char * ua_str ){
-  ua_t * user_agent = parse_to_c_ua( ua_str );
-  return user_agent;
 }
 /*str_container_t *** matches = get_regex_matches( "___ abc123def ___ ghi456 ___", "[a-z]*([0-9]+)([a-z]*)", 3, 20 );*/

@@ -281,63 +281,55 @@ int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
   return 0;
 }
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
-  ua_t * ua_parsed = parse_user_agent(ua_str);
-  printf( "str: %s\ndevice.family: %s device.brand: %s device.model: %s\n:os.family: %s %s.%s.%s.%s \nbrowser.family: %s  %s.%s.%s.%s \n",
-      ua_str, ua_parsed->device.family, ua_parsed->device.brand, ua_parsed->device.model,
-      ua_parsed->os.family, ua_parsed->os.major, ua_parsed->os.minor, ua_parsed->os.patch,
-      ua_parsed->os.patch_minor, ua_parsed->browser.family,
-      ua_parsed->browser.major, ua_parsed->browser.minor,
-      ua_parsed->browser.patch, ua_parsed->browser.patch_minor );
-  char * device_version_template = "%s %s";
-  char * version_template = "%s %s %s";
-  char * os_version = (char *) malloc(snprintf(
-      NULL, 0, version_template,
-      ua_parsed->os.major,
-      ua_parsed->os.minor,
-      ua_parsed->os.patch )+ 1);
+  ua_t * ua_parsed = (ua_t *)parse_to_c_ua( ua_str );
+  //printf( "ua_str: %s\ndevice.family: %s\ndevice.brand: %s\ndevice.model: %s\nos.family: %s\nos.version: %s.%s.%s.%s\nbrowser.family: %s\nbrowser.version: %s.%s.%s.%s\n", ua_str, ua_parsed->device->family, ua_parsed->device->brand, ua_parsed->device->model, ua_parsed->os->family, ua_parsed->os->major, ua_parsed->os->minor, ua_parsed->os->patch, ua_parsed->os->patch_minor, ua_parsed->browser->family, ua_parsed->browser->major, ua_parsed->browser->minor, ua_parsed->browser->patch, ua_parsed->browser->patch_minor );
+  char * device_version_template = "%s.%s";
+  char * version_template = "%s.%s.%s";
+  char * os_version = (char *) malloc(snprintf( NULL, 0 ,version_template,
+      ua_parsed->os->major,
+      ua_parsed->os->minor,
+      ua_parsed->os->patch ) + sizeof(char));
   sprintf( os_version, version_template,
-      ua_parsed->os.major,
-      ua_parsed->os.minor,
-      ua_parsed->os.patch );
+      ua_parsed->os->major,
+      ua_parsed->os->minor,
+      ua_parsed->os->patch );
   char * browser_version = (char *) malloc( snprintf(
       NULL, 0, version_template,
-      ua_parsed->browser.major,
-      ua_parsed->browser.minor,
-      ua_parsed->browser.patch ) +1);
+      (char *)  ua_parsed->browser->major,
+      (char *)  ua_parsed->browser->minor,
+      (char *)  ua_parsed->browser->patch ) + sizeof(char) );
   sprintf( browser_version, version_template,
-      ua_parsed->browser.major,
-      ua_parsed->browser.minor,
-      ua_parsed->browser.patch );
-  char * device_version = (char *) malloc(snprintf(
+      (char *)  ua_parsed->browser->major,
+      (char *)  ua_parsed->browser->minor,
+      (char *)  ua_parsed->browser->patch );
+  char * device_version = (char *) malloc( snprintf(
       NULL, 0, device_version_template,
-      ua_parsed->device.brand,
-      ua_parsed->device.model ) + 1 );
-  sprintf( device_version,device_version_template, 
-      ua_parsed->device.brand,
-      ua_parsed->device.model );
+      (char *)  ua_parsed->device->brand,
+      (char *)  ua_parsed->device->model ) + sizeof(char) );
+  sprintf( device_version, device_version_template,
+      (char *)  ua_parsed->device->brand,
+      (char *)  ua_parsed->device->model );
   if (stats_counter_incr( h_metrics->client_ua_str, ua_str ) == 0) {
     return 1;
   }
-  /*
-  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device.family ) == 0) {
+  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device->family ) == 0) {
     return 2;
   }
-  if (stats_counter_incr( h_metrics->client_oses , ua_parsed->os.family ) == 0) {
+  if (stats_counter_incr( h_metrics->client_oses , ua_parsed->os->family ) == 0) {
     return 3;
   }
-  if (stats_counter_incr( h_metrics->client_browsers, ua_parsed->browser.family ) == 0) {
+  if (stats_counter_incr( h_metrics->client_browsers, ua_parsed->browser->family ) == 0) {
     return 4;
   }
   if (stats_counter_incr( h_metrics->client_devices_vers, device_version ) == 0) {
     return 5;
   }
-  if (stats_counter_incr( h_metrics->client_browsers_vers, browser_version) == 0) {
+  if (stats_counter_incr( h_metrics->client_browsers_vers, browser_version ) == 0) {
     return 6;
   }
   if (stats_counter_incr( h_metrics->client_oses_vers, os_version ) == 0) {
     return 7;
   }
-  */
   return 0;
 }
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){

@@ -12,13 +12,13 @@ node *node_init(const char *s, int val ) {
   return n;
 }
 size_t ht_kget_nval( hashtable_t *table, const char *str ){
-  node *n = (node *) ht_get( table, str, strlen(str), sizeof( node ) );
+  node *n = (node *) ht_get( table, (void * )str, strlen(str), sizeof( node ) );
   if (n == NULL) {
     return -1;
   }
   int nval = n->nval;
   free(n);
-  return n->nval;
+  return (size_t) nval;
 }
 void ht_kadd_val_to_k_nval(hashtable_t *table, const char *str, int val) {
   if( ! ht_exists(table, str, strlen(str))){

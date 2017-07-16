@@ -8,45 +8,37 @@
 #include <boost/algorithm/string.hpp>
 #include <yaml-cpp/yaml.h>
 #include "uap.hpp"
-
 namespace {
-
   typedef std::map<std::string::size_type, size_t> i2tuple;
-
   struct GenericStore {
     std::string replacement;
     i2tuple replacementMap;
     boost::regex regExpr;
   };
-
   struct DeviceStore : GenericStore {
     std::string brandReplacement;
     std::string modelReplacement;
     i2tuple brandReplacementMap;
     i2tuple modelReplacementMap;
   };
-
   struct AgentStore : GenericStore {
     std::string majorVersionReplacement;
     std::string minorVersionReplacement;
     std::string patchVersionReplacement;
     std::string patchMinorVersionReplacement;
   };
-
   void mark_placeholders(i2tuple& replacement_map, const std::string& device_property) {
     auto loc = device_property.rfind("$");
     while (loc != std::string::npos) {
       const auto replacement = device_property.substr(loc + 1, 1);
       replacement_map[loc] = strtol(replacement.c_str(), nullptr, 10);
-
-      if (loc < 2)
+      if (loc < 2){
         break;
-
+      }
       loc = device_property.rfind("$", loc - 2);
     }
     return;
   }
-
   DeviceStore fill_device_store(const YAML::Node& device_parser) {
     DeviceStore device;
     bool regex_flag = false;
@@ -78,12 +70,10 @@ namespace {
     }
     return device;
   }
-
-  AgentStore fill_agent_store(const YAML::Node& node,
-                              const std::string& repl,
-                              const std::string& major_repl,
-                              const std::string& minor_repl,
-                              const std::string& patch_repl) {
+  AgentStore fill_agent_store(
+    const YAML::Node& node,
+    const std::string& repl, const std::string& major_repl,
+    const std::string& minor_repl, const std::string& patch_repl) {
     AgentStore agent_store;
     //std::cout<< "======== fill agent store\n";
     assert(node.Type() == YAML::NodeType::Map);
@@ -109,40 +99,34 @@ namespace {
     }
     return agent_store;
   }
-
   struct UAStore {
     explicit UAStore(const std::string& regexes_file_path) {
-      auto regexes = YAML::LoadFile(regexes_file_path);
-
+      YAML::Node regexes = YAML::LoadFile(regexes_file_path);
       const auto& user_agent_parsers = regexes["user_agent_parsers"];
-      for (const auto& user_agent : user_agent_parsers) {
-        const auto browser =
-            fill_agent_store(user_agent, "family_replacement", "v1_replacement", "v2_replacement", "v3_replacement");
+      for (const YAML::Node &user_agent : user_agent_parsers) {
+        AgentStore browser = fill_agent_store( user_agent,
+              "family_replacement",
+              "v1_replacement", 
+              "v2_replacement",
+              "v3_replacement" );
         browserStore.push_back(browser);
       }
-
       const auto& os_parsers = regexes["os_parsers"];
       for (const auto& o : os_parsers) {
-        const auto os =
-            fill_agent_store(o, "os_replacement", "os_v1_replacement", "os_v2_replacement", "os_v3_replacement");
+        const auto os = fill_agent_store( o,
+            "os_replacement", "os_v1_replacement",
+            "os_v2_replacement", "os_v3_replacement");
         osStore.push_back(os);
       }
-
       const auto& device_parsers = regexes["device_parsers"];
       for (const auto& device_parser : device_parsers) {
         deviceStore.push_back(fill_device_store(device_parser));
       }
     }
-
     std::vector<DeviceStore> deviceStore;
     std::vector<AgentStore> osStore;
     std::vector<AgentStore> browserStore;
   };
-
-  /////////////
-  // HELPERS //
-  /////////////
-
   void replace_all_placeholders(std::string& ua_property, const boost::smatch& result, const i2tuple& replacement_map) {
     for (auto iter = replacement_map.rbegin(); iter != replacement_map.rend(); ++iter) {
       ua_property.replace(iter->first, 2, result[iter->second].str());
@@ -153,7 +137,7 @@ namespace {
   void print_all_matches( boost::smatch m ){
     unsigned int i =0;
     for(i=0; i< m.size(); i++ ){
-      //std::cout<<"m["<<i<<"]: "<<m[i]<<"\n";
+      std::cout<<"m["<<i<<"]: "<<m[i]<<"\n";
     }
   }
   Device parse_device_impl(const std::string& ua, const UAStore* ua_store) {
@@ -176,7 +160,6 @@ namespace {
             //std::cout<<" device.family(replace_all_placeholders) "<< device.family <<"\n";
           }
         }
-
         if (!d.brandReplacement.empty()) {
           device.brand = d.brandReplacement;
           //std::cout<< "device.brand = d.brandReplacement "<< d.brandReplacement<< "\n";
@@ -203,30 +186,30 @@ namespace {
         device.family = "Other";
       }
     }
-
     return device;
   }
-
-  template <class AGENT, class AGENT_STORE >
-  void fill_agent(AGENT& agent, const AGENT_STORE& store, const boost::smatch& m, const bool os) {
+  template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& agent,
+      const AGENT_STORE& store,
+      const boost::smatch& m, const bool os ) {
     //std::cout<< "======== fill agent (os="<< std::boolalpha<<os<<") \n";
     //std::cout<<"m.size(): "<<m.size()<<"\n";
     if (m.size() > 1) {
       //std::cout<<"store.replacement.empty "<< std::boolalpha << store.replacement.empty() <<"\n";
-      agent.family =
-          !store.replacement.empty() ? boost::regex_replace(store.replacement, boost::regex("\\$1"), m[1].str()) : m[1];
+      agent.family = !store.replacement.empty() ? 
+        boost::regex_replace(
+            store.replacement, boost::regex("\\$1"), m[1].str()) : m[1];
       //std::cout<<"store.replacement = "<<store.replacement<<"\n";
       //std::cout<<"m1 = "<<m[1].str()<<"\n";
       //std::cout<<"agent family = "<<agent.family<<"\n";
     } else {
       //std::cout<<"store.replacement.empty "<< std::boolalpha << store.replacement.empty() <<"\n";
-      agent.family =
-          !store.replacement.empty() ? boost::regex_replace(store.replacement, boost::regex("\\$1"), m[0].str()) : m[0];
+      agent.family = !store.replacement.empty() ?
+        boost::regex_replace(
+            store.replacement, boost::regex("\\$1"), m[0].str()) : m[0];
       //std::cout<<"store.replacement = "<<store.replacement<<"\n";
       //std::cout<<"m0 = "<<m[0].str()<<"\n";
     }
     boost::algorithm::trim(agent.family);
-
     // The chunk above is slightly faster than the one below.
     // if ( store.replacement.empty() && m.size() > 1) {
     //   agent.family = m[1].str();
@@ -236,7 +219,6 @@ namespace {
     //       replace_all_placeholders(agent.family,m,store.replacementMap);
     //     }
     // }
-
     if (!store.majorVersionReplacement.empty()) {
       agent.major = store.majorVersionReplacement;
       //std::cout<<"store.majorVersionReplacement"<< store.majorVersionReplacement <<"\n";
@@ -263,11 +245,9 @@ namespace {
       //std::cout<<"agent.patch_minor m5 "<< m[5] <<"\n";
     }
   }
-
   Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store) {
     //std::cout<<"parse browser\n";
     Agent browser;
-
     for (const auto& b : ua_store->browserStore) {
       boost::smatch m;
       if (boost::regex_search(ua, m, b.regExpr)) {
@@ -278,14 +258,11 @@ namespace {
         browser.family = "Other";
       }
     }
-
     return browser;
   }
-
   Agent parse_os_impl(const std::string& ua, const UAStore* ua_store) {
     //std::cout<<"parse os\n";
     Agent os;
-
     for (const auto& o : ua_store->osStore) {
       boost::smatch m;
       if (boost::regex_search(ua, m, o.regExpr)) {
@@ -297,61 +274,49 @@ namespace {
         os.family = "Other";
       }
     }
-
     return os;
   }
-
+  const UserAgentParser g_ua_parser("./uap_regexes.yaml");
 }  // namespace
 UserAgentParser::UserAgentParser(const std::string& regexes_file_path) : regexes_file_path_{regexes_file_path} {
-  ua_store_ = new UAStore(regexes_file_path);
+  ua_store_ = (const void *) new UAStore(regexes_file_path);
 }
 UserAgentParser::~UserAgentParser() {
-  delete static_cast<const UAStore*>(ua_store_);
+  delete (ua_store_);
 }
 UserAgent UserAgentParser::parse(const std::string& ua) const {
-  const auto ua_store = static_cast<const UAStore*>(ua_store_);
-  const auto device = parse_device_impl(ua, ua_store);
-  const auto os = parse_os_impl(ua, ua_store);
-  const auto browser = parse_browser_impl(ua, ua_store);
+  const UAStore * ua_store = (const UAStore*)(ua_store_);
+  Device device = parse_device_impl(ua, ua_store);
+  Agent os = parse_os_impl(ua, ua_store);
+  Agent browser = parse_browser_impl(ua, ua_store);
   return {device, os, browser};
 }
-
-extern "C" void * uap_parser_create() {
-  return new UserAgentParser ("./regexes_new.yaml");
+void to_cstr( std::string from, char * &to){
+  to = new char[from.length()];
+  strcpy( to, from.c_str() );
 }
-extern "C" char * to_cstr( std::string str){
-  char * charp = new char[str.size()+1];
-  std::copy(str.begin(), str.end(), charp);
-  charp[str.size()] = '\0';
-  return charp;
-}
-extern "C" ua_agent_t convert_to_cagent( Agent agent ){
-  ua_agent_t cagent;
-  cagent.family = to_cstr( agent.family );
-  cagent.major= to_cstr( agent.major );
-  cagent.minor = to_cstr( agent.minor );
-  cagent.patch = to_cstr( agent.patch );
-  cagent.patch_minor = to_cstr( agent.patch_minor );
+ua_agent_t * convert_to_cagent( Agent agent ){
+  ua_agent_t * cagent = (ua_agent_t *)malloc(sizeof(ua_agent_t));
+  to_cstr( agent.family, cagent->family  );
+  to_cstr( agent.major, cagent->major );
+  to_cstr( agent.minor, cagent->minor );
+  to_cstr( agent.patch, cagent->patch );
+  to_cstr( agent.patch_minor,cagent->patch_minor );
   return cagent;
 }
-extern "C" ua_device_t convert_to_cdevice( Device device ){
-  ua_device_t cdevice;
-  cdevice.family = to_cstr( device.family );
-  cdevice.model = to_cstr( device.model );
-  cdevice.brand = to_cstr( device.brand );
+ua_device_t * convert_to_cdevice( Device device ){
+  ua_device_t * cdevice = (ua_device_t *) malloc(sizeof(ua_device_t));
+  to_cstr( device.family, cdevice->family );
+  to_cstr( device.model, cdevice->model );
+  to_cstr( device.brand, cdevice->brand );
   return cdevice;
 }
-extern "C" ua_t convert_to_cua( UserAgent ua ){
-  ua_t user_agent;
-  user_agent.device = convert_to_cdevice(ua.device);
-  user_agent.os = convert_to_cagent( ua.os );
-  user_agent.browser  = convert_to_cagent( ua.browser);
+ua_t * parse_to_c_ua( char * ua_cstr ) {
+  std::string uastr( ua_cstr );
+  const UserAgent ua = g_ua_parser.parse( uastr );
+  ua_t * user_agent = ( ua_t * ) malloc(sizeof(ua_t));
+  user_agent->device = convert_to_cdevice( ua.device );
+  user_agent->os = convert_to_cagent( ua.os );
+  user_agent->browser  = convert_to_cagent( ua.browser );
   return user_agent;
-}
-extern "C" ua_t * parse_to_c_ua( char * ua_cstr ) {
-  const UserAgentParser g_ua_parser("./uap_regexes.yaml");
-  std::string uastr(ua_cstr);
-  UserAgent ua = g_ua_parser.parse( uastr );
-  ua_t uat = convert_to_cua(ua);
-  return &uat;
 }
