@@ -11,6 +11,9 @@ extern "C" {
 #ifndef __HASHTABLE_H__
 #include "hashtable.h"
 #endif
+#ifndef __HTLOG_GEOIP__
+#include "htlog_geoip.h"
+#endif
 #ifndef __HTTPACCESS_MYSQL__
 #include "htlog_mysql.h"
 #endif
@@ -31,9 +34,12 @@ typedef struct httpaccess_metrics {
   hashtable_t * client_geo_locations;
   hashtable_t * visits;             //per hour distinct did,ip count
   hashtable_t * client_ua_str;
-  hashtable_t * client_browser_vers;
+  hashtable_t * client_devices;
+  hashtable_t * client_oses;
+  hashtable_t * client_browsers;
+  hashtable_t * client_devices_vers;
   hashtable_t * client_oses_vers;
-  hashtable_t * client_platform;
+  hashtable_t * client_browsers_vers;
   hashtable_t * page_paths;
   hashtable_t * pageviews;          //per hour distinct did,ip,page_id count
   hashtable_t * tvectors_inner;

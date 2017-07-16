@@ -1,0 +1,150 @@
+hashtable.c:102:62: error: invalid conversion from ‘void*’ to ‘ht_iterator_list_t*’ [-fpermissive]
+   table->iterator_list = calloc(1, sizeof(ht_iterator_list_t));
+                                                              ^
+--
+hashtable.c:157:79: error: invalid conversion from ‘void*’ to ‘ht_iterator_list_t*’ [-fpermissive]
+   ht_iterator_list_t *new_iterator_list = calloc(1, sizeof(ht_iterator_list_t));
+                                                                               ^
+hashtable.c:188:50: error: invalid conversion from ‘void*’ to ‘ht_items_list_t* {aka _ht_item_list*}’ [-fpermissive]
+         new_list = malloc(sizeof(ht_items_list_t));
+                                                  ^
+--
+hashtable.c:247:57: error: invalid conversion from ‘void*’ to ‘ht_items_list_t* {aka _ht_item_list*}’ [-fpermissive]
+   ht_items_list_t *list = malloc(sizeof(ht_items_list_t));
+                                                         ^
+--
+hashtable.c:285:57: error: invalid conversion from ‘void*’ to ‘const unsigned char*’ [-fpermissive]
+   uint32_t hash = ht_hash_one_at_a_time(table, key, klen);
+                                                         ^
+hashtable.c:69:24: error:   initializing argument 2 of ‘uint32_t ht_hash_one_at_a_time(hashtable_t*, const unsigned char*, ssize_t)’ [-fpermissive]
+ static inline uint32_t ht_hash_one_at_a_time(hashtable_t *table, const unsigned char *str, const ssize_t len) {
+                        ^
+--
+hashtable.c:403:57: error: invalid conversion from ‘void*’ to ‘const unsigned char*’ [-fpermissive]
+   uint32_t hash = ht_hash_one_at_a_time(table, key, klen);
+                                                         ^
+hashtable.c:69:24: error:   initializing argument 2 of ‘uint32_t ht_hash_one_at_a_time(hashtable_t*, const unsigned char*, ssize_t)’ [-fpermissive]
+ static inline uint32_t ht_hash_one_at_a_time(hashtable_t *table, const unsigned char *str, const ssize_t len) {
+                        ^
+--
+hashtable.c:552:15: error: invalid conversion from ‘size_t {aka long unsigned int}’ to ‘size_t* {aka long unsigned int*}’ [-fpermissive]
+     arg->dlen = *vlen;
+               ^
+--
+hashtable.c:588:60: error: invalid conversion from ‘void*’ to ‘hashtable_key_t* {aka _hashtable_key_s*}’ [-fpermissive]
+       hashtable_key_t *key = malloc(sizeof(hashtable_key_t));
+                                                            ^
+--
+hashtable.c:622:62: error: invalid conversion from ‘void*’ to ‘hashtable_value_t* {aka _hashtable_value_s*}’ [-fpermissive]
+       hashtable_value_t *v = malloc(sizeof(hashtable_value_t));
+                                                              ^
+--
+hashtable.c:646:45: error: too many arguments to function
+   return arg->cb(table, key, klen, arg->user);
+                                             ^
+--
+hashtable.c:649:38: error: invalid conversion from ‘ht_key_iterator_callback_t {aka ht_iterator_status_t (*)(_hashtable_s*, void*, long unsigned int, void*)}’ to ‘int (*)()’ [-fpermissive]
+   ht_iterator_arg_t arg = { cb, user };
+                                      ^
+hashtable.c:650:53: error: invalid conversion from ‘int (*)(hashtable_t*, void*, size_t, void*, size_t, void*) {aka int (*)(_hashtable_s*, void*, long unsigned int, void*, long unsigned int, void*)}’ to ‘ht_pair_iterator_callback_t {aka ht_iterator_status_t (*)(_hashtable_s*, void*, long unsigned int, void*, long unsigned int, void*)}’ [-fpermissive]
+   ht_foreach_pair(table, ht_foreach_key_helper, &arg);
+                                                     ^
+--
+hashtable.h:97:6: error:   initializing argument 2 of ‘void ht_foreach_pair(hashtable_t*, ht_pair_iterator_callback_t, void*)’ [-fpermissive]
+ void ht_foreach_pair(hashtable_t *table, ht_pair_iterator_callback_t cb, void *user);
+      ^
+--
+hashtable.c:654:47: error: too many arguments to function
+   return arg->cb(table, value, vlen, arg->user);
+                                               ^
+--
+hashtable.c:657:38: error: invalid conversion from ‘ht_value_iterator_callback_t {aka ht_iterator_status_t (*)(_hashtable_s*, void*, long unsigned int, void*)}’ to ‘int (*)()’ [-fpermissive]
+   ht_iterator_arg_t arg = { cb, user };
+                                      ^
+hashtable.c:658:55: error: invalid conversion from ‘int (*)(hashtable_t*, void*, size_t, void*, size_t, void*) {aka int (*)(_hashtable_s*, void*, long unsigned int, void*, long unsigned int, void*)}’ to ‘ht_pair_iterator_callback_t {aka ht_iterator_status_t (*)(_hashtable_s*, void*, long unsigned int, void*, long unsigned int, void*)}’ [-fpermissive]
+   ht_foreach_pair(table, ht_foreach_value_helper, &arg);
+                                                       ^
+--
+hashtable.h:97:6: error:   initializing argument 2 of ‘void ht_foreach_pair(hashtable_t*, ht_pair_iterator_callback_t, void*)’ [-fpermissive]
+ void ht_foreach_pair(hashtable_t *table, ht_pair_iterator_callback_t cb, void *user);
+      ^
+--
+ht_nodes.c:15:70: error: invalid conversion from ‘const void*’ to ‘void*’ [-fpermissive]
+   node *n = (node *) ht_get( table, str, strlen(str), sizeof( node ) );
+                                                                      ^
+--
+hashtable.h:26:7: error:   initializing argument 2 of ‘void* ht_get(hashtable_t*, void*, size_t, size_t*)’ [-fpermissive]
+ void* ht_get(hashtable_t *table, void *key, size_t klen, size_t *dlen);
+       ^
+ht_nodes.c:15:61: error: invalid conversion from ‘long unsigned int’ to ‘size_t* {aka long unsigned int*}’ [-fpermissive]
+   node *n = (node *) ht_get( table, str, strlen(str), sizeof( node ) );
+                                                             ^
+--
+hashtable.h:26:7: error:   initializing argument 4 of ‘void* ht_get(hashtable_t*, void*, size_t, size_t*)’ [-fpermissive]
+ void* ht_get(hashtable_t *table, void *key, size_t klen, size_t *dlen);
+       ^
+--
+ht_nodes.c:24:42: error: invalid conversion from ‘const void*’ to ‘void*’ [-fpermissive]
+   if( ! ht_exists(table, str, strlen(str))){
+                                          ^
+--
+hashtable.h:28:5: error:   initializing argument 2 of ‘int ht_exists(hashtable_t*, void*, size_t)’ [-fpermissive]
+ int ht_exists(hashtable_t *table, void *key, size_t klen);
+     ^
+ht_nodes.c:26:57: error: invalid conversion from ‘const void*’ to ‘void*’ [-fpermissive]
+     ht_set( table, str, strlen(str), data, sizeof(node) );
+                                                         ^
+--
+hashtable.h:35:5: error:   initializing argument 2 of ‘int ht_set(hashtable_t*, void*, size_t, void*, size_t)’ [-fpermissive]
+ int ht_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen);
+     ^
+ht_nodes.c:30:69: error: invalid conversion from ‘const void*’ to ‘void*’ [-fpermissive]
+     node * n = (node *) ht_get(table, str, strlen(str), sizeof(node));
+                                                                     ^
+--
+hashtable.h:26:7: error:   initializing argument 2 of ‘void* ht_get(hashtable_t*, void*, size_t, size_t*)’ [-fpermissive]
+ void* ht_get(hashtable_t *table, void *key, size_t klen, size_t *dlen);
+       ^
+ht_nodes.c:30:63: error: invalid conversion from ‘long unsigned int’ to ‘size_t* {aka long unsigned int*}’ [-fpermissive]
+     node * n = (node *) ht_get(table, str, strlen(str), sizeof(node));
+                                                               ^
+--
+hashtable.h:26:7: error:   initializing argument 4 of ‘void* ht_get(hashtable_t*, void*, size_t, size_t*)’ [-fpermissive]
+ void* ht_get(hashtable_t *table, void *key, size_t klen, size_t *dlen);
+       ^
+--
+htlog_processing.c: In function ‘char* h_metrics_get_error(httpaccess_metrics*)’:
+htlog_processing.c:73:12: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+     return "No error";
+            ^
+htlog_processing.c: In function ‘int h_metrics_parse_line(logline*, char*)’:
+--
+htlog_processing.c:276:62: error: ‘get_geoip_country’ was not declared in this scope
+   char * country_name = (char *) get_geoip_country(0, user_ip);
+                                                              ^
+--
+   h_metrics_set_error(h_metrics, "Out of memory processing data");
+                                                                 ^
+htlog_processing.c: In function ‘int logs_scan(httpaccess_metrics*, char*)’:
+--
+       h_metrics_set_error(h_metrics, "Unable to open '%s': '%s'", filename, strerror(errno));
+                                                                                            ^
+htlog_processing.c: In function ‘int process_logfile(char*)’:
+--
+htlog_mysql.c:110:75: error: invalid conversion from ‘void (*)(void*)’ to ‘void* (*)(void*)’ [-fpermissive]
+   iterate_all_linklist_nodes( uniq_ips, build_ips_sql, (void *) ips_sql_n );
+                                                                           ^
+--
+htlog_mysql.h:40:5: error:   initializing argument 2 of ‘int iterate_all_linklist_nodes(linked_list_t*, void* (*)(void*), void*)’ [-fpermissive]
+ int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg);
+     ^
+--
+htlog_mysql.c:126:93: error: invalid conversion from ‘void (*)(void*)’ to ‘void* (*)(void*)’ [-fpermissive]
+   iterate_all_linklist_nodes( uniq_locations, build_locations_sql, (void *) countries_sql_n );
+                                                                                             ^
+--
+htlog_mysql.h:40:5: error:   initializing argument 2 of ‘int iterate_all_linklist_nodes(linked_list_t*, void* (*)(void*), void*)’ [-fpermissive]
+ int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg);
+     ^
+--
+make: *** [htlog_processing.o] Error 1

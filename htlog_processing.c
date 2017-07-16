@@ -6,8 +6,8 @@
 #include "htlog_processing.h"
 httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   httpaccess_metrics *h_metrics;
-  if ((h_metrics = malloc(sizeof( httpaccess_metrics ))) == NULL) {
-    return ;
+  if ((h_metrics = (httpaccess_metrics * )malloc(sizeof( httpaccess_metrics ))) == NULL) {
+    return h_metrics;
   }
   h_metrics->real_did = real_did;
   h_metrics->uid = uid;
@@ -20,9 +20,12 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   h_metrics->client_geo_locations = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->visits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_ua_str = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_browser_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_devices= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_devices_vers= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_oses = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_oses_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_platform = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_browsers= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_browsers_vers= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->page_paths = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->pageviews= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->tvectors_inner = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
@@ -39,9 +42,12 @@ httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) 
   free( h_metrics->client_geo_locations);
   free( h_metrics->visits);
   free( h_metrics->client_ua_str);
-  free( h_metrics->client_browser_vers);
-  free( h_metrics->client_oses_vers);
-  free( h_metrics->client_platform);
+  free( h_metrics->client_devices );
+  free( h_metrics->client_devices_vers );
+  free( h_metrics->client_oses  );
+  free( h_metrics->client_oses_vers );
+  free( h_metrics->client_browsers );
+  free( h_metrics->client_browsers_vers );
   free( h_metrics->page_paths);
   free( h_metrics->pageviews);
   free( h_metrics->tvectors_inner);
@@ -251,7 +257,7 @@ int stats_counter_incr( hashtable_t *table, char* key ) {
     free(n);
   }
   else {
-    node *n = (node *) ht_get_copy( table, key, strlen( key )+1, sizeof(node *) );
+    node *n = (node *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(node *) );
     n->nval++;
     val = n->nval;
     ht_set(table, key, strlen( key ) + 1, n, sizeof(node *));
@@ -275,11 +281,63 @@ int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
   return 0;
 }
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
-  printf( "%s \n", ua_str );
-  int res = stats_counter_incr( h_metrics->client_ua_str, ua_str );
-  if (res == 0) {
+  ua_t * ua_parsed = parse_user_agent(ua_str);
+  printf( "str: %s\ndevice.family: %s device.brand: %s device.model: %s\n:os.family: %s %s.%s.%s.%s \nbrowser.family: %s  %s.%s.%s.%s \n",
+      ua_str, ua_parsed->device.family, ua_parsed->device.brand, ua_parsed->device.model,
+      ua_parsed->os.family, ua_parsed->os.major, ua_parsed->os.minor, ua_parsed->os.patch,
+      ua_parsed->os.patch_minor, ua_parsed->browser.family,
+      ua_parsed->browser.major, ua_parsed->browser.minor,
+      ua_parsed->browser.patch, ua_parsed->browser.patch_minor );
+  char * device_version_template = "%s %s";
+  char * version_template = "%s %s %s";
+  char * os_version = (char *) malloc(snprintf(
+      NULL, 0, version_template,
+      ua_parsed->os.major,
+      ua_parsed->os.minor,
+      ua_parsed->os.patch )+ 1);
+  sprintf( os_version, version_template,
+      ua_parsed->os.major,
+      ua_parsed->os.minor,
+      ua_parsed->os.patch );
+  char * browser_version = (char *) malloc( snprintf(
+      NULL, 0, version_template,
+      ua_parsed->browser.major,
+      ua_parsed->browser.minor,
+      ua_parsed->browser.patch ) +1);
+  sprintf( browser_version, version_template,
+      ua_parsed->browser.major,
+      ua_parsed->browser.minor,
+      ua_parsed->browser.patch );
+  char * device_version = (char *) malloc(snprintf(
+      NULL, 0, device_version_template,
+      ua_parsed->device.brand,
+      ua_parsed->device.model ) + 1 );
+  sprintf( device_version,device_version_template, 
+      ua_parsed->device.brand,
+      ua_parsed->device.model );
+  if (stats_counter_incr( h_metrics->client_ua_str, ua_str ) == 0) {
     return 1;
   }
+  /*
+  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device.family ) == 0) {
+    return 2;
+  }
+  if (stats_counter_incr( h_metrics->client_oses , ua_parsed->os.family ) == 0) {
+    return 3;
+  }
+  if (stats_counter_incr( h_metrics->client_browsers, ua_parsed->browser.family ) == 0) {
+    return 4;
+  }
+  if (stats_counter_incr( h_metrics->client_devices_vers, device_version ) == 0) {
+    return 5;
+  }
+  if (stats_counter_incr( h_metrics->client_browsers_vers, browser_version) == 0) {
+    return 6;
+  }
+  if (stats_counter_incr( h_metrics->client_oses_vers, os_version ) == 0) {
+    return 7;
+  }
+  */
   return 0;
 }
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){

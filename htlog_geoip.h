@@ -20,7 +20,7 @@ extern "C" {
         if (gip == NULL) {                           \
             printf("error: %s%s does not exist\n", \
                    DATADIR, basename);             \
-            return;                                \
+            return NULL;                                \
             /* or a 'longjmp(geo_jmp,1)'? */       \
         }                                          \
     } while (0)
