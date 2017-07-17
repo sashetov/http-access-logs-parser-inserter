@@ -42,4 +42,33 @@ str_container_t *** get_regex_matches(
   }
   return results;
 }
+char * get_version_string( char * major, char * minor, char * patch, char * patch_minor ){
+  char * vt1= "%s";
+  char * vt2= "%s.%s";
+  char * vt3= "%s.%s.%s";
+  char * vt4= "%s.%s.%s.%s";
+  char * version_str;
+  if( strcmp( major, "" ) == 0 ){
+    return "";
+  }
+  else if( strcmp( minor, "" ) == 0 ){
+    return major;
+  }
+  else if( strcmp( patch, "" ) == 0 ){
+    version_str = (char *) malloc( snprintf( NULL, 0 , vt2,
+          major, minor ) + sizeof(char));
+    sprintf( version_str, vt2, major, minor );
+  }
+  else if( strcmp( patch_minor, "" ) == 0 ){
+    version_str = (char *) malloc( snprintf( NULL, 0 , vt3,
+          major, minor, patch ) + sizeof(char));
+    sprintf( version_str, vt2, major, minor, patch );
+  }
+  else{
+    version_str = (char *) malloc( snprintf( NULL, 0 , vt4,
+          major, minor, patch, patch_minor ) + sizeof(char));
+    sprintf( version_str, vt2, major, minor, patch, patch_minor );
+  }
+  return version_str;
+}
 /*str_container_t *** matches = get_regex_matches( "___ abc123def ___ ghi456 ___", "[a-z]*([0-9]+)([a-z]*)", 3, 20 );*/

@@ -4,11 +4,13 @@
 #include <time.h>
 #endif
 #include "htlog_processing.h"
-httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
+httpaccess_metrics* h_metrics_init(
+    int real_did, int uid, char ** user_hostnames ) {
   httpaccess_metrics *h_metrics;
   if ((h_metrics = (httpaccess_metrics * )malloc(sizeof( httpaccess_metrics ))) == NULL) {
     return h_metrics;
   }
+  h_metrics->internal_hostnames = user_hostnames;
   h_metrics->real_did = real_did;
   h_metrics->uid = uid;
   h_metrics->error = NULL;
@@ -37,6 +39,7 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid ) {
   return h_metrics;
 }
 httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) {
+  free( h_metrics->internal_hostnames );
   free( h_metrics->hits);
   free( h_metrics->client_ips);
   free( h_metrics->client_geo_locations);
@@ -282,63 +285,86 @@ int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
 }
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
   ua_t * ua_parsed = (ua_t *)parse_to_c_ua( ua_str );
-  //printf( "ua_str: %s\ndevice.family: %s\ndevice.brand: %s\ndevice.model: %s\nos.family: %s\nos.version: %s.%s.%s.%s\nbrowser.family: %s\nbrowser.version: %s.%s.%s.%s\n", ua_str, ua_parsed->device->family, ua_parsed->device->brand, ua_parsed->device->model, ua_parsed->os->family, ua_parsed->os->major, ua_parsed->os->minor, ua_parsed->os->patch, ua_parsed->os->patch_minor, ua_parsed->browser->family, ua_parsed->browser->major, ua_parsed->browser->minor, ua_parsed->browser->patch, ua_parsed->browser->patch_minor );
-  char * device_version_template = "%s.%s";
-  char * version_template = "%s.%s.%s";
-  char * os_version = (char *) malloc(snprintf( NULL, 0 ,version_template,
-      ua_parsed->os->major,
-      ua_parsed->os->minor,
-      ua_parsed->os->patch ) + sizeof(char));
-  sprintf( os_version, version_template,
-      ua_parsed->os->major,
-      ua_parsed->os->minor,
-      ua_parsed->os->patch );
-  char * browser_version = (char *) malloc( snprintf(
-      NULL, 0, version_template,
-      (char *)  ua_parsed->browser->major,
-      (char *)  ua_parsed->browser->minor,
-      (char *)  ua_parsed->browser->patch ) + sizeof(char) );
-  sprintf( browser_version, version_template,
-      (char *)  ua_parsed->browser->major,
-      (char *)  ua_parsed->browser->minor,
-      (char *)  ua_parsed->browser->patch );
-  char * device_version = (char *) malloc( snprintf(
-      NULL, 0, device_version_template,
-      (char *)  ua_parsed->device->brand,
-      (char *)  ua_parsed->device->model ) + sizeof(char) );
-  sprintf( device_version, device_version_template,
-      (char *)  ua_parsed->device->brand,
-      (char *)  ua_parsed->device->model );
-  if (stats_counter_incr( h_metrics->client_ua_str, ua_str ) == 0) {
+  char * device_vers_template= "%s %s";
+  char * os_version = get_version_string(
+      ua_parsed->os->major, ua_parsed->os->minor, ua_parsed->os->patch, "");
+  char * browser_version = get_version_string(
+      ua_parsed->browser->major,
+      ua_parsed->browser->minor,
+      ua_parsed->browser->patch,
+      ua_parsed->browser->patch_minor );
+  char * device_vers = (char *) malloc( snprintf( NULL, 0,
+        device_vers_template,
+        ua_parsed->device->brand, ua_parsed->device->model) + sizeof(char));
+  sprintf( device_vers , device_vers_template,
+      ua_parsed->device->brand, ua_parsed->device->model);
+  if (stats_counter_incr(
+        h_metrics->client_ua_str, ua_str ) == 0) {
     return 1;
-  }
-  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device->family ) == 0) {
+  } //else printf("stats_counter_incr(client_ua_str,%s)\n", ua_str );
+  if (stats_counter_incr(
+        h_metrics->client_devices, ua_parsed->device->family ) == 0) {
     return 2;
-  }
-  if (stats_counter_incr( h_metrics->client_oses , ua_parsed->os->family ) == 0) {
+  } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
+  if (stats_counter_incr(
+        h_metrics->client_oses , ua_parsed->os->family ) == 0) {
     return 3;
-  }
-  if (stats_counter_incr( h_metrics->client_browsers, ua_parsed->browser->family ) == 0) {
+  } //else printf("stats_counter_incr(client_oses,%s)\n", ua_parsed->os->family);
+  if (stats_counter_incr(
+        h_metrics->client_browsers, ua_parsed->browser->family ) == 0) {
     return 4;
-  }
-  if (stats_counter_incr( h_metrics->client_devices_vers, device_version ) == 0) {
+  } //else printf("stats_counter_incr(client_browsers,%s)\n", ua_parsed->browser->family);
+  if (stats_counter_incr(
+        h_metrics->client_devices, ua_parsed->device->family ) == 0) {
     return 5;
-  }
-  if (stats_counter_incr( h_metrics->client_browsers_vers, browser_version ) == 0) {
+  } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
+  if (stats_counter_incr(
+        h_metrics->client_devices_vers, device_vers) == 0) {
     return 6;
-  }
-  if (stats_counter_incr( h_metrics->client_oses_vers, os_version ) == 0) {
+  } //else printf("stats_counter_incr(devices_vers,%s)\n", device_vers);
+  if (stats_counter_incr(
+        h_metrics->client_browsers_vers, browser_version ) == 0) {
     return 7;
-  }
+  } //else printf("stats_counter_incr(browsers_vers,%s)\n", browser_version);
+  if (stats_counter_incr(
+        h_metrics->client_oses_vers, os_version ) == 0) {
+    return 8;
+  } //else printf("stats_counter_incr(oses_vers,%s)\n", os_version);
   return 0;
 }
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
+  if (stats_counter_incr(
+        h_metrics->page_paths, page_path) == 0) {
+    return 1;
+  }// else printf("stats_counter_incr(page_paths,%s)\n", page_path);
   return 0;
 }
-int stats_process_referer_and_sqs( httpaccess_metrics *h_metrics, char *ref_str ){
+int stats_process_referer_str(
+    httpaccess_metrics *h_metrics, char *ref_str ){
+  char * referer_url;
+  char * search_qstr;
+  char * search_hostnames[0] = "google.com";
+  referer_url = get_referer_url( ref_str, h_metrics->internal_hostnames );
+  printf("ref_str:%s\n", ref_str);
+  if (stats_counter_incr(
+        h_metrics->referer_urls, referer_url ) == 0 ) {
+    return 1;
+  }// else printf("stats_counter_incr(ref_str,%s)\n", referer_url);
+  search_qstr = get_search_query_str( ref_str, search_hostnames );
+  if (stats_counter_incr(
+        h_metrics->search_qstr, search_qstr) == 0 ) {
+    return 2;
+  } else printf("stats_counter_incr(search_qstr,%s)\n", search_qstr);
   return 0;
 }
 int stats_process_hits( httpaccess_metrics *h_metrics ){
+  int length = snprintf( NULL, 0, "%d", h_metrics->real_did ) + 1;
+  char* real_did_str = (char *)malloc( length );
+  snprintf( real_did_str, length, "%d", h_metrics->real_did );
+  if (stats_counter_incr(
+        h_metrics->hits, real_did_str) == 0 ) {
+    return 1;
+  }
   return 0;
 }
 int stats_process_visits( httpaccess_metrics *h_metrics ){
@@ -372,7 +398,7 @@ int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
     if ( stats_process_page_paths( h_metrics, ll.req ) ) {
       goto oom;
     }
-    if ( stats_process_referer_and_sqs( h_metrics, ll.ref ) ) {
+    if ( stats_process_referer_str( h_metrics, ll.ref ) ) {
       goto oom;
     }
     if ( stats_process_hits( h_metrics ) ) {
@@ -484,8 +510,9 @@ unsigned long get_numeric_ip(char* addr) {
   return ipnum + octet;
 }
 int process_logfile( char* filename ) {
-  httpaccess_metrics *h_metrics = h_metrics_init( 0, 0 );
   char * hostname = "atthematch.com";
+  char ** hostnames= strcpy(hostnames[0],hostname);
+  httpaccess_metrics *h_metrics = h_metrics_init( 0, 0, hostnames );
   mysql_domain_resultset_t * drs = get_real_did_uid( hostname );
   h_metrics->real_did = drs->did;
   h_metrics->uid      = drs->uid;

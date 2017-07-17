@@ -15,6 +15,7 @@ typedef struct str_container {
 } str_container_t;
 str_container_t *** get_regex_matches(
     char * str, char * regex_str, size_t num_groups, size_t max_matches );
+char * get_version_string( char * major, char * minor, char * patch, char * patch_minor );
 #ifdef __cplusplus
 }
 #endif

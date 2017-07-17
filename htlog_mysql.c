@@ -39,6 +39,26 @@ int get_did_for_domain_name( MYSQL * con,  char * domain_name ) {
   //mysql_close(con);
   return did;
 }
+char ** get_domain_aliases( MYSQL * con, char * domain_name ){
+  char ** hostnames = (char **)malloc( sizeof(char *));
+  char * query_template = "SET @did=(SELECT did FROM domains where domain_name ='%s'); SELECT domain_name FROM domains WHERE alias_of=@did OR did=@did;";
+  char * query = (char *) malloc(snprintf(NULL, 0, query_template, domain_name ) + 1);
+  sprintf(query, query_template, domain_name );
+  if (mysql_query(con, query)){
+    finish_with_error(con);
+  }
+  MYSQL_RES *result = mysql_store_result(con);
+  int num_fields = mysql_num_fields(result);
+  MYSQL_ROW row;
+  int i = 0;
+  while ((row = mysql_fetch_row(result))) { 
+    char * hostname = row[0] ? row[0] : "";
+    hostnames[i] = (char *) malloc(strlen(hostname)+1);
+    strcpy( hostnames[i], hostname );
+    i++;
+  }
+  return hostnames;
+}
 mysql_domain_resultset_t * get_real_did_uid_from_possible( MYSQL * con, int possible_did ) {
   mysql_domain_resultset_t *results =  ( mysql_domain_resultset_t * ) malloc(
       sizeof(mysql_domain_resultset_t) );
@@ -151,4 +171,6 @@ int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void *
   }
   cb((void*) sqln );
 };
+
+
 #endif

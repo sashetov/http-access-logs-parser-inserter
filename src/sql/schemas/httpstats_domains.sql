@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS httpstats_vu;
+DROP DATABASE IF EXISTS httpstats_domains;
 CREATE DATABASE httpstats_domains;
 USE httpstats_domains;
 SET GLOBAL innodb_file_per_table=1;

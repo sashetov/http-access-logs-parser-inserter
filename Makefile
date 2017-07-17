@@ -10,22 +10,24 @@ GEOIP_CFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags geoi
 GEOIP_LDFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs geoip)
 UAP_LDFLAGS=-lboost_regex -lyaml-cpp
 all: dump_cpp_vars clean test_progs cloudstats tags
-cloudstats: clean_local uap.o htlog_uap.o hashtable.o htlog_processing.o linklist.o ht_nodes.o htlog_analyzer.o
-	$(CXX) -o cloudstats htlog_analyzer.o htlog_processing.o ht_nodes.o hashtable.o linklist.o htlog_geoip.o htlog_mysql.o htlog_uap.o uap.o $(GEOIP_LDFLAGS) $(MYSQLC_LDFLAGS) $(UAP_LDFLAGS)
+cloudstats: clean_local htlog_urls.o uap.o htlog_uap.o hashtable.o htlog_processing.o linklist.o ht_nodes.o htlog_analyzer.o
+	$(CXX) -o cloudstats htlog_urls.o htlog_analyzer.o htlog_processing.o ht_nodes.o hashtable.o linklist.o htlog_geoip.o htlog_mysql.o htlog_uap.o uap.o $(GEOIP_LDFLAGS) $(MYSQLC_LDFLAGS) $(UAP_LDFLAGS)
 htlog_analyzer.o:
 	$(CXX) -c $(CXXFLAGS) $(DEBUG) $(MYSQLC_CFLAGS) htlog_analyzer.cpp
-htlog_uap.o:
-	$(CXX) -c $(CXXFLAGS) $(DEBUG) htlog_uap.c 
-uap.o:
-	$(CXX) -c $(CXXFLAGS) $(DEBUG) uap.cpp
 htlog_processing.o:
-	$(CXX) -c $(CXXFLAGS) $(GEOIP_CFLAGS) $(MYSQLC_CFLAGS) $(DEBUG)   htlog_geoip.c htlog_mysql.c htlog_processing.c
+	$(CXX) -c $(CXXFLAGS) $(GEOIP_CFLAGS) $(MYSQLC_CFLAGS) $(DEBUG) htlog_geoip.c htlog_mysql.c htlog_processing.c
 linklist.o:
 	$(CC) -c $(CFLAGS) $(DEBUG) linklist.c
 ht_nodes.o:
 	$(CC) -c $(CFLAGS) $(DEBUG) ht_nodes.c
 hashtable.o:
 	$(CC) -c $(CFLAGS) $(DEBUG) hashtable.c
+htlog_uap.o:
+	$(CXX) -c $(CXXFLAGS) $(DEBUG) htlog_uap.c
+uap.o:
+	$(CXX) -c $(CXXFLAGS) $(DEBUG) uap.cpp
+htlog_urls.o:
+	$(CXX) -c $(CXXFLAGS) $(DEBUG) htlog_urls.c
 test_progs:
 	$(MAKE) -C tests/ all
 dump_cpp_vars:
