@@ -52,7 +52,7 @@ char ** get_domain_aliases( MYSQL * con, char * domain_name ){
   MYSQL_ROW row;
   int i = 0;
   while ((row = mysql_fetch_row(result))) { 
-    char * hostname = row[0] ? row[0] : "";
+    char * hostname = row[0] ? row[0] : (char *)"";
     hostnames[i] = (char *) malloc(strlen(hostname)+1);
     strcpy( hostnames[i], hostname );
     i++;
@@ -171,6 +171,4 @@ int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void *
   }
   cb((void*) sqln );
 };
-
-
 #endif

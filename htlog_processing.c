@@ -5,12 +5,26 @@
 #endif
 #include "htlog_processing.h"
 httpaccess_metrics* h_metrics_init(
-    int real_did, int uid, char ** user_hostnames ) {
+    int real_did, int uid,
+    char ** user_hostnames, int nihosts,
+    char ** search_hostnames, int nshosts ) {
+  int i =0;
   httpaccess_metrics *h_metrics;
   if ((h_metrics = (httpaccess_metrics * )malloc(sizeof( httpaccess_metrics ))) == NULL) {
     return h_metrics;
   }
-  h_metrics->internal_hostnames = user_hostnames;
+  h_metrics->num_ihosts = nihosts;
+  for(i = 0; i< h_metrics->num_ihosts; i++) {
+    h_metrics->internal_hostnames = (char **) malloc(sizeof(user_hostnames));
+    h_metrics->internal_hostnames[i] = (char *) malloc(strlen(user_hostnames[i])+1);
+    strcpy(h_metrics->internal_hostnames[i], user_hostnames[i]);
+  }
+  h_metrics->num_shosts= nshosts;
+  for(i = 0; i< h_metrics->num_shosts; i++) {
+    h_metrics->search_hostnames = (char **) malloc(sizeof(search_hostnames));
+    h_metrics->search_hostnames[i] = (char *) malloc(strlen(search_hostnames[i])+1);
+    strcpy(h_metrics->search_hostnames[i], search_hostnames[i]);
+  }
   h_metrics->real_did = real_did;
   h_metrics->uid = uid;
   h_metrics->error = NULL;
@@ -22,41 +36,52 @@ httpaccess_metrics* h_metrics_init(
   h_metrics->client_geo_locations = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->visits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_ua_str = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_devices= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_devices_vers= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_devices = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_oses = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_browsers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_devices_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->client_oses_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_browsers= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_browsers_vers= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->client_browsers_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->page_paths = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->pageviews= ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->referer_hostnames = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->referer_pathstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->referer_paramstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->internref_hostnames = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->internref_pathstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->internref_paramstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->search_queries = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->pageviews = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->tvectors_inner = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->tvectors_inner_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->referer_urls = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->search_qstr = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->tvectors_incoming = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   h_metrics->tvectors_inc_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
   return h_metrics;
 }
 httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) {
   free( h_metrics->internal_hostnames );
+  free( h_metrics->search_hostnames );
   free( h_metrics->hits);
   free( h_metrics->client_ips);
   free( h_metrics->client_geo_locations);
   free( h_metrics->visits);
   free( h_metrics->client_ua_str);
-  free( h_metrics->client_devices );
-  free( h_metrics->client_devices_vers );
-  free( h_metrics->client_oses  );
-  free( h_metrics->client_oses_vers );
-  free( h_metrics->client_browsers );
-  free( h_metrics->client_browsers_vers );
+  free( h_metrics->client_devices);
+  free( h_metrics->client_oses);
+  free( h_metrics->client_browsers);
+  free( h_metrics->client_devices_vers);
+  free( h_metrics->client_oses_vers);
+  free( h_metrics->client_browsers_vers);
   free( h_metrics->page_paths);
+  free( h_metrics->referer_hostnames);
+  free( h_metrics->referer_pathstrings);
+  free( h_metrics->referer_paramstrings);
+  free( h_metrics->internref_hostnames);
+  free( h_metrics->internref_pathstrings);
+  free( h_metrics->internref_paramstrings);
+  free( h_metrics->search_queries);
   free( h_metrics->pageviews);
   free( h_metrics->tvectors_inner);
   free( h_metrics->tvectors_inner_per_hour);
-  free( h_metrics->referer_urls);
-  free( h_metrics->search_qstr);
   free( h_metrics->tvectors_incoming);
   free( h_metrics->tvectors_inc_per_hour);
   return h_metrics;
@@ -136,7 +161,12 @@ int h_metrics_parse_line(logline *ll, char *l) {
     }
   }
   //REQ
-  if ((req = strstr(l, "\"GET")) != NULL || (req = strstr(l, "\"POST")) != NULL || (req = strstr(l, "\"HEAD")) != NULL || (req = strstr(l, "\"get")) != NULL || (req = strstr(l, "\"post")) != NULL || (req = strstr(l, "\"head")) != NULL) {
+  if ((req = strstr(l, "\"GET")) != NULL ||
+      (req = strstr(l, "\"POST")) != NULL || 
+      (req = strstr(l, "\"HEAD")) != NULL || 
+      (req = strstr(l, "\"get")) != NULL || 
+      (req = strstr(l, "\"post")) != NULL || 
+      (req = strstr(l, "\"head")) != NULL) {
     req++;
   }
   else {
@@ -339,22 +369,56 @@ int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
   }// else printf("stats_counter_incr(page_paths,%s)\n", page_path);
   return 0;
 }
-int stats_process_referer_str(
-    httpaccess_metrics *h_metrics, char *ref_str ){
-  char * referer_url;
-  char * search_qstr;
-  char * search_hostnames[0] = "google.com";
-  referer_url = get_referer_url( ref_str, h_metrics->internal_hostnames );
-  printf("ref_str:%s\n", ref_str);
-  if (stats_counter_incr(
-        h_metrics->referer_urls, referer_url ) == 0 ) {
-    return 1;
-  }// else printf("stats_counter_incr(ref_str,%s)\n", referer_url);
-  search_qstr = get_search_query_str( ref_str, search_hostnames );
-  if (stats_counter_incr(
-        h_metrics->search_qstr, search_qstr) == 0 ) {
-    return 2;
-  } else printf("stats_counter_incr(search_qstr,%s)\n", search_qstr);
+int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str ){
+  char * qstr;
+  int length =0;
+  referer_url_t * parsed_url;
+  parsed_url = parse_referer_str( referer_str, 
+      h_metrics->num_ihosts, h_metrics->internal_hostnames,
+      h_metrics->num_shosts, h_metrics->search_hostnames );
+  if( parsed_url && parsed_url->is_internal == URL_INTERNAL ) {
+    if (stats_counter_incr( h_metrics->internref_hostnames, parsed_url->hostname) == 0 ) {
+      free_referer_url(parsed_url);
+      return 1;
+    }
+    if (stats_counter_incr( h_metrics->internref_pathstrings, parsed_url->path_str) == 0 ) {
+      free_referer_url(parsed_url);
+      return 2;
+    }
+    if (stats_counter_incr( h_metrics->internref_paramstrings, parsed_url->params_str) == 0 ) {
+      free_referer_url(parsed_url);
+      return 3;
+    }
+  }
+  else if(  parsed_url && parsed_url->is_internal == URL_EXTERNAL_NOSEARCH ){
+    if (stats_counter_incr(
+          h_metrics->referer_hostnames, parsed_url->hostname) == 0 ) {
+      free_referer_url(parsed_url);
+      return 5;
+    }
+    if (stats_counter_incr(
+          h_metrics->referer_pathstrings, parsed_url->path_str) == 0 ) {
+      free_referer_url(parsed_url);
+      return 5;
+    }
+    if (stats_counter_incr( 
+          h_metrics->referer_paramstrings, parsed_url->params_str) == 0 ) {
+      free_referer_url(parsed_url);
+      return 6;
+    }
+  }
+  else if(  parsed_url && parsed_url->is_internal == URL_SEARCH ) {
+    length = snprintf( NULL, 0, "%s:%s", parsed_url->hostname, parsed_url->params_str ) + 1;
+    qstr = (char *) malloc( length );
+    snprintf( qstr, length, "%s:%s", parsed_url->hostname, parsed_url->params_str );
+    if ( stats_counter_incr( h_metrics->search_queries, qstr) == 0 ) {
+      free_referer_url(parsed_url);
+      return 7;
+    }
+  }
+  else if(parsed_url){
+    free_referer_url(parsed_url);
+  }
   return 0;
 }
 int stats_process_hits( httpaccess_metrics *h_metrics ){
@@ -440,7 +504,9 @@ int logs_scan(httpaccess_metrics *h_metrics, char *filename) {
   else {
     if ((fp = fopen(filename, "r")) == NULL) {
       int errno;
-      h_metrics_set_error(h_metrics, "Unable to open '%s': '%s'", filename, strerror(errno));
+      h_metrics_set_error(
+          h_metrics, "Unable to open '%s': '%s'", filename,
+          strerror(errno));
       return 1;
     }
   }
@@ -511,8 +577,13 @@ unsigned long get_numeric_ip(char* addr) {
 }
 int process_logfile( char* filename ) {
   char * hostname = "atthematch.com";
-  char ** hostnames= strcpy(hostnames[0],hostname);
-  httpaccess_metrics *h_metrics = h_metrics_init( 0, 0, hostnames );
+  char ** hostnames;
+  hostnames[0]=(char*)malloc(strlen( hostname )+1);
+  strcpy(hostnames[0],hostname);
+  char **search_hostnames = (char **)malloc(sizeof(char**));
+  search_hostnames[0] = (char *)"google.com";
+  httpaccess_metrics *h_metrics = h_metrics_init(
+      0, 0, hostnames, 1, search_hostnames, 1 );
   mysql_domain_resultset_t * drs = get_real_did_uid( hostname );
   h_metrics->real_did = drs->did;
   h_metrics->uid      = drs->uid;

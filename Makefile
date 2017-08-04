@@ -27,7 +27,7 @@ htlog_uap.o:
 uap.o:
 	$(CXX) -c $(CXXFLAGS) $(DEBUG) uap.cpp
 htlog_urls.o:
-	$(CXX) -c $(CXXFLAGS) $(DEBUG) htlog_urls.c
+	$(CC) -c $(CFLAGS) $(DEBUG) htlog_urls.c
 test_progs:
 	$(MAKE) -C tests/ all
 dump_cpp_vars:
