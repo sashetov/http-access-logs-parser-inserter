@@ -31,59 +31,59 @@ httpaccess_metrics* h_metrics_init(
   h_metrics->st= h_metrics->et = time(NULL);
   h_metrics->lines_processed= 0;
   h_metrics->lines_failed   = 0;
-  h_metrics->hits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_ips = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_geo_locations = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->visits = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_ua_str = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_devices = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_oses = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_browsers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_devices_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_oses_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->client_browsers_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->page_paths = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->referer_hostnames = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->referer_pathstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->referer_paramstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->internref_hostnames = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->internref_pathstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->internref_paramstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->search_queries = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->pageviews = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->tvectors_inner = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->tvectors_inner_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->tvectors_incoming = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
-  h_metrics->tvectors_inc_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,0,NULL);
+  h_metrics->hits = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_ips = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_geo_locations = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->visits = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_ua_str = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_devices = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_oses = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_browsers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_devices_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_oses_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->client_browsers_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->page_paths = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->referer_hostnames = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->referer_pathstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->referer_paramstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->internref_hostnames = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->internref_pathstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->internref_paramstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->search_queries = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->pageviews = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->tvectors_inner = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->tvectors_inner_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->tvectors_incoming = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
+  h_metrics->tvectors_inc_per_hour = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   return h_metrics;
 }
 httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) {
   free( h_metrics->internal_hostnames );
   free( h_metrics->search_hostnames );
-  free( h_metrics->hits);
-  free( h_metrics->client_ips);
-  free( h_metrics->client_geo_locations);
-  free( h_metrics->visits);
-  free( h_metrics->client_ua_str);
-  free( h_metrics->client_devices);
-  free( h_metrics->client_oses);
-  free( h_metrics->client_browsers);
-  free( h_metrics->client_devices_vers);
-  free( h_metrics->client_oses_vers);
-  free( h_metrics->client_browsers_vers);
-  free( h_metrics->page_paths);
-  free( h_metrics->referer_hostnames);
-  free( h_metrics->referer_pathstrings);
-  free( h_metrics->referer_paramstrings);
-  free( h_metrics->internref_hostnames);
-  free( h_metrics->internref_pathstrings);
-  free( h_metrics->internref_paramstrings);
-  free( h_metrics->search_queries);
-  free( h_metrics->pageviews);
-  free( h_metrics->tvectors_inner);
-  free( h_metrics->tvectors_inner_per_hour);
-  free( h_metrics->tvectors_incoming);
-  free( h_metrics->tvectors_inc_per_hour);
+  ht_destroy( h_metrics->hits);
+  ht_destroy( h_metrics->client_ips);
+  ht_destroy( h_metrics->client_geo_locations);
+  ht_destroy( h_metrics->visits);
+  ht_destroy( h_metrics->client_ua_str);
+  ht_destroy( h_metrics->client_devices);
+  ht_destroy( h_metrics->client_oses);
+  ht_destroy( h_metrics->client_browsers);
+  ht_destroy( h_metrics->client_devices_vers);
+  ht_destroy( h_metrics->client_oses_vers);
+  ht_destroy( h_metrics->client_browsers_vers);
+  ht_destroy( h_metrics->page_paths);
+  ht_destroy( h_metrics->referer_hostnames);
+  ht_destroy( h_metrics->referer_pathstrings);
+  ht_destroy( h_metrics->referer_paramstrings);
+  ht_destroy( h_metrics->internref_hostnames);
+  ht_destroy( h_metrics->internref_pathstrings);
+  ht_destroy( h_metrics->internref_paramstrings);
+  ht_destroy( h_metrics->search_queries);
+  ht_destroy( h_metrics->pageviews);
+  ht_destroy( h_metrics->tvectors_inner);
+  ht_destroy( h_metrics->tvectors_inner_per_hour);
+  ht_destroy( h_metrics->tvectors_incoming);
+  ht_destroy( h_metrics->tvectors_inc_per_hour);
   return h_metrics;
 }
 void h_metrics_set_error(httpaccess_metrics *h_metrics, char *fmt, ...) {
@@ -196,9 +196,9 @@ int h_metrics_parse_line(logline *ll, char *l) {
   }
   *p = '\0';
   //TIME
-  if (ll->time == (time_t)-1) {
-    return 1;
-  }
+  //if (ll->time == (time_t)-1) {
+  //  return 1;
+  //}
   //DATE
   if ((p = strchr(date, ':')) == NULL) {
     return 1;
@@ -284,21 +284,29 @@ void print_logline( logline * ll ) {
 }
 int stats_counter_incr( hashtable_t *table, char* key ) {
   int val=1;
+  printf("key: '%s'\n",key);
+  if(strlen(key) == 0){
+    return val;
+  }
   if (! ht_exists(table, key, strlen(key) + 1 ) ) {
     node *n = node_init( key, 1 );
-    ht_set(table, key, strlen(key)+1, n, sizeof(node *) );
-    free(n);
+    ht_set(table, key, strlen(key)+1, n, sizeof(node));
+    printf("key: '%s'\n",key);
+    // don't free this node here as we're using ht_set not ht_set_copy
+    //free_node(n);
   }
   else {
-    node *n = (node *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(node *) );
+    node *n = (node *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(node));
     n->nval++;
     val = n->nval;
-    ht_set(table, key, strlen( key ) + 1, n, sizeof(node *));
-    free(n);
+    ht_set(table, key, strlen( key ) + 1, n, sizeof(node));
+    // don't free this node as we're using ht_set not ht_set_copy
+    //free_node(n);
   }
   return val;
 }
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
+  printf("processing user_ips \n");
   int res = stats_counter_incr( h_metrics->client_ips, user_ip );
   if (res == 0) {
     return 1;
@@ -306,6 +314,7 @@ int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
   return 0;
 }
 int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
+  printf("processing geoips \n");
   char * country_name = (char *) get_geoip_country(0, user_ip);
   int res = stats_counter_incr( h_metrics->client_geo_locations, country_name);
   if (res == 0) {
@@ -314,6 +323,7 @@ int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
   return 0;
 }
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
+  printf("processing ua \n");
   ua_t * ua_parsed = (ua_t *)parse_to_c_ua( ua_str );
   char * device_vers_template= "%s %s";
   char * os_version = get_version_string(
@@ -363,6 +373,7 @@ int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
   return 0;
 }
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
+  printf("processing page_paths \n");
   if (stats_counter_incr(
         h_metrics->page_paths, page_path) == 0) {
     return 1;
@@ -376,6 +387,7 @@ int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str 
   parsed_url = parse_referer_str( referer_str, 
       h_metrics->num_ihosts, h_metrics->internal_hostnames,
       h_metrics->num_shosts, h_metrics->search_hostnames );
+  printf("processing parsed_urls \n");
   if( parsed_url && parsed_url->is_internal == URL_INTERNAL ) {
     if (stats_counter_incr( h_metrics->internref_hostnames, parsed_url->hostname) == 0 ) {
       free_referer_url(parsed_url);
@@ -422,6 +434,7 @@ int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str 
   return 0;
 }
 int stats_process_hits( httpaccess_metrics *h_metrics ){
+  printf("processing hits \n");
   int length = snprintf( NULL, 0, "%d", h_metrics->real_did ) + 1;
   char* real_did_str = (char *)malloc( length );
   snprintf( real_did_str, length, "%d", h_metrics->real_did );
@@ -449,7 +462,7 @@ int stats_process_tvectors( httpaccess_metrics *h_metrics ){
 int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
   logline ll;
   if (h_metrics_parse_line(&ll, l) == 0) {
-    //print_logline( &ll );
+    print_logline( &ll );
     if ( stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
       goto oom;
     }
@@ -577,7 +590,7 @@ unsigned long get_numeric_ip(char* addr) {
 }
 int process_logfile( char* filename ) {
   char * hostname = "atthematch.com";
-  char ** hostnames;
+  char ** hostnames = (char **) malloc( sizeof(char *) );
   hostnames[0]=(char*)malloc(strlen( hostname )+1);
   strcpy(hostnames[0],hostname);
   char **search_hostnames = (char **)malloc(sizeof(char**));

@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 #define ERROR_MAX               100
-#define HT_ALLOC_SIZE_MAX       4048
+#define HT_ALLOC_SIZE_MAX       40480
 #define HT_ALLOC_SIZE_DEFAULT   1024
 #include <stdlib.h>
 #include <stdint.h>
@@ -13,6 +13,7 @@ typedef struct node {
 } node;
 #define __HT_NODE__
 node        *node_init ( const char *s, int val );
+void free_node( node * n);
 #ifndef __HASHTABLE_H__
 #include "hashtable.h"
 #endif

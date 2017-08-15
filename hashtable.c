@@ -277,7 +277,9 @@ static inline ht_items_list_t * ht_set_list(hashtable_t *table, uint32_t hash) {
   // NOTE: the newly created list is already locked
   return list;
 }
-static inline int ht_set_internal(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen, void **prev_data, size_t *prev_len, int copy, int inx) {
+static inline int ht_set_internal(
+    hashtable_t *table, void *key, size_t klen, void *data, size_t dlen,
+    void **prev_data, size_t *prev_len, int copy, int inx ) {
   void *prev = NULL;
   size_t plen = 0;
   if (!klen)

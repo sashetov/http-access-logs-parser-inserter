@@ -197,7 +197,7 @@ namespace {
       //std::cout<<"store.replacement.empty "<< std::boolalpha << store.replacement.empty() <<"\n";
       agent.family = !store.replacement.empty() ? 
         boost::regex_replace(
-            store.replacement, boost::regex("\\$1"), m[1].str()) : m[1];
+            store.replacement, boost::regex("\\$1"), m[1].str()) : m[1].str();
       //std::cout<<"store.replacement = "<<store.replacement<<"\n";
       //std::cout<<"m1 = "<<m[1].str()<<"\n";
       //std::cout<<"agent family = "<<agent.family<<"\n";
@@ -205,7 +205,7 @@ namespace {
       //std::cout<<"store.replacement.empty "<< std::boolalpha << store.replacement.empty() <<"\n";
       agent.family = !store.replacement.empty() ?
         boost::regex_replace(
-            store.replacement, boost::regex("\\$1"), m[0].str()) : m[0];
+            store.replacement, boost::regex("\\$1"), m[0].str()) : m[0].str();
       //std::cout<<"store.replacement = "<<store.replacement<<"\n";
       //std::cout<<"m0 = "<<m[0].str()<<"\n";
     }
