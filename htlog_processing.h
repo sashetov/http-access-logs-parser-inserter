@@ -94,6 +94,30 @@ typedef struct logline {
   struct tm tm;
 } logline;
 #define __LOG_LINE__
+#ifndef __SHARED_ARGS__
+#include <unistd.h>
+typedef struct func_args {
+  char * filename;
+  long start_line;
+  long num_lines;
+  int line_index;
+  int tid;
+//  semaphore_t * sem;
+} func_args_t;
+typedef struct shared_arg {
+  int func_id;
+  int curr_id;
+  int num_funcs;
+  httpaccess_metrics* h_metrics;
+  func_args_t **  func_args;
+} shared_arg_t;
+void * longs_scan_parallel( void * arg );
+int lines_count( char * filename );
+func_args_t * init_func_args( int tid, char * filename, long start_line, long num_lines, int locked );
+void free_func_args_t( func_args_t * arguments );
+void free_shared_args( shared_arg_t * prog_args);
+#define __SHARED_ARGS__
+#endif
 #include <stddef.h> //uint32_t
 #include <stdint.h> //uint32_t
 void print_logline_header( );

@@ -4,10 +4,7 @@
 #include <time.h>
 #endif
 #include "htlog_processing.h"
-httpaccess_metrics* h_metrics_init(
-    int real_did, int uid,
-    char ** user_hostnames, int nihosts,
-    char ** search_hostnames, int nshosts ) {
+httpaccess_metrics* h_metrics_init( int real_did, int uid, char ** user_hostnames, int nihosts, char ** search_hostnames, int nshosts ) {
   int i =0;
   httpaccess_metrics *h_metrics;
   if ((h_metrics = (httpaccess_metrics * )malloc(sizeof( httpaccess_metrics ))) == NULL) {
@@ -281,6 +278,45 @@ int h_metrics_parse_line(logline *ll, char *l) {
   ll->ref = ref;
   return 0;
 }
+int lines_count( char * filename ){
+  int i = 0;
+  int bufsize = 10000;
+  char * res = (char*) malloc( sizeof(char) * bufsize );
+  FILE * fp = fopen( filename , "r");
+  if (fp == NULL) {
+    printf("exit fail fopen\n");
+    exit(EXIT_FAILURE);
+  }
+  while( fgets( res, bufsize, fp ) ){
+    if( res != NULL ){
+      i++;
+    }
+  }
+  fclose(fp);
+  return i;
+}
+func_args_t * init_func_args( int tid, char * filename, long start_line, long num_lines, int locked ){
+  int fd;
+  func_args_t * result = (func_args_t *) malloc(sizeof(func_args_t));
+  result->tid = tid;
+  result->start_line = start_line;
+  result->line_index= start_line;
+  result->filename = strdup(filename);
+  result->num_lines = num_lines;
+  return result;
+}
+void free_func_args_t( func_args_t * arguments ){
+  free(arguments->filename);
+  free(arguments);
+}
+void free_shared_args( shared_arg_t * prog_args){
+  int i = 0;
+  h_metrics_free( prog_args->h_metrics );
+  for(i =0; i<prog_args->num_funcs; i++){
+    free_func_args_t( prog_args->func_args[i]);
+  }
+  free(prog_args->func_args);
+}
 void print_logline_header( ) {
   printf ("host|user_hostname|date|hour|timezone|req|ref|agent\n");
 }
@@ -345,50 +381,42 @@ int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
         ua_parsed->device->brand, ua_parsed->device->model) + sizeof(char));
   sprintf( device_vers , device_vers_template,
       ua_parsed->device->brand, ua_parsed->device->model);
-  if (stats_counter_incr(
-        h_metrics->client_ua_str, ua_str ) == 0) {
+  if (stats_counter_incr( h_metrics->client_ua_str, ua_str ) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 1;
   } //else printf("stats_counter_incr(client_ua_str,%s)\n", ua_str );
-  if (stats_counter_incr(
-        h_metrics->client_devices, ua_parsed->device->family ) == 0) {
+  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device->family ) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 2;
   } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
-  if (stats_counter_incr(
-        h_metrics->client_oses , ua_parsed->os->family ) == 0) {
+  if (stats_counter_incr( h_metrics->client_oses , ua_parsed->os->family ) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 3;
   } //else printf("stats_counter_incr(client_oses,%s)\n", ua_parsed->os->family);
-  if (stats_counter_incr(
-        h_metrics->client_browsers, ua_parsed->browser->family ) == 0) {
+  if (stats_counter_incr( h_metrics->client_browsers, ua_parsed->browser->family ) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 4;
   } //else printf("stats_counter_incr(client_browsers,%s)\n", ua_parsed->browser->family);
-  if (stats_counter_incr(
-        h_metrics->client_devices, ua_parsed->device->family ) == 0) {
+  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device->family ) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 5;
   } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
-  if (stats_counter_incr(
-        h_metrics->client_devices_vers, device_vers) == 0) {
+  if (stats_counter_incr( h_metrics->client_devices_vers, device_vers) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 6;
   } //else printf("stats_counter_incr(devices_vers,%s)\n", device_vers);
-  if (stats_counter_incr(
-        h_metrics->client_browsers_vers, browser_version ) == 0) {
+  if (stats_counter_incr( h_metrics->client_browsers_vers, browser_version ) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 7;
   } //else printf("stats_counter_incr(browsers_vers,%s)\n", browser_version);
-  if (stats_counter_incr(
-        h_metrics->client_oses_vers, os_version ) == 0) {
+  if (stats_counter_incr( h_metrics->client_oses_vers, os_version ) == 0) {
     free_c_ua(ua_parsed);
     free( device_vers );
     return 8;
@@ -533,38 +561,49 @@ oom:
   h_metrics_set_error(h_metrics, "Out of memory processing data");
   return 1;
 }
-int logs_scan(httpaccess_metrics *h_metrics, char *filename) {
+void * logs_scan_parallel(  void * arg ){
   FILE *fp;
+  int i = 0;
   char buf[LINE_MAX];
   int use_stdin = 0;
-  if (filename[0] == '-' && filename[1] == '\0') {
+  shared_arg_t * params = (shared_arg_t * ) arg;
+  params->curr_id++;
+  int cid = params->curr_id;
+  int fid = params->func_id;
+  if (params->func_args[cid]->filename[0] == '-' && params->func_args[cid]->filename[1] == '\0') {
     if (CONFIG_STREAM_MODE)
-      return 0;
+      pthread_exit((void*)0);
     fp = stdin;
     use_stdin = 1;
   }
-  else {
-    if ((fp = fopen(filename, "r")) == NULL) {
+  else if ((fp = fopen(params->func_args[cid]->filename, "r")) == NULL) {
       int errno;
-      h_metrics_set_error(
-          h_metrics, "Unable to open '%s': '%s'", filename,
-          strerror(errno));
-      return 1;
+      h_metrics_set_error( params->h_metrics, "Unable to open '%s': '%s'", params->func_args[cid]->filename, strerror(errno));
+      pthread_exit((void*)1);
+  }
+  i = 0;
+  while( fgets(buf, LINE_MAX, fp) != NULL  && i < params->func_args[cid]->start_line) {
+    i++;
+  }
+  i = 0;
+  while ( fgets(buf, LINE_MAX, fp) != NULL && i < params->func_args[cid]->num_lines ) {
+    i++;
+    params->func_args[cid]->line_index++;
+    //fprintf(stdout, "%d ", params->func_args[cid]->line_index);
+    if (h_metrics_process_line(params->h_metrics, buf)) {
+      fclose(fp);
+      fprintf(stderr, "%s: %s\n", params->func_args[cid]->filename, h_metrics_get_error(params->h_metrics));
+      pthread_exit((void*)2);
     }
   }
-  //print_logline_header();
-  while (fgets(buf, LINE_MAX, fp) != NULL) {
-    if (h_metrics_process_line(h_metrics, buf)) {
-      fclose(fp);
-      fprintf(stderr, "%s: %s\n", filename, h_metrics_get_error(h_metrics));
-      return 1;
-    }
+  if( params->func_id!= params->num_funcs -1 ){
+    params->func_id++;
   }
   if (!use_stdin) {
     fclose(fp);
   }
-  h_metrics->et = time(NULL);
-  return 0;
+  params->h_metrics->et = time(NULL);
+  pthread_exit((void*)0);
 }
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -618,27 +657,57 @@ unsigned long get_numeric_ip(char* addr) {
   return ipnum + octet;
 }
 int process_logfile( char* filename ) {
+  int i =0,rc;
+  int n = 40; // ideally should be num cpus
+  int lines = lines_count(filename);
+  long index = 0;
+  int remainder = lines % n;
+  int chunk_lines = lines / n;
+  long line_index = 0;
   char * hostname = "atthematch.com";
   char ** hostnames = (char **) malloc( sizeof(char *) );
-  //hostnames[0]=(char*)malloc(strlen( hostname )+1);
-  //strcpy(hostnames[0],hostname);
   hostnames[0] = strdup(hostname);
   char **search_hostnames = (char **)malloc(sizeof(char*));
   search_hostnames[0] = (char *)"google.com";
-  httpaccess_metrics *h_metrics = h_metrics_init(
-      0, 0, hostnames, 1, search_hostnames, 1 );
+  pthread_t * func_thread =  ( pthread_t *) malloc( n * sizeof(pthread_t *));
+  shared_arg_t * prog_args  = ( shared_arg_t * ) malloc( sizeof(shared_arg_t) );
+  int * retvals = (int *)malloc( n * sizeof(int));
+  prog_args->h_metrics = h_metrics_init( 0, 0, hostnames, 1, search_hostnames, 1 );
   mysql_domain_resultset_t * drs = get_real_did_uid( hostname );
-  h_metrics->real_did = drs->did;
-  h_metrics->uid      = drs->uid;
-  if ( logs_scan( h_metrics, filename ) ) {
-    char *err= h_metrics_get_error( h_metrics );
-    if( err ) {
-      fprintf(stderr, "%s\n", err);
-      exit(1);
+  prog_args->h_metrics->real_did = drs->did;
+  prog_args->h_metrics->uid      = drs->uid;
+  prog_args->num_funcs = n;
+  prog_args->func_id = 0;
+  prog_args->curr_id = -1;
+  prog_args->func_args = (func_args_t **) malloc( n * sizeof(func_args_t *));
+  for( i= 0; i < n; i++ ){
+    int num_lines = chunk_lines;
+    if( i == n -1 ){
+      num_lines += remainder;
+    }
+    prog_args->func_args[i] = init_func_args(i, filename, line_index, num_lines, 1);
+    line_index+= num_lines;
+  }
+  for( i =0; i< n; i++){
+    rc = pthread_create( &func_thread[i], NULL, logs_scan_parallel, (void*) prog_args );
+    if (rc){
+      printf("ERROR; return code from pthread_create() is %d\n", rc);
+      pthread_exit((void*)1);
     }
   }
-  insert_h_metrics( h_metrics );
-  h_metrics_free( h_metrics );
+  for( i= 0; i < n; i++ ){
+    pthread_join( func_thread[i], (void **)&retvals[i] );
+    if(retvals[i]){
+      char *err= h_metrics_get_error( prog_args->h_metrics );
+      if( err ) {
+        fprintf(stderr, "%s\n", err);
+        //pthread_exit((void*)2);
+      }
+    }
+  }
+  free(func_thread);
+  insert_h_metrics( prog_args->h_metrics );
+  free_shared_args( prog_args );
   free(hostnames[0]);
   free(hostnames);
   free(search_hostnames);

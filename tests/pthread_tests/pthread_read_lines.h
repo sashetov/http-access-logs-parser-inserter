@@ -22,12 +22,10 @@ struct semaphore {
 typedef struct semaphore semaphore_t;
 typedef struct func_args {
   char * filename;
+  long start_line;
   long num_lines;
   int line_index;
   int tid;
-  int threads_locked;
-  //pthread_cond_t wait_cond;
-  //pthread_mutex_t lock;
   semaphore_t * sem;
 } func_args_t;
 typedef struct shared_arg {
@@ -36,9 +34,9 @@ typedef struct shared_arg {
   int num_funcs;
   func_args_t **  func_args;
 } shared_arg_t;
-func_args_t * init_func_args( int tid, char * filename, long num_lines, int line_index, int locked );
-void print_shared_arg( shared_arg_t );
+func_args_t * init_func_args( int tid, char * filename, long start_line, long num_lines, int locked );
 void free_func_args_t( func_args_t * args );
+int lines_count( char * filename );
 void read_n_lines_from_file( shared_arg_t * params);
 void* func( void* params );
 #ifdef __cplusplus
