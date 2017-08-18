@@ -25,6 +25,7 @@ typedef struct sql_node {
   node * n;
   char * sql;
 } sql_node_t;
+void free_sql_node( sql_node_t * n);
 void finish_with_error( MYSQL *con );
 MYSQL * get_my_conn( char *my_hostname, char *my_user, char *my_password, char * my_db, int my_port  );
 struct mysql_domain_resultset * get_real_did_results( MYSQL * con, int possible_did );

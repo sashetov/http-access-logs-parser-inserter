@@ -36,30 +36,30 @@ typedef struct httpaccess_metrics {
   char ** internal_hostnames;
   int num_shosts;
   char ** search_hostnames;
-  hashtable_t * hits; //per hour count for all urls under this did
-  hashtable_t * client_ips;
-  hashtable_t * client_geo_locations;
-  hashtable_t * visits; //per hour distinct did,ip count
-  hashtable_t * client_ua_str;
-  hashtable_t * client_devices;
-  hashtable_t * client_oses;
-  hashtable_t * client_browsers;
-  hashtable_t * client_devices_vers;
-  hashtable_t * client_oses_vers;
-  hashtable_t * client_browsers_vers;
-  hashtable_t * page_paths;
-  hashtable_t * referer_hostnames;
-  hashtable_t * referer_pathstrings;
-  hashtable_t * referer_paramstrings;
-  hashtable_t * internref_hostnames;
-  hashtable_t * internref_pathstrings;
-  hashtable_t * internref_paramstrings;
-  hashtable_t * search_queries;
-  hashtable_t * pageviews; //per hour distinct did,ip,page_id count
-  hashtable_t * tvectors_inner;
-  hashtable_t * tvectors_inner_per_hour;
-  hashtable_t * tvectors_incoming;
-  hashtable_t * tvectors_inc_per_hour;
+  hashtable_t * client_ips;             // ip_id
+  hashtable_t * client_geo_locations;   // country_id
+  hashtable_t * client_ua_str;          // device_id, os_id, browser_id
+  hashtable_t * client_devices;         // with client_devices vers device_id 
+  hashtable_t * client_devices_vers;    // device_id
+  hashtable_t * client_oses;            // with client_oses_vers os_id
+  hashtable_t * client_oses_vers;       // os_id
+  hashtable_t * client_browsers;        // with client_browsers_vers browser_id
+  hashtable_t * client_browsers_vers;   // browser_id
+  hashtable_t * page_paths;             // page_id, needs domains_id
+  hashtable_t * referer_hostnames;      // referer_domain_id
+  hashtable_t * referer_pathstrings;    // with referer_hostnames: referer_id, referer_domain_id
+  hashtable_t * referer_paramstrings;   // with internref_hostnames, internref_pathstrings, internref_paramstrings: domain_id, page_id, url_param_id
+  hashtable_t * internref_hostnames;    // domain_id
+  hashtable_t * internref_pathstrings;  // page_id
+  hashtable_t * internref_paramstrings; // url_param_id
+  hashtable_t * search_queries;         // search_term_id
+  hashtable_t * tvectors_inner;         // needs page_id
+  hashtable_t * tvectors_inner_per_hour;// needs page_id
+  hashtable_t * tvectors_incoming;      // needs referer_id
+  hashtable_t * tvectors_inc_per_hour;  // needs referer_id
+  hashtable_t * hits;                   // needs page_id
+  hashtable_t * visits;                 // needs ip_id entities
+  hashtable_t * pageviews;              // needs page_id, ip_id
 } httpaccess_metrics;
 #define __HTTPACCESS_METRICS__
 httpaccess_metrics* h_metrics_init( int real_did, int uid,

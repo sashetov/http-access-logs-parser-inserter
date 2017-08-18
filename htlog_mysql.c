@@ -1,5 +1,9 @@
 #ifndef __HTTPACCESS_MYSQL__
 #include "htlog_mysql.h"
+void free_sql_node( sql_node_t * n ){
+  free_node( n->n );
+  free( n->sql );
+}
 void finish_with_error( MYSQL *con ) {
   fprintf(stderr, "%s\n", mysql_error(con));
   mysql_close(con);
@@ -37,6 +41,7 @@ int get_did_for_domain_name( MYSQL * con,  char * domain_name ) {
   }
   mysql_free_result(result);
   //mysql_close(con);
+  free(query);
   return did;
 }
 char ** get_domain_aliases( MYSQL * con, char * domain_name ){
@@ -57,6 +62,7 @@ char ** get_domain_aliases( MYSQL * con, char * domain_name ){
     strcpy( hostnames[i], hostname );
     i++;
   }
+  free(query);
   return hostnames;
 }
 mysql_domain_resultset_t * get_real_did_uid_from_possible( MYSQL * con, int possible_did ) {
@@ -86,6 +92,7 @@ mysql_domain_resultset_t * get_real_did_uid_from_possible( MYSQL * con, int poss
   (* results).did          = did;
   (* results).uid          = uid;
   mysql_free_result(result);
+  free(query);
   return results;
 }
 mysql_domain_resultset_t * get_real_did_uid( char * domain_name ) {
@@ -103,21 +110,21 @@ void build_ips_sql( void * arg ){
   char * ip = sqln->n->name;
   unsigned long n_ip = get_numeric_ip(ip);
   char * numstr_template = "%lu,";
-  size_t len = strlen(sqln->sql);
   char * ipnum = (char *)malloc( snprintf(NULL, 0, numstr_template, n_ip) + 1 );
   sprintf( ipnum, numstr_template, n_ip );
   sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, ipnum) + 1 );
   sprintf( sqln->sql,"%s%s", sqln->sql, ipnum);
+  free(ipnum);
 }
 void build_locations_sql( void * arg ){
   sql_node_t * sqln = (sql_node_t *)arg;
   char * country = sqln->n->name;
   char * loc_template = "\"%s\",";
-  size_t len = strlen(sqln->sql);
-  char * country_quoted= (char * )malloc( snprintf(NULL, 0, loc_template, country) + 1 );
+  char * country_quoted= (char * ) malloc( snprintf(NULL, 0, loc_template, country) + 1 );
   sprintf( country_quoted, loc_template, country );
   sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, country_quoted) + 1 );
   sprintf( sqln->sql,"%s%s", sqln->sql, country_quoted );
+  free(country_quoted);
 }
 sql_node_t * get_ips_insert_sql( httpaccess_metrics* h_metrics ){
   linked_list_t* uniq_ips = ht_get_all_keys(h_metrics->client_ips);
@@ -125,10 +132,9 @@ sql_node_t * get_ips_insert_sql( httpaccess_metrics* h_metrics ){
   char * sql_suffix = ");";
   sql_node_t * ips_sql_n= (sql_node_t *) malloc( sizeof(sql_node_t) );
   ips_sql_n->n = (node *) malloc(sizeof(node));
-  ips_sql_n->sql =  (char*) malloc(strlen(sql_prefix));
+  ips_sql_n->sql =  (char*) malloc(strlen(sql_prefix)+1);
   strcpy( ips_sql_n->sql, sql_prefix );
   iterate_all_linklist_nodes( uniq_ips, (void* (*)(void*)) build_ips_sql, ips_sql_n );
-  size_t len = strlen(ips_sql_n->sql);
   //chop off the last char
   ips_sql_n->sql[strlen(ips_sql_n->sql)-1] = '\0';
   ips_sql_n->sql= (char *)realloc( ips_sql_n->sql, strlen(ips_sql_n->sql) + 2 + 1 );
@@ -141,10 +147,9 @@ sql_node_t * get_countries_insert_sql( httpaccess_metrics* h_metrics ){
   char * sql_suffix = ");";
   sql_node_t * countries_sql_n= (sql_node_t *) malloc( sizeof(sql_node_t) );
   countries_sql_n->n = (node *) malloc(sizeof(node));
-  countries_sql_n->sql =  (char*) malloc(strlen(sql_prefix));
+  countries_sql_n->sql =  (char*) malloc(strlen(sql_prefix)+1);
   strcpy( countries_sql_n->sql, sql_prefix );
   iterate_all_linklist_nodes( uniq_locations, (void* (*)(void*)) build_locations_sql, (void *) countries_sql_n );
-  size_t len = strlen(countries_sql_n->sql);
   //chop off the last char
   countries_sql_n->sql[strlen(countries_sql_n->sql)-1] = '\0';
   countries_sql_n->sql= (char *)realloc( countries_sql_n->sql, strlen(countries_sql_n->sql) + 2 + 1 );
@@ -155,6 +160,8 @@ int insert_h_metrics( httpaccess_metrics *h_metrics ) {
   sql_node_t * ips_sql_n = get_ips_insert_sql( h_metrics );
   sql_node_t * countries_sql_n = get_countries_insert_sql( h_metrics );
   //printf("%s\n%s\n", ips_sql_n->sql, countries_sql_n->sql);
+  free_sql_node(ips_sql_n);
+  free_sql_node(countries_sql_n);
   return 0;
 }
 int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg ){
@@ -171,4 +178,5 @@ int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void *
   }
   cb((void*) sqln );
 };
+
 #endif

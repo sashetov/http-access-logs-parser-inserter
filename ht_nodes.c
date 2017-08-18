@@ -8,7 +8,7 @@ node *node_init(const char *s, int val ) {
   node *n = (node *) malloc(sizeof(node));
   if(strlen(s)){
     n->name= strdup(s);
-    printf("allocating '%s'(%d), '%s'(%d)\n",s,strlen(s),n->name,strlen(n->name));
+    //printf("allocating '%s'(%d), '%s'(%d)\n",s,strlen(s),n->name,strlen(n->name));
   }
   n->nval = val;
   return n;
@@ -16,7 +16,7 @@ node *node_init(const char *s, int val ) {
 
 void free_node( node  * n) {
   if(strlen(n->name)){
-    printf("freeing '%s', size: %d\n",n->name, strlen(n->name));
+    //printf("freeing '%s', size: %d\n",n->name, strlen(n->name));
     free(n->name);
   }
   free(n);

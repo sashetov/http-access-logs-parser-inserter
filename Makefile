@@ -33,7 +33,7 @@ test_progs:
 dump_cpp_vars:
 	gcc -dM -E - < /dev/null
 clean_local:
-	rm -rf *.o htlog_analyzer cloudstats 
+	rm -rf *.d *.o htlog_analyzer cloudstats 
 tags:
 	ctags --language-force=C *.h *.c
 clean: clean_local

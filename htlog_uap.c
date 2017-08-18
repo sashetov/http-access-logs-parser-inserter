@@ -40,6 +40,7 @@ str_container_t *** get_regex_matches(
     }
     cursor += offset;
   }
+  free(regex);
   return results;
 }
 char * get_version_string( char * major, char * minor, char * patch, char * patch_minor ){

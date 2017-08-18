@@ -54,4 +54,5 @@ void to_cstr( std::string from, char * &to );
 ua_agent_t * convert_to_cagent( Agent agent );
 ua_device_t * convert_to_cdevice( Device device );
 extern "C" ua_t * parse_to_c_ua( char * uastr );
+extern "C" void free_c_ua( ua_t * user_agent );
 #endif

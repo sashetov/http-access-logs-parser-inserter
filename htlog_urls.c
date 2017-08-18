@@ -45,8 +45,9 @@ url_params_t ** url_params_init( char * params_str, int num_params ){
   int i = 0;
   char t = '&', pt='=';
   char * cursor = params_str;
-  int * positions = (int * ) malloc(sizeof(int));
-  char ** params_strs = (char **) malloc(sizeof(char *));
+  int positions_nums = num_params == 0 ? 2 : num_params+1;
+  int * positions = (int * ) malloc(sizeof(int) * positions_nums );
+  char ** params_strs = (char **) malloc(sizeof(char *) * num_params );
   positions[0] = 0;
   cursor= strchr( cursor, t);
   while( cursor != NULL ){
@@ -69,12 +70,16 @@ url_params_t ** url_params_init( char * params_str, int num_params ){
       params[i-1]->key[substr_len-1] = '\0';
       //printf("params[%d].key=%s\n",i-1,params[i-1]->key);
       params_cursor++; //skip the = char
-      params[i-1]->value= (char *) malloc(strlen(params_cursor)+1);
-      strcpy( params[i-1]->value, params_cursor );
+      //params[i-1]->value= (char *) malloc(strlen(params_cursor)+1);
+      //strcpy( params[i-1]->value, params_cursor );
+      params[i-1]->value= strdup(params_cursor);
       //printf("params[%d].value=%s\n",i-1,params[i-1]->value);
     }
+    free( params_strs[i-1] );
     cursor = strchr(cursor + 1, t);
   }
+  free( positions );
+  free( params_strs );
   return params;
 }
 
@@ -91,12 +96,9 @@ void url_params_free( url_params_t ** params, int len ){
 referer_url_t * referer_url_init( int internal, char * hostname, char * path_str, char * params_str ){
   referer_url_t * ref = (referer_url_t *) malloc(sizeof(referer_url_t));
   ref->is_internal = internal;
-  ref->hostname = (char *) malloc( strlen(hostname) + 1);
-  strcpy( ref->hostname, hostname );
-  ref->path_str = (char *) malloc( strlen(path_str) + 1);
-  strcpy( ref->path_str, path_str );
-  ref->params_str =(char *) malloc(strlen(params_str) + 1);
-  strcpy( ref->params_str, params_str );
+  ref->hostname = strdup(hostname);
+  ref->path_str = strdup(path_str);
+  ref->params_str = strdup(params_str);
   ref->n_params = get_num_params(ref->params_str);
   ref->params = url_params_init( ref->params_str, ref->n_params);
   return ref;
@@ -133,8 +135,9 @@ referer_url_t * parse_referer_str( char * referer_str, int nih, char ** internal
         internal_host_path += strlen(internal_hostnames[i])+1;
         //printf("internal_host_path:%s\n",internal_host_path);
         internal_match = i+1; // >0 in case of first match
-        hostname = (char *) malloc( strlen( internal_hostnames[i] + 1));
-        strcpy(hostname,internal_hostnames[i]);
+        //hostname = (char *) malloc( strlen( internal_hostnames[i] )+ 1);
+        //strcpy(hostname,internal_hostnames[i]);
+        hostname = strdup(internal_hostnames[i]);
         //printf("hostname:%s\n",hostname);
         break;
       }
@@ -146,8 +149,9 @@ referer_url_t * parse_referer_str( char * referer_str, int nih, char ** internal
           search_host_path+=strlen(search_hostnames[i])+1;
           //printf("search_host_path:%s\n",search_host_path);
           search_match = i+1; // to be > 0
-          hostname = (char *) malloc( strlen( search_hostnames[i] + 1));
-          strcpy(hostname,search_hostnames[i]);
+          //hostname = (char *) malloc( strlen( search_hostnames[i] + 1));
+          //strcpy( hostname, search_hostnames[i] );
+          hostname = strdup(search_hostnames[i]);
           //printf("hostname:%s\n",hostname);
           break;
         }
@@ -193,13 +197,18 @@ referer_url_t * parse_referer_str( char * referer_str, int nih, char ** internal
     //printf("internal_match:%d search_match:%d external_match:%d\n", internal_match, search_match, external_match);
     if(internal_match) {
       ref = referer_url_init( URL_INTERNAL, hostname, (char*) internal_host_path, (char*) params_str);
+      //free(internal_host_path); // segfaults on free
     }
     else if(search_match) {
       ref = referer_url_init( URL_SEARCH, hostname, (char*)search_host_path, (char*)params_str);
+      //free(search_host_path); // munmap_chunk - invalid pointer
     }
     else if(external_match) {
       ref = referer_url_init( URL_INTERNAL, hostname, (char*)external_host_path, (char*)params_str);
+      free(external_host_path);
     }
+    free(hostname);
+    //free(params_str);  // free() - invalid pointer
   }
   return ref;
 }

@@ -58,7 +58,14 @@ httpaccess_metrics* h_metrics_init(
   return h_metrics;
 }
 httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) {
+  int i;
+  for(i = 0; i< h_metrics->num_ihosts; i++) {
+    free(h_metrics->internal_hostnames[i]);
+  }
   free( h_metrics->internal_hostnames );
+  for(i = 0; i< h_metrics->num_shosts; i++) {
+    free( h_metrics->search_hostnames[i] );
+  }
   free( h_metrics->search_hostnames );
   ht_destroy( h_metrics->hits);
   ht_destroy( h_metrics->client_ips);
@@ -284,14 +291,14 @@ void print_logline( logline * ll ) {
 }
 int stats_counter_incr( hashtable_t *table, char* key ) {
   int val=1;
-  printf("key: '%s'\n",key);
+  //printf("key: '%s'\n",key);
   if(strlen(key) == 0){
     return val;
   }
   if (! ht_exists(table, key, strlen(key) + 1 ) ) {
     node *n = node_init( key, 1 );
     ht_set(table, key, strlen(key)+1, n, sizeof(node));
-    printf("key: '%s'\n",key);
+    //printf("key: '%s'\n",key);
     // don't free this node here as we're using ht_set not ht_set_copy
     //free_node(n);
   }
@@ -306,7 +313,7 @@ int stats_counter_incr( hashtable_t *table, char* key ) {
   return val;
 }
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
-  printf("processing user_ips \n");
+  //printf("processing user_ips \n");
   int res = stats_counter_incr( h_metrics->client_ips, user_ip );
   if (res == 0) {
     return 1;
@@ -314,7 +321,7 @@ int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
   return 0;
 }
 int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
-  printf("processing geoips \n");
+  //printf("processing geoips \n");
   char * country_name = (char *) get_geoip_country(0, user_ip);
   int res = stats_counter_incr( h_metrics->client_geo_locations, country_name);
   if (res == 0) {
@@ -323,8 +330,8 @@ int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip ){
   return 0;
 }
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
-  printf("processing ua \n");
-  ua_t * ua_parsed = (ua_t *)parse_to_c_ua( ua_str );
+  //printf("processing ua \n");
+  ua_t * ua_parsed = (ua_t *) parse_to_c_ua( ua_str );
   char * device_vers_template= "%s %s";
   char * os_version = get_version_string(
       ua_parsed->os->major, ua_parsed->os->minor, ua_parsed->os->patch, "");
@@ -340,40 +347,60 @@ int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
       ua_parsed->device->brand, ua_parsed->device->model);
   if (stats_counter_incr(
         h_metrics->client_ua_str, ua_str ) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 1;
   } //else printf("stats_counter_incr(client_ua_str,%s)\n", ua_str );
   if (stats_counter_incr(
         h_metrics->client_devices, ua_parsed->device->family ) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 2;
   } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
   if (stats_counter_incr(
         h_metrics->client_oses , ua_parsed->os->family ) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 3;
   } //else printf("stats_counter_incr(client_oses,%s)\n", ua_parsed->os->family);
   if (stats_counter_incr(
         h_metrics->client_browsers, ua_parsed->browser->family ) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 4;
   } //else printf("stats_counter_incr(client_browsers,%s)\n", ua_parsed->browser->family);
   if (stats_counter_incr(
         h_metrics->client_devices, ua_parsed->device->family ) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 5;
   } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
   if (stats_counter_incr(
         h_metrics->client_devices_vers, device_vers) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 6;
   } //else printf("stats_counter_incr(devices_vers,%s)\n", device_vers);
   if (stats_counter_incr(
         h_metrics->client_browsers_vers, browser_version ) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 7;
   } //else printf("stats_counter_incr(browsers_vers,%s)\n", browser_version);
   if (stats_counter_incr(
         h_metrics->client_oses_vers, os_version ) == 0) {
+    free_c_ua(ua_parsed);
+    free( device_vers );
     return 8;
   } //else printf("stats_counter_incr(oses_vers,%s)\n", os_version);
+  free_c_ua(ua_parsed);
+  free( device_vers );
+  //free( browser_version ); // valgrind claims r_x mapped sector for these...
+  //free( os_version );
   return 0;
 }
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
-  printf("processing page_paths \n");
+  //printf("processing page_paths \n");
   if (stats_counter_incr(
         h_metrics->page_paths, page_path) == 0) {
     return 1;
@@ -387,7 +414,7 @@ int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str 
   parsed_url = parse_referer_str( referer_str, 
       h_metrics->num_ihosts, h_metrics->internal_hostnames,
       h_metrics->num_shosts, h_metrics->search_hostnames );
-  printf("processing parsed_urls \n");
+  //printf("processing parsed_urls \n");
   if( parsed_url && parsed_url->is_internal == URL_INTERNAL ) {
     if (stats_counter_incr( h_metrics->internref_hostnames, parsed_url->hostname) == 0 ) {
       free_referer_url(parsed_url);
@@ -425,8 +452,10 @@ int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str 
     snprintf( qstr, length, "%s:%s", parsed_url->hostname, parsed_url->params_str );
     if ( stats_counter_incr( h_metrics->search_queries, qstr) == 0 ) {
       free_referer_url(parsed_url);
+      free(qstr);
       return 7;
     }
+    free(qstr);
   }
   else if(parsed_url){
     free_referer_url(parsed_url);
@@ -434,7 +463,7 @@ int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str 
   return 0;
 }
 int stats_process_hits( httpaccess_metrics *h_metrics ){
-  printf("processing hits \n");
+  //printf("processing hits \n");
   int length = snprintf( NULL, 0, "%d", h_metrics->real_did ) + 1;
   char* real_did_str = (char *)malloc( length );
   snprintf( real_did_str, length, "%d", h_metrics->real_did );
@@ -462,7 +491,7 @@ int stats_process_tvectors( httpaccess_metrics *h_metrics ){
 int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
   logline ll;
   if (h_metrics_parse_line(&ll, l) == 0) {
-    print_logline( &ll );
+    //print_logline( &ll );
     if ( stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
       goto oom;
     }
@@ -591,9 +620,10 @@ unsigned long get_numeric_ip(char* addr) {
 int process_logfile( char* filename ) {
   char * hostname = "atthematch.com";
   char ** hostnames = (char **) malloc( sizeof(char *) );
-  hostnames[0]=(char*)malloc(strlen( hostname )+1);
-  strcpy(hostnames[0],hostname);
-  char **search_hostnames = (char **)malloc(sizeof(char**));
+  //hostnames[0]=(char*)malloc(strlen( hostname )+1);
+  //strcpy(hostnames[0],hostname);
+  hostnames[0] = strdup(hostname);
+  char **search_hostnames = (char **)malloc(sizeof(char*));
   search_hostnames[0] = (char *)"google.com";
   httpaccess_metrics *h_metrics = h_metrics_init(
       0, 0, hostnames, 1, search_hostnames, 1 );
@@ -609,5 +639,8 @@ int process_logfile( char* filename ) {
   }
   insert_h_metrics( h_metrics );
   h_metrics_free( h_metrics );
+  free(hostnames[0]);
+  free(hostnames);
+  free(search_hostnames);
 }
 #endif
