@@ -32,13 +32,9 @@ httpaccess_metrics* h_metrics_init( int real_did, int uid, char ** user_hostname
   h_metrics->client_ips = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->client_geo_locations = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->visits = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
-  h_metrics->client_ua_str = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->client_devices = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->client_oses = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->client_browsers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
-  h_metrics->client_devices_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
-  h_metrics->client_oses_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
-  h_metrics->client_browsers_vers = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->page_paths = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->referer_hostnames = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
   h_metrics->referer_pathstrings = ht_create(HT_ALLOC_SIZE_DEFAULT,HT_ALLOC_SIZE_MAX,NULL);
@@ -68,13 +64,9 @@ httpaccess_metrics* h_metrics_reset_hashtables( httpaccess_metrics* h_metrics ) 
   ht_destroy( h_metrics->client_ips);
   ht_destroy( h_metrics->client_geo_locations);
   ht_destroy( h_metrics->visits);
-  ht_destroy( h_metrics->client_ua_str);
   ht_destroy( h_metrics->client_devices);
   ht_destroy( h_metrics->client_oses);
   ht_destroy( h_metrics->client_browsers);
-  ht_destroy( h_metrics->client_devices_vers);
-  ht_destroy( h_metrics->client_oses_vers);
-  ht_destroy( h_metrics->client_browsers_vers);
   ht_destroy( h_metrics->page_paths);
   ht_destroy( h_metrics->referer_hostnames);
   ht_destroy( h_metrics->referer_pathstrings);
@@ -325,6 +317,17 @@ void print_logline( logline * ll ) {
       ll->host, ll->user_hostname, ll->date, ll->hour, 
       ll->timezone, ll->req, ll->ref, ll->agent);
 }
+void free_logline( logline *ll ){
+  free( ll->host );
+  free( ll->user_hostname );
+  free( ll->date);
+  free( ll->hour);
+  free( ll->timezone);
+  free( ll->req);
+  free( ll->ref);
+  free( ll->agent);
+  //free(  ll->tm);
+}
 int stats_counter_incr( hashtable_t *table, char* key ) {
   int val=1;
   //printf("key: '%s'\n",key);
@@ -333,19 +336,36 @@ int stats_counter_incr( hashtable_t *table, char* key ) {
   }
   if (! ht_exists(table, key, strlen(key) + 1 ) ) {
     node *n = node_init( key, 1 );
-    ht_set(table, key, strlen(key)+1, n, sizeof(node));
-    //printf("key: '%s'\n",key);
-    // don't free this node here as we're using ht_set not ht_set_copy
-    //free_node(n);
+    ht_set_copy(table, key, strlen(key)+1, n, sizeof(node),NULL,NULL);
+    free_node(n);
   }
   else {
     node *n = (node *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(node));
     n->nval++;
     val = n->nval;
-    ht_set(table, key, strlen( key ) + 1, n, sizeof(node));
-    // don't free this node as we're using ht_set not ht_set_copy
-    //free_node(n);
+    ht_set_copy(table, key, strlen( key ) + 1, n, sizeof(node), NULL, NULL);
+    free_node(n);
   }
+  return val;
+}
+int stats_name_version_node_incr( hashtable_t *table, char * name, char * version ) {
+  int val=1;
+  char * key_template = "%s_%s";
+  char * key = (char *) malloc( snprintf( NULL, 0, key_template, name, version) + 1);
+  sprintf( key, key_template, name, version);
+  if(strlen(version) == 0){
+    version = (char *) realloc( version, 5 );
+    version = "none";
+  }
+  if(strlen(name) == 0){
+    name = (char *) realloc( name, 5 );
+    name = "none";
+  }
+  if(strlen(key) == 0){
+    return val;
+  }
+  ht_add_nvers_to_k_nval( table, key, name, version, val );
+  free(key);
   return val;
 }
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip ){
@@ -369,68 +389,40 @@ int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str ){
   //printf("processing ua \n");
   ua_t * ua_parsed = (ua_t *) parse_to_c_ua( ua_str );
   char * device_vers_template= "%s %s";
-  char * os_version = get_version_string(
-      ua_parsed->os->major, ua_parsed->os->minor, ua_parsed->os->patch, "");
-  char * browser_version = get_version_string(
-      ua_parsed->browser->major,
-      ua_parsed->browser->minor,
-      ua_parsed->browser->patch,
-      ua_parsed->browser->patch_minor );
-  char * device_vers = (char *) malloc( snprintf( NULL, 0,
-        device_vers_template,
-        ua_parsed->device->brand, ua_parsed->device->model) + sizeof(char));
-  sprintf( device_vers , device_vers_template,
-      ua_parsed->device->brand, ua_parsed->device->model);
-  if (stats_counter_incr( h_metrics->client_ua_str, ua_str ) == 0) {
-    free_c_ua(ua_parsed);
+  char * os_version = get_version_string( ua_parsed->os->major, ua_parsed->os->minor, ua_parsed->os->patch, "");
+  char * browser_version = get_version_string( ua_parsed->browser->major, ua_parsed->browser->minor, ua_parsed->browser->patch, ua_parsed->browser->patch_minor );
+  char * device_vers = (char *) malloc( snprintf( NULL, 0, device_vers_template, ua_parsed->device->brand, ua_parsed->device->model ) + 1);
+  sprintf( device_vers, device_vers_template, ua_parsed->device->brand, ua_parsed->device->model);
+  if (stats_name_version_node_incr( h_metrics->client_devices, ua_parsed->device->family, device_vers ) == 0) {
+    free_c_ua( ua_parsed );
+    free( browser_version );
+    free( os_version );
     free( device_vers );
     return 1;
-  } //else printf("stats_counter_incr(client_ua_str,%s)\n", ua_str );
-  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device->family ) == 0) {
-    free_c_ua(ua_parsed);
+  }
+  if (stats_name_version_node_incr( h_metrics->client_oses , ua_parsed->os->family, os_version ) == 0) {
+    free_c_ua( ua_parsed );
+    free( browser_version );
+    free( os_version );
     free( device_vers );
     return 2;
-  } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
-  if (stats_counter_incr( h_metrics->client_oses , ua_parsed->os->family ) == 0) {
+  } 
+  if (stats_name_version_node_incr( h_metrics->client_browsers, ua_parsed->browser->family, browser_version ) == 0) {
     free_c_ua(ua_parsed);
+    free( browser_version );
+    free( os_version );
     free( device_vers );
     return 3;
-  } //else printf("stats_counter_incr(client_oses,%s)\n", ua_parsed->os->family);
-  if (stats_counter_incr( h_metrics->client_browsers, ua_parsed->browser->family ) == 0) {
-    free_c_ua(ua_parsed);
-    free( device_vers );
-    return 4;
-  } //else printf("stats_counter_incr(client_browsers,%s)\n", ua_parsed->browser->family);
-  if (stats_counter_incr( h_metrics->client_devices, ua_parsed->device->family ) == 0) {
-    free_c_ua(ua_parsed);
-    free( device_vers );
-    return 5;
-  } //else printf("stats_counter_incr(client_devices,%s)\n", ua_parsed->device->family);
-  if (stats_counter_incr( h_metrics->client_devices_vers, device_vers) == 0) {
-    free_c_ua(ua_parsed);
-    free( device_vers );
-    return 6;
-  } //else printf("stats_counter_incr(devices_vers,%s)\n", device_vers);
-  if (stats_counter_incr( h_metrics->client_browsers_vers, browser_version ) == 0) {
-    free_c_ua(ua_parsed);
-    free( device_vers );
-    return 7;
-  } //else printf("stats_counter_incr(browsers_vers,%s)\n", browser_version);
-  if (stats_counter_incr( h_metrics->client_oses_vers, os_version ) == 0) {
-    free_c_ua(ua_parsed);
-    free( device_vers );
-    return 8;
-  } //else printf("stats_counter_incr(oses_vers,%s)\n", os_version);
+  }
   free_c_ua(ua_parsed);
   free( device_vers );
-  //free( browser_version ); // valgrind claims r_x mapped sector for these...
-  //free( os_version );
+  free( os_version );
+  free( browser_version );
   return 0;
 }
 int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
   //printf("processing page_paths \n");
-  if (stats_counter_incr(
-        h_metrics->page_paths, page_path) == 0) {
+  if (stats_counter_incr( h_metrics->page_paths, page_path) == 0) {
     return 1;
   }// else printf("stats_counter_incr(page_paths,%s)\n", page_path);
   return 0;
@@ -438,10 +430,7 @@ int stats_process_page_paths( httpaccess_metrics *h_metrics, char *page_path ){
 int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str ){
   char * qstr;
   int length =0;
-  referer_url_t * parsed_url;
-  parsed_url = parse_referer_str( referer_str, 
-      h_metrics->num_ihosts, h_metrics->internal_hostnames,
-      h_metrics->num_shosts, h_metrics->search_hostnames );
+  referer_url_t * parsed_url=parse_referer_str( referer_str, h_metrics->num_ihosts, h_metrics->internal_hostnames, h_metrics->num_shosts, h_metrics->search_hostnames );
   //printf("processing parsed_urls \n");
   if( parsed_url && parsed_url->is_internal == URL_INTERNAL ) {
     if (stats_counter_incr( h_metrics->internref_hostnames, parsed_url->hostname) == 0 ) {
@@ -458,18 +447,15 @@ int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str 
     }
   }
   else if(  parsed_url && parsed_url->is_internal == URL_EXTERNAL_NOSEARCH ){
-    if (stats_counter_incr(
-          h_metrics->referer_hostnames, parsed_url->hostname) == 0 ) {
+    if (stats_counter_incr( h_metrics->referer_hostnames, parsed_url->hostname) == 0 ) {
+      free_referer_url(parsed_url);
+      return 4;
+    }
+    if (stats_counter_incr( h_metrics->referer_pathstrings, parsed_url->path_str) == 0 ) {
       free_referer_url(parsed_url);
       return 5;
     }
-    if (stats_counter_incr(
-          h_metrics->referer_pathstrings, parsed_url->path_str) == 0 ) {
-      free_referer_url(parsed_url);
-      return 5;
-    }
-    if (stats_counter_incr( 
-          h_metrics->referer_paramstrings, parsed_url->params_str) == 0 ) {
+    if (stats_counter_incr( h_metrics->referer_paramstrings, parsed_url->params_str) == 0 ) {
       free_referer_url(parsed_url);
       return 6;
     }
@@ -485,9 +471,7 @@ int stats_process_referer_str( httpaccess_metrics *h_metrics, char *referer_str 
     }
     free(qstr);
   }
-  else if(parsed_url){
-    free_referer_url(parsed_url);
-  }
+  free_referer_url(parsed_url);
   return 0;
 }
 int stats_process_hits( httpaccess_metrics *h_metrics ){
@@ -495,10 +479,11 @@ int stats_process_hits( httpaccess_metrics *h_metrics ){
   int length = snprintf( NULL, 0, "%d", h_metrics->real_did ) + 1;
   char* real_did_str = (char *)malloc( length );
   snprintf( real_did_str, length, "%d", h_metrics->real_did );
-  if (stats_counter_incr(
-        h_metrics->hits, real_did_str) == 0 ) {
+  if (stats_counter_incr( h_metrics->hits, real_did_str) == 0 ) {
+    free(real_did_str);
     return 1;
   }
+  free(real_did_str);
   return 0;
 }
 int stats_process_visits( httpaccess_metrics *h_metrics ){
@@ -558,6 +543,7 @@ int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
     return 0;
   }
 oom:
+  free_logline(&ll);
   h_metrics_set_error(h_metrics, "Out of memory processing data");
   return 1;
 }

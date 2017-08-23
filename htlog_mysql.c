@@ -3,6 +3,12 @@
 void free_sql_node( sql_node_t * n ){
   free_node( n->n );
   free( n->sql );
+  free( n );
+}
+void free_sql_name_vers_node( sql_name_version_node_t * n){
+  free_name_version_node(n->n);
+  free( n->sql );
+  free( n );
 }
 void finish_with_error( MYSQL *con ) {
   fprintf(stderr, "%s\n", mysql_error(con));
@@ -114,62 +120,148 @@ void build_ips_sql( void * arg ){
   sprintf( ipnum, numstr_template, n_ip );
   sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, ipnum) + 1 );
   sprintf( sqln->sql,"%s%s", sqln->sql, ipnum);
+  sqln->num_rows++;
   free(ipnum);
 }
-void build_locations_sql( void * arg ){
+void build_name_sql( void * arg ){
   sql_node_t * sqln = (sql_node_t *)arg;
-  char * country = sqln->n->name;
+  char * name = sqln->n->name;
   char * loc_template = "\"%s\",";
-  char * country_quoted= (char * ) malloc( snprintf(NULL, 0, loc_template, country) + 1 );
-  sprintf( country_quoted, loc_template, country );
-  sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, country_quoted) + 1 );
-  sprintf( sqln->sql,"%s%s", sqln->sql, country_quoted );
-  free(country_quoted);
+  char * name_quoted= (char * ) malloc( snprintf(NULL, 0, loc_template, name) + 1 );
+  sprintf( name_quoted, loc_template, name );
+  sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, name_quoted) + 1 );
+  sprintf( sqln->sql,"%s%s", sqln->sql, name_quoted );
+  sqln->num_rows++;
+  free(name_quoted);
 }
-sql_node_t * get_ips_insert_sql( httpaccess_metrics* h_metrics ){
-  linked_list_t* uniq_ips = ht_get_all_keys(h_metrics->client_ips);
-  char * sql_prefix = "INSERT INTO httpstats_clients.ips(ipv4) VALUES (";
-  char * sql_suffix = ");";
-  sql_node_t * ips_sql_n= (sql_node_t *) malloc( sizeof(sql_node_t) );
-  ips_sql_n->n = (node *) malloc(sizeof(node));
-  ips_sql_n->sql =  (char*) malloc(strlen(sql_prefix)+1);
-  strcpy( ips_sql_n->sql, sql_prefix );
-  iterate_all_linklist_nodes( uniq_ips, (void* (*)(void*)) build_ips_sql, ips_sql_n );
-  //chop off the last char
-  ips_sql_n->sql[strlen(ips_sql_n->sql)-1] = '\0';
-  ips_sql_n->sql= (char *)realloc( ips_sql_n->sql, strlen(ips_sql_n->sql) + 2 + 1 );
-  sprintf( ips_sql_n->sql,"%s%s", ips_sql_n->sql, ");");
-  return ips_sql_n;
+void build_params_sql( void * arg ){
+  int i;
+  sql_node_t * sqln = (sql_node_t *)arg;
+  char * name = sqln->n->name;
+  int num_params = get_num_params(name);
+  url_params_t ** params= url_params_init( name, num_params );
+  char * nv_template= "(\"%s\",\"%s\"),";
+  for(i = 0; i< num_params; i++){
+    if( strcmp( params[i]->key, "" ) == 0 ){
+      continue;
+    }
+    if( strcmp( params[i]->value, "" ) == 0 ){
+      continue;
+    }
+    char * kv_quoted= (char * ) malloc( snprintf( NULL, 0, nv_template, params[i]->key, params[i]->value ) + 1 );
+    sprintf( kv_quoted, nv_template, params[i]->key, params[i]->value );
+    sqln->sql= (char *) realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, kv_quoted) + 1 );
+    sprintf( sqln->sql,"%s%s", sqln->sql, kv_quoted);
+    sqln->num_rows++;
+    free(kv_quoted);
+  }
+  //url_params_free( params, num_params ); //TODO: something is fucked here
 }
-sql_node_t * get_countries_insert_sql( httpaccess_metrics* h_metrics ){
-  linked_list_t* uniq_locations = ht_get_all_keys(h_metrics->client_geo_locations);
-  char * sql_prefix = "INSERT INTO httpstats_clients.locations(name) VALUES (";
+void build_name_vers_sql( void * arg ){
+  sql_name_version_node_t * sqln = (sql_name_version_node_t *)arg;
+  char * name= sqln->n->name;
+  char * vers= sqln->n->version;
+  char * nv_template= "(\"%s\",\"%s\"),";
+  char * name_vers_quoted= (char * ) malloc( snprintf(NULL, 0, nv_template, name, vers) + 1 );
+  sprintf( name_vers_quoted, nv_template, name, vers );
+  sqln->sql= (char *)realloc( sqln->sql, snprintf(NULL,0,"%s%s",sqln->sql, name_vers_quoted) + 1 );
+  sprintf( sqln->sql,"%s%s", sqln->sql, name_vers_quoted);
+  sqln->num_rows++;
+  free(name_vers_quoted);
+}
+sql_node_t * get_name_insert_sql(hashtable_t * table, char * table_name, void * builder_func ){
+  linked_list_t* uniq_keys_ll = ht_get_all_keys( table );
+  char * sql_prefix_template = "INSERT INTO %s(name) VALUES (";
+  char * sql_prefix = (char * ) malloc(snprintf(NULL, 0, sql_prefix_template, table_name) + 1);
+  sprintf(sql_prefix, sql_prefix_template, table_name );
   char * sql_suffix = ");";
-  sql_node_t * countries_sql_n= (sql_node_t *) malloc( sizeof(sql_node_t) );
-  countries_sql_n->n = (node *) malloc(sizeof(node));
-  countries_sql_n->sql =  (char*) malloc(strlen(sql_prefix)+1);
-  strcpy( countries_sql_n->sql, sql_prefix );
-  iterate_all_linklist_nodes( uniq_locations, (void* (*)(void*)) build_locations_sql, (void *) countries_sql_n );
+  sql_node_t * sql_n= (sql_node_t *) malloc( sizeof(sql_node_t) );
+  sql_n->n = (node *) malloc(sizeof(node));
+  sql_n->sql =  (char*) malloc(strlen(sql_prefix)+1);
+  strcpy( sql_n->sql, sql_prefix );
+  int r = iterate_all_linklist_nodes( uniq_keys_ll, (void* (*)(void*)) builder_func, (void *) sql_n );
   //chop off the last char
-  countries_sql_n->sql[strlen(countries_sql_n->sql)-1] = '\0';
-  countries_sql_n->sql= (char *)realloc( countries_sql_n->sql, strlen(countries_sql_n->sql) + 2 + 1 );
-  sprintf( countries_sql_n->sql,"%s%s", countries_sql_n->sql, ");");
-  return countries_sql_n;
+  sql_n->sql[strlen(sql_n->sql)-1] = '\0';
+  sql_n->sql= (char *) realloc( sql_n->sql, strlen(sql_n->sql) + 2 + 1 );
+  sprintf( sql_n->sql, "%s%s", sql_n->sql, ");");
+  return sql_n;
+}
+sql_name_version_node_t * get_name_version_insert_sql( hashtable_t * table, char * table_name, void * builder_func ){
+  linked_list_t* uniq_keys_ll= ht_get_all_keys(table);
+  char * sql_prefix_template = "INSERT INTO %s(name,version) VALUES ";
+  char * sql_prefix = (char * ) malloc(snprintf(NULL, 0, sql_prefix_template, table_name) + 1);
+  sprintf(sql_prefix, sql_prefix_template, table_name );
+  char * sql_suffix = ";";
+  sql_name_version_node_t * sql_n = (sql_name_version_node_t *) malloc( sizeof(sql_name_version_node_t) );
+  sql_n->n = (name_version_node_t *) malloc(sizeof(name_version_node_t));
+  sql_n->sql =  (char*) malloc(strlen(sql_prefix)+1);
+  strcpy( sql_n->sql, sql_prefix );
+  iterate_all_linklist_nv_nodes( table, uniq_keys_ll, (void* (*)(void*)) builder_func, (void *) sql_n );
+  //chop off the last char
+  sql_n->sql[strlen(sql_n->sql)-1] = '\0';
+  sql_n->sql= (char *) realloc( sql_n->sql, strlen(sql_n->sql) + 1 + 1 );
+  sprintf( sql_n->sql, "%s%s", sql_n->sql, sql_suffix);
+  return sql_n;
+}
+sql_name_version_node_t * get_key_value_insert_sql( hashtable_t * table, char * table_name, void * builder_func ){
+  linked_list_t* uniq_keys_ll= ht_get_all_keys(table);
+  char * sql_prefix_template = "INSERT INTO %s(k,val) VALUES ";
+  char * sql_prefix = (char * ) malloc(snprintf(NULL, 0, sql_prefix_template, table_name) + 1);
+  sprintf(sql_prefix, sql_prefix_template, table_name );
+  char * sql_suffix = ";";
+  sql_name_version_node_t * sql_n = (sql_name_version_node_t *) malloc( sizeof(sql_name_version_node_t) );
+  sql_n->sql =  (char*) malloc(strlen(sql_prefix)+1);
+  strcpy( sql_n->sql, sql_prefix );
+  iterate_all_linklist_nv_nodes( table, uniq_keys_ll, (void* (*)(void*)) builder_func, (void *) sql_n );
+  sql_n->sql[strlen(sql_n->sql)-1] = '\0';
+  sql_n->sql= (char *) realloc( sql_n->sql, strlen(sql_n->sql) + 1 + 1 );
+  sprintf( sql_n->sql, "%s%s", sql_n->sql, sql_suffix);
+  return sql_n;
 }
 int insert_h_metrics( httpaccess_metrics *h_metrics ) {
-  sql_node_t * ips_sql_n = get_ips_insert_sql( h_metrics );
-  sql_node_t * countries_sql_n = get_countries_insert_sql( h_metrics );
-  printf("%s\n%s\n", ips_sql_n->sql, countries_sql_n->sql);
-  free_sql_node(ips_sql_n);
-  free_sql_node(countries_sql_n);
+  //sql_node_t * ips_sql_n = get_name_insert_sql( h_metrics->client_ips, "httpstats_clients.ips", (void *) build_ips_sql);
+  //sql_node_t * countries_sql_n = get_name_insert_sql( h_metrics->client_geo_locations, "httpstats_clients.locations", (void *) build_name_sql);
+  //sql_name_version_node_t * devices_sql_n = get_name_version_insert_sql( h_metrics->client_devices, "httpstats_clients.devices", (void * ) build_name_vers_sql);
+  //sql_name_version_node_t * oses_sql_n = get_name_version_insert_sql( h_metrics->client_oses, "httpstats_clients.oses",  (void * ) build_name_vers_sql);
+  //sql_name_version_node_t * browsers_sql_n = get_name_version_insert_sql( h_metrics->client_browsers, "httpstats_clients.browsers",  (void * ) build_name_vers_sql);
+  //sql_node_t * pages_sql_n = get_name_insert_sql( h_metrics->page_paths, "httpstats_pages.pages_paths", (void *) build_name_sql);
+  //sql_node_t * internref_pages_sql_n = get_name_insert_sql( h_metrics->internref_pathstrings, "httpstats_pages.pages_paths", (void *) build_name_sql);
+  //sql_node_t * ref_pages_sql_n = get_name_insert_sql( h_metrics->referer_pathstrings, "httpstats_pages.pages_paths", (void *) build_name_sql);
+  //sql_node_t * external_hostnames_sql_n = get_name_insert_sql( h_metrics->referer_hostnames, "httpstats_pages.external_domains", (void *) build_name_sql);
+  //sql_name_version_node_t * referer_params_sql_n = get_key_value_insert_sql( h_metrics->referer_paramstrings, "httpstats_pages.url_params", (void *) build_params_sql );
+  sql_name_version_node_t * internref_params_sql_n = get_key_value_insert_sql( h_metrics->internref_paramstrings, "httpstats_pages.url_params", (void *) build_params_sql );
+  //printf( "%s %d\n", ips_sql_n->sql, ips_sql_n->num_rows );
+  //printf( "%s %d\n", countries_sql_n->sql, countries_sql_n->num_rows );
+  //printf( "%s %d\n", devices_sql_n->sql, devices_sql_n->num_rows );
+  //printf( "%s %d\n", oses_sql_n->sql, oses_sql_n->num_rows );
+  //printf( "%s %d\n", browsers_sql_n->sql, browsers_sql_n->num_rows );
+  //printf( "%s %d\n", pages_sql_n->sql, pages_sql_n->num_rows );
+  //printf( "%s %d\n", ref_pages_sql_n->sql, ref_pages_sql_n->num_rows );
+  //printf( "%s %d\n", referer_params_sql_n->sql, referer_params_sql_n->num_rows );
+  printf( "%s %d\n", internref_params_sql_n->sql, internref_params_sql_n->num_rows );
+  //printf( "%s %d\n", external_hostnames_sql_n->sql, external_hostnames_sql_n->num_rows );
+  //free_sql_node(ips_sql_n);
+  //free_sql_node(countries_sql_n);
+  //free_sql_node(pages_sql_n);
+  //free_sql_node(ref_pages_sql_n);
+  //free_sql_node(external_hostnames_sql_n);
+  //free_sql_name_vers_node(referer_params_sql_n);
+  free_sql_name_vers_node(internref_params_sql_n);
+  //free_sql_name_vers_node(devices_sql_n);
+  //free_sql_name_vers_node(oses_sql_n);
   return 0;
 }
 int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void * arg ){
   int c = list_count(linkedl);
+  sql_node_t* sqln   = (sql_node_t *) arg;
+  sqln->num_rows = 0;
+  sqln->n = node_init("a",0); //empty string messes up free at later point
+  if(c == 0) {
+    return 0;
+  }
   list_entry_t* head = linkedl->head;
   list_entry_t* tail = linkedl->tail;
   list_entry_t* next = head->next;
-  sql_node_t* sqln   = (sql_node_t *) arg;
   sqln->n            = (node *) next->value;
   while( next != tail ){
     cb((void*) sqln );
@@ -177,6 +269,27 @@ int iterate_all_linklist_nodes( linked_list_t* linkedl, void *cb(void *), void *
     sqln->n = (node *) next->value;
   }
   cb((void*) sqln );
+  return c;
 };
-
+int iterate_all_linklist_nv_nodes( hashtable_t * table, linked_list_t* linkedl, void *cb(void *), void * arg ){
+  int c = list_count(linkedl);
+  sql_name_version_node_t * sqln   = (sql_name_version_node_t *) arg;
+  sqln->num_rows = 0;
+  if(c == 0) {
+    sqln->n = name_version_node_init(" "," ",0); //empty string messes up free at later point
+    return 0;
+  }
+  list_entry_t* head = linkedl->head;
+  list_entry_t* tail = linkedl->tail;
+  list_entry_t* next = head->next;
+  char * key = ((name_version_node_t *) next->value)->name;
+  sqln->n   = (name_version_node_t *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(name_version_node_t));
+  while( next != tail ){
+    cb((void*) sqln );
+    next = next->next;
+    key = ((name_version_node_t *) next->value)->name;
+    sqln->n = (name_version_node_t *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(name_version_node_t));
+  }
+  cb((void*) sqln );
+};
 #endif

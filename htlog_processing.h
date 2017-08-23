@@ -1,4 +1,7 @@
 #ifdef __cplusplus
+#ifndef __UAP__
+#include "uap.hpp"
+#endif
 extern "C" {
 #endif
 #define LINE_MAX                1000
@@ -38,13 +41,9 @@ typedef struct httpaccess_metrics {
   char ** search_hostnames;
   hashtable_t * client_ips;             // ip_id
   hashtable_t * client_geo_locations;   // country_id
-  hashtable_t * client_ua_str;          // device_id, os_id, browser_id
   hashtable_t * client_devices;         // with client_devices vers device_id 
-  hashtable_t * client_devices_vers;    // device_id
-  hashtable_t * client_oses;            // with client_oses_vers os_id
-  hashtable_t * client_oses_vers;       // os_id
-  hashtable_t * client_browsers;        // with client_browsers_vers browser_id
-  hashtable_t * client_browsers_vers;   // browser_id
+  hashtable_t * client_oses;            // os_id
+  hashtable_t * client_browsers;        // browser_id
   hashtable_t * page_paths;             // page_id, needs domains_id
   hashtable_t * referer_hostnames;      // referer_domain_id
   hashtable_t * referer_pathstrings;    // with referer_hostnames: referer_id, referer_domain_id
@@ -123,7 +122,9 @@ void free_shared_args( shared_arg_t * prog_args);
 void print_logline_header( );
 int h_metrics_parse_line( logline *ll, char *l);
 void print_logline( logline * ll );
+void free_logline( logline * ll);
 int stats_counter_incr( hashtable_t *table, char *key);
+int stats_name_version_node_incr( hashtable_t *table, char * name, char * version );
 uint32_t get_ip_by_dns( char * hostname , char* ip);
 unsigned long get_numeric_ip( char* ip );
 int process_logfile( char* filename  );

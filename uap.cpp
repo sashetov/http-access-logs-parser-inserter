@@ -319,21 +319,3 @@ ua_t * parse_to_c_ua( char * ua_cstr ) {
   user_agent->browser  = convert_to_cagent( ua.browser );
   return user_agent;
 }
-void free_c_ua( ua_t * user_agent ) {
-  free(user_agent->device->family);
-  free(user_agent->device->model);
-  free(user_agent->device->brand);
-  free(user_agent->device);
-  free(user_agent->os->family);
-  free(user_agent->os->major);
-  free(user_agent->os->minor);
-  free(user_agent->os->patch);
-  free(user_agent->os->patch_minor);
-  free(user_agent->os);
-  free(user_agent->browser->family);
-  free(user_agent->browser->major);
-  free(user_agent->browser->minor);
-  free(user_agent->browser->patch);
-  free(user_agent->browser->patch_minor);
-  free(user_agent->browser);
-}

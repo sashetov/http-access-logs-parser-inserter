@@ -26,10 +26,25 @@ void ht_destroy(hashtable_t *table);
 void* ht_get(hashtable_t *table, void *key, size_t klen, size_t *dlen);
 //@brief Check if a key exists in the hashtable @param table : A valid pointer to an hashtable_t structure @param key   : The key to use @param klen  : The length of the key @return 1 If the key exists, 0 if it doesn't exist and -1 in case of error 
 int ht_exists(hashtable_t *table, void *key, size_t klen);
-//@brief Get a copy of the value stored at a specific key @param table : A valid pointer to an hashtable_t structure @param key   : The key to use @param klen  : The length of the key @param dlen  : If not NULL, the size of the returned data will be stored at the address pointed by dlen @return The stored value if any, NULL otherwise @note The returned value is a copy (memcpy) of the stored value and the caller MUST release it using free() once done @note The copy is a simple copy done using memcpy() if the stored value is structured and requires a deep copy, then ht_get_deep_copy() should be used instead of this function 
+//@brief Get a copy of the value stored at a specific key 
+//@param table : A valid pointer to an hashtable_t structure 
+//@param key   : The key to use 
+//@param klen  : The length of the key 
+//@param dlen  : If not NULL, the size of the returned data will be stored at the address pointed by dlen 
+//@return The stored value if any, NULL otherwise 
+//@note The returned value is a copy (memcpy) of the stored value and the caller MUST release it using free() once done 
+//@note The copy is a simple copy done using memcpy() if the stored value is structured and requires a deep copy, then ht_get_deep_copy() should be used instead of this function 
 void* ht_get_copy(hashtable_t *table, void *key, size_t klen, size_t *dlen);
 typedef void *(*ht_deep_copy_callback_t)(void *data, size_t dlen, void *user);
-//@brief Get a copy of the value stored at a specific key @param table : A valid pointer to an hashtable_t structure @param key   : The key to use @param klen  : The length of the key @param dlen  : If not NULL, the size of the returned data will be stored at the address pointed by dlen @param copy_cb : The callback which will take care of deep-copying the data @param user    : A private pointer which will be passed back to the copy_cb @return The stored value if any, NULL otherwise @note The returned value is eventually created by the deep_copy callback hence the caller knows if memory will need to be disposed or not and how to fully release the structured value which has been deep copied
+//@brief Get a copy of the value stored at a specific key
+//@param table : A valid pointer to an hashtable_t structure
+//@param key   : The key to use
+//@param klen  : The length of the key
+//@param dlen  : If not NULL, the size of the returned data will be stored at the address pointed by dlen
+//@param copy_cb : The callback which will take care of deep-copying the data 
+//@param user    : A private pointer which will be passed back to the copy_cb 
+//@return The stored value if any, NULL otherwise 
+//@note The returned value is eventually created by the deep_copy callback hence the caller knows if memory will need to be disposed or not and how to fully release the structured value which has been deep copied
 void *ht_get_deep_copy(hashtable_t *table, void *key, size_t klen, size_t *dlen, ht_deep_copy_callback_t copy_cb, void *user);
 //@brief Set the value for a specific key @param table : A valid pointer to an hashtable_t structure @param key   : The key to use @param klen  : The length of the key @param data  : A pointer to the data to store @param dlen  : The size of the data @return 0 on success, -1 otherwise
 int ht_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen);
@@ -37,7 +52,16 @@ int ht_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen);
 int ht_get_and_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen, void **prev_data, size_t *prev_len);
 // @brief Get the value for a specific key or set a new value if none has been found @param table    : A valid pointer to an hashtable_t structure @param key      : The key to use @param klen     : The length of the key @param data     : A pointer to the new data to store if none is found @param dlen     : The size of the data to store @param cur_data : If not NULL, the referenced pointer will be set to point to the current data @param cur_len  : If not NULL, the size of the current data will be stored in the memory pointed by cur_len @return 0 the value new value has been set successfully;\n 1 if a value was already set;\n -1 in case of errors
 int ht_get_or_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen, void **cur_data, size_t *cur_len);
-//@brief Set the value for a specific key and returns the previous value if any.  The new value will be copied before being stored @param table : A valid pointer to an hashtable_t structure @param key   : The key to use @param klen  : The length of the key @param data  : A pointer to the data to store @param dlen  : The size of the data @param prev_data : If not NULL, the referenced pointer will be set to point to the previous data @param prev_len  : If not NULL, the size of the previous data will be stored in the memory pointed by prev_len @return The previous value if any, NULL otherwise @note If prev_data is not NULL, the previous data will not be released using the free_value callback so the caller will be responsible of releasing the previous data once done with it 
+//@brief Set the value for a specific key and returns the previous value if any.
+//The new value will be copied before being stored @param table : A valid pointer to an hashtable_t structure 
+//@param key   : The key to use 
+//@param klen  : The length of the key
+//@param data  : A pointer to the data to store
+//@param dlen  : The size of the data 
+//@param prev_data : If not NULL, the referenced pointer will be set to point to the previous data 
+//@param prev_len  : If not NULL, the size of the previous data will be stored in the memory pointed by prev_len 
+//@return The previous value if any, NULL otherwise 
+//@note If prev_data is not NULL, the previous data will not be released using the free_value callback so the caller will be responsible of releasing the previous data once done with it 
 int ht_set_copy(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen, void **prev_data, size_t *prev_len);
 //@brief Set the value for a specific key if there is no value already stored @param table : A valid pointer to an hashtable_t structure @param key   : The key to use @param klen  : The length of the key @param data  : A pointer to the data to store @param dlen  : The size of the data @return 0 on success;\n 1 if a value was already set;\n -1 in case of errors
 int ht_set_if_not_exists(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen);

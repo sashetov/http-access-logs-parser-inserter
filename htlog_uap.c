@@ -50,26 +50,43 @@ char * get_version_string( char * major, char * minor, char * patch, char * patc
   char * vt4= "%s.%s.%s.%s";
   char * version_str;
   if( strcmp( major, "" ) == 0 ){
-    return "";
+    version_str = (char *) malloc(5);
+    version_str = "none";
+    return version_str;
   }
   else if( strcmp( minor, "" ) == 0 ){
     return major;
   }
   else if( strcmp( patch, "" ) == 0 ){
-    version_str = (char *) malloc( snprintf( NULL, 0 , vt2,
-          major, minor ) + sizeof(char));
+    version_str = (char *) malloc( snprintf( NULL, 0 , vt2, major, minor ) + sizeof(char));
     sprintf( version_str, vt2, major, minor );
   }
   else if( strcmp( patch_minor, "" ) == 0 ){
-    version_str = (char *) malloc( snprintf( NULL, 0 , vt3,
-          major, minor, patch ) + sizeof(char));
+    version_str = (char *) malloc( snprintf( NULL, 0 , vt3, major, minor, patch ) + sizeof(char));
     sprintf( version_str, vt2, major, minor, patch );
   }
-  else{
-    version_str = (char *) malloc( snprintf( NULL, 0 , vt4,
-          major, minor, patch, patch_minor ) + sizeof(char));
+  else {
+    version_str = (char *) malloc( snprintf( NULL, 0 , vt4, major, minor, patch, patch_minor ) + sizeof(char));
     sprintf( version_str, vt2, major, minor, patch, patch_minor );
   }
   return version_str;
+}
+void free_c_ua( ua_t * user_agent ) {
+  free(user_agent->device->family);
+  free(user_agent->device->model);
+  free(user_agent->device->brand);
+  free(user_agent->device);
+  free(user_agent->os->family);
+  free(user_agent->os->major);
+  free(user_agent->os->minor);
+  free(user_agent->os->patch);
+  free(user_agent->os->patch_minor);
+  free(user_agent->os);
+  free(user_agent->browser->family);
+  free(user_agent->browser->major);
+  free(user_agent->browser->minor);
+  free(user_agent->browser->patch);
+  free(user_agent->browser->patch_minor);
+  free(user_agent->browser);
 }
 /*str_container_t *** matches = get_regex_matches( "___ abc123def ___ ghi456 ___", "[a-z]*([0-9]+)([a-z]*)", 3, 20 );*/

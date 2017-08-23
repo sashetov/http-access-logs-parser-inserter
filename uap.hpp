@@ -1,4 +1,7 @@
 #ifndef __UAP__
+#ifndef __HTLOG_UAP__
+#include "htlog_uap.h"
+#endif
 #include <string>
 struct Generic {
   std::string family;
@@ -33,26 +36,9 @@ class UserAgentParser {
   const std::string regexes_file_path_;
   const void* ua_store_;
 };
-extern "C" typedef struct ua_agent {
-  char * family;
-  char * major;
-  char * minor;
-  char * patch;
-  char * patch_minor;
-} ua_agent_t;
-extern "C" typedef struct ua_device {
-  char * family;
-  char * model;
-  char * brand;
-} ua_device_t;
-extern "C" typedef struct ua {
-  ua_device_t * device;
-  ua_agent_t * os;
-  ua_agent_t * browser;
-} ua_t;
-void to_cstr( std::string from, char * &to );
 ua_agent_t * convert_to_cagent( Agent agent );
 ua_device_t * convert_to_cdevice( Device device );
+void to_cstr( std::string from, char * &to );
 extern "C" ua_t * parse_to_c_ua( char * uastr );
-extern "C" void free_c_ua( ua_t * user_agent );
+#define __UAP__
 #endif
