@@ -12,23 +12,26 @@ typedef struct str_container {
 } str_container_t;
 str_container_t *** get_regex_matches( char * str, char * regex_str, size_t num_groups, size_t max_matches );
 char * get_version_string( char * major, char * minor, char * patch, char * patch_minor );
+char * get_device_version_string( char * model, char * brand);
 typedef struct ua_agent {
-  char * family;
-  char * major;
-  char * minor;
-  char * patch;
-  char * patch_minor;
+  char family[100];
+  char major[100];
+  char minor[100];
+  char patch[100];
+  char patch_minor[100];
 } ua_agent_t;
 typedef struct ua_device {
-  char * family;
-  char * model;
-  char * brand;
+  char family[100];
+  char model[100];
+  char brand[100];
 } ua_device_t;
 typedef struct ua {
   ua_device_t * device;
   ua_agent_t * os;
   ua_agent_t * browser;
 } ua_t;
+ua_agent_t * init_ua_agent( char * family, char * major, char * minor, char * patch, char * patch_minor );
+ua_device_t * init_ua_device( char * family, char * model, char * brand );
 void free_c_ua( ua_t * user_agent );
 #define __HTLOG_UAP__
 #ifdef __cplusplus

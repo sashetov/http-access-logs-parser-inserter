@@ -12,7 +12,11 @@ typedef struct _hashtable_s hashtable_t;
 //@brief Callback that, if provided, will be called to release the value resources when an item is being removed from the table
 typedef void (*ht_free_item_callback_t)(void *);
 #define HT_SIZE_MIN 128
-//@brief Create a new table descriptor @param initial_size : initial size of the table; if 0 HT_SIZE_MIN will be used as initial size @param max_size     : maximum size the table can be grown up to @param free_item_cb : the callback to use when an item needs to be released @return a newly allocated and initialized table The table will be expanded if necessary 
+//@brief Create a new table descriptor 
+//@param initial_size : initial size of the table; if 0 HT_SIZE_MIN will be used as initial size 
+//@param max_size     : maximum size the table can be grown up to 
+//@param free_item_cb : the callback to use when an item needs to be released 
+//@return a newly allocated and initialized table The table will be expanded if necessary 
 hashtable_t* ht_create(size_t initial_size, size_t max_size, ht_free_item_callback_t free_item_cb);
 //@brief Initialize a pre-allocated table descriptor This function can be used to initialize a statically defined table @return 0 on success; -1 otherwise
 int ht_init(hashtable_t *table, size_t initial_size, size_t max_size, ht_free_item_callback_t free_item_cb);
@@ -53,7 +57,8 @@ int ht_get_and_set(hashtable_t *table, void *key, size_t klen, void *data, size_
 // @brief Get the value for a specific key or set a new value if none has been found @param table    : A valid pointer to an hashtable_t structure @param key      : The key to use @param klen     : The length of the key @param data     : A pointer to the new data to store if none is found @param dlen     : The size of the data to store @param cur_data : If not NULL, the referenced pointer will be set to point to the current data @param cur_len  : If not NULL, the size of the current data will be stored in the memory pointed by cur_len @return 0 the value new value has been set successfully;\n 1 if a value was already set;\n -1 in case of errors
 int ht_get_or_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen, void **cur_data, size_t *cur_len);
 //@brief Set the value for a specific key and returns the previous value if any.
-//The new value will be copied before being stored @param table : A valid pointer to an hashtable_t structure 
+//The new value will be copied before being stored 
+//@param table : A valid pointer to an hashtable_t structure 
 //@param key   : The key to use 
 //@param klen  : The length of the key
 //@param data  : A pointer to the data to store

@@ -23,12 +23,12 @@ typedef struct mysql_domain_resultset {
 } mysql_domain_resultset_t;
 typedef struct sql_node {
   node * n;
-  char * sql;
+  char*  sql;
   int num_rows;
 } sql_node_t;
 typedef struct sql_name_version_node {
   name_version_node_t * n;
-  char * sql;
+  char* sql;
   int num_rows;
 } sql_name_version_node_t;
 void free_sql_node( sql_node_t * n);

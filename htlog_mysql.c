@@ -1,12 +1,12 @@
 #ifndef __HTTPACCESS_MYSQL__
 #include "htlog_mysql.h"
 void free_sql_node( sql_node_t * n ){
-  free_node( n->n );
+  free_node( n->n, "sql_node" );
   free( n->sql );
   free( n );
 }
 void free_sql_name_vers_node( sql_name_version_node_t * n){
-  free_name_version_node(n->n);
+  free_name_version_node(n->n, "sql_nv_node");
   free( n->sql );
   free( n );
 }
@@ -282,14 +282,21 @@ int iterate_all_linklist_nv_nodes( hashtable_t * table, linked_list_t* linkedl, 
   list_entry_t* head = linkedl->head;
   list_entry_t* tail = linkedl->tail;
   list_entry_t* next = head->next;
-  char * key = ((name_version_node_t *) next->value)->name;
-  sqln->n   = (name_version_node_t *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(name_version_node_t));
+  char * key_template = "%s_%s";
+  char * name = ((name_version_node_t *) next->value)->name;
+  char * version = ((name_version_node_t *) next->value)->version;
+  char * key = (char *) malloc( snprintf( NULL, 0, key_template, name, version) + 1);
+  sprintf( key, key_template, name, version);
+  //size_t * size = (size_t*) (sizeof(name_version_node_t) + strlen(name) + 1 + strlen(version) + 1 );
+  size_t * size = (size_t*) sizeof(name_version_node_t);
+  sqln->n   = (name_version_node_t *) ht_get( table, key, strlen( key )+1, size );
   while( next != tail ){
     cb((void*) sqln );
     next = next->next;
     key = ((name_version_node_t *) next->value)->name;
-    sqln->n = (name_version_node_t *) ht_get_copy( table, key, strlen( key )+1, (size_t*) sizeof(name_version_node_t));
+    sqln->n = (name_version_node_t *) ht_get( table, key, strlen( key )+1, size );
   }
   cb((void*) sqln );
+  free(key);
 };
 #endif

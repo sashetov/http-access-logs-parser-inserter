@@ -38,7 +38,7 @@ class UserAgentParser {
 };
 ua_agent_t * convert_to_cagent( Agent agent );
 ua_device_t * convert_to_cdevice( Device device );
-void to_cstr( std::string from, char * &to );
+void to_cstr( std::string from, char * to );
 extern "C" ua_t * parse_to_c_ua( char * uastr );
 #define __UAP__
 #endif

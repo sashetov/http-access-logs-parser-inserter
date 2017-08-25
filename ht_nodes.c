@@ -7,60 +7,61 @@
 node *node_init(const char *s, int val ) {
   node *n = (node *) malloc(sizeof(node));
   if(strlen(s)){
-    n->name= strdup(s);
-    //printf("allocating '%s'(%d), '%s'(%d)\n",s,strlen(s),n->name,strlen(n->name));
+    //n->name= strdup(s);
+    strncpy(n->name, s, strlen(s));
+    n->name[strlen(s)] = '\0';
   }
   n->nval = val;
   return n;
 }
 name_version_node_t * name_version_node_init(char *name, char *version, int val ) {
   name_version_node_t *n = (name_version_node_t *) malloc(sizeof(name_version_node_t));
-  n->name= strdup(name);
-  n->version= strdup(version);
+  strncpy(n->name, name, strlen(name));
+  n->name[strlen(name)] = '\0';
+  strncpy(n->version, version,  strlen(version));
+  n->version[strlen(version)] = '\0';
   n->nval = (size_t) val;
   return n;
 }
-void free_node( node  * n) {
-  free(n->name);
+void free_node( node  * n, char * which) {
+  //printf("which %s n->name %s addr %p &n %p\n",which ,n->name, &n->name, &n);
+  //free(n->name);
   free(n);
 }
-void free_name_version_node( name_version_node_t * n) {
-  free(n->name);
-  free(n->version);
+void free_node_cb( node  * n ) {
+  //free(n->name);
   free(n);
 }
-size_t ht_kget_nval( hashtable_t *table, const char *key ){
-  node *n = (node *) ht_get_copy( table, (void * )key , strlen(key)+1, (size_t *)sizeof( node ));
+void free_name_version_node( name_version_node_t * n, char * which ) {
+  //printf("which %s n->name %s addr %p n->version %s addr %p &n %p\n",which ,n->name, &n->name, n->version, &n->version, &n);
+  //free(n->name);
+  //free(n->version);
+  free(n);
+}
+size_t ht_kget_nval( hashtable_t *table, const char *key, char * which ){
+  //size_t * size =(size_t *)( sizeof(node) + strlen(key) +1);
+  size_t * size = ( size_t * ) sizeof(node);
+  node *n = (node *) ht_get( table, (void * )key , strlen(key)+1, size);
   if (n == NULL) {
     return -1;
   }
   int nval = n->nval;
-  free_node(n);
   return (size_t) nval;
 }
-void ht_kadd_val_to_k_nval(hashtable_t *table, const char *str, int val) {
-  if( ! ht_exists(table, str, strlen(str))){
-    node * data = (node *)node_init(str,val);
-    ht_set_copy( table, str, strlen(str)+1, data, sizeof(node),NULL,NULL );
-    free_node( data );
-  }
-  else {
-    node * n = (node *) ht_get_copy(table, str, strlen(str)+1, sizeof(node));
-    n->nval += val;
-    free_node(n);
-  }
-}
-void ht_add_nvers_to_k_nval(hashtable_t *table, char *key, char *name, char *vers, int val) {
+void ht_add_nvers_to_k_nval(
+    hashtable_t *table, char *key, char *name, char *vers, int val, char * which ) {
+  name_version_node_t * n;
+  //size_t * size =(size_t *)( sizeof(name_version_node_t) + strlen(name) +1 + strlen(vers) + 1 );
+  size_t * size = ( size_t * ) sizeof(name_version_node_t);
   if( ! ht_exists(table, key, strlen(key)+1)){
-    name_version_node_t * n= name_version_node_init(name,vers,val);
-    ht_set_copy( table, key, strlen(key)+1, n, sizeof(name_version_node_t),NULL,NULL);
-    free_name_version_node( n );
+    n = name_version_node_init(name,vers,val);
+    ht_set( table, key, strlen(key)+1, n, size);
   }
   else {
-    name_version_node_t * n = (name_version_node_t *) ht_get_copy( table, key, strlen(key)+1, sizeof(name_version_node_t));
+    n = (name_version_node_t *) ht_get( table, key, strlen(key)+1, size);
     n->nval += val;
-    ht_set_copy( table, key, strlen(key)+1, n, sizeof(name_version_node_t),NULL,NULL);
-    free_name_version_node( n );
+    ht_set( table, key, strlen(key)+1, n, size);
   }
+  //free_name_version_node( n, which );
 }
 #endif

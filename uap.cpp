@@ -181,6 +181,7 @@ namespace {
             //std::cout<<" device.model(replace_all_placeholders) "<< device.model <<"\n";
           }
         }
+        //std::cout<<"device.family: "<<device.family<<" "<<"device.brand: "<<device.brand<<" "<<"device.model: "<<device.model<<" \n";
         break;
       } else {
         device.family = "Other";
@@ -291,23 +292,25 @@ UserAgent UserAgentParser::parse(const std::string& ua) const {
   Agent browser = parse_browser_impl(ua, ua_store);
   return {device, os, browser};
 }
-void to_cstr( std::string from, char * &to){
-  to = strdup(from.c_str());
+void to_cstr( std::string from, char * to){
+  if(strlen(from.c_str())){
+    to = strdup(from.c_str());
+  } else {
+    to = strdup("");
+  }
 }
 ua_agent_t * convert_to_cagent( Agent agent ){
-  ua_agent_t * cagent = (ua_agent_t *)malloc(sizeof(ua_agent_t));
-  to_cstr( agent.family, cagent->family  );
-  to_cstr( agent.major, cagent->major );
-  to_cstr( agent.minor, cagent->minor );
-  to_cstr( agent.patch, cagent->patch );
-  to_cstr( agent.patch_minor,cagent->patch_minor );
+  ua_agent_t * cagent = init_ua_agent(
+      (char *)agent.family.c_str(),
+      (char *)agent.major.c_str(),
+      (char *)agent.minor.c_str(),
+      (char *)agent.patch.c_str(),
+      (char *)agent.patch_minor.c_str());
   return cagent;
 }
 ua_device_t * convert_to_cdevice( Device device ){
-  ua_device_t * cdevice = (ua_device_t *) malloc(sizeof(ua_device_t));
-  to_cstr( device.family, cdevice->family );
-  to_cstr( device.model, cdevice->model );
-  to_cstr( device.brand, cdevice->brand );
+  ua_device_t * cdevice = init_ua_device( 
+     (char *) device.family.c_str(), (char *)device.model.c_str(), (char *)device.brand.c_str() );
   return cdevice;
 }
 ua_t * parse_to_c_ua( char * ua_cstr ) {

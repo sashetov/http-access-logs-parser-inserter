@@ -55,7 +55,7 @@ url_params_t ** url_params_init( char * params_str, int num_params ){
   int position;
   int substr_len;
   cursor= strchr( cursor, t);
-  printf("params_str:%s num_params:%d position_nums:%d\n", params_str, num_params, positions_nums );
+  //printf("params_str:%s num_params:%d position_nums:%d\n", params_str, num_params, positions_nums );
   positions[0] = 0;
   if( cursor == NULL && num_params == 1 ){
     params_cursor = params_str;
@@ -67,10 +67,10 @@ url_params_t ** url_params_init( char * params_str, int num_params ){
       params[0]->key = (char*) malloc(substr_len);
       memcpy( params[0]->key, &params_str[0], substr_len-1);
       params[0]->key[substr_len-1] = '\0';
-      printf("params[%d].key=%s\n",0,params[0]->key);
+      //printf("params[%d].key=%s\n",0,params[0]->key);
       params_cursor++; //skip the = char
       params[0]->value= strdup(params_cursor);
-      printf("params[%d].value=%s\n",0,params[0]->value);
+      //printf("params[%d].value=%s\n",0,params[0]->value);
     }
   }
   while( cursor != NULL ){
@@ -82,7 +82,7 @@ url_params_t ** url_params_init( char * params_str, int num_params ){
     params_strs[i-1] = (char *)malloc(substr_len);
     memcpy( params_strs[i-1], &params_str[positions[i-1]], substr_len-1 );
     params_strs[i-1][substr_len -1] = '\0';
-    printf("params_strs[%d]=%s\n",(i-1),params_strs[i-1]);
+    //printf("params_strs[%d]=%s\n",(i-1),params_strs[i-1]);
     params_cursor = params_strs[i-1];
     params_cursor = strchr(params_cursor, pt);
     if( params_cursor != NULL) {
@@ -91,10 +91,10 @@ url_params_t ** url_params_init( char * params_str, int num_params ){
       params[i-1]->key = (char*) malloc(substr_len);
       memcpy( params[i-1]->key, &params_strs[i-1][0], substr_len-1);
       params[i-1]->key[substr_len-1] = '\0';
-      printf("params[%d].key=%s\n",i-1,params[i-1]->key);
+      //printf("params[%d].key=%s\n",i-1,params[i-1]->key);
       params_cursor++; //skip the = char
       params[i-1]->value= strdup(params_cursor);
-      printf("params[%d].value=%s\n",i-1,params[i-1]->value);
+      //printf("params[%d].value=%s\n",i-1,params[i-1]->value);
     }
     free( params_strs[i-1] );
     cursor = strchr( cursor + 1, t );
