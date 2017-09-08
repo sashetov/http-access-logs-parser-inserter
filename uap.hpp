@@ -9,6 +9,7 @@ struct Generic {
 struct Device : Generic {
   std::string model;
   std::string brand;
+  std::string toString() const { return model + " " + brand; };
 };
 struct Agent : Generic {
   std::string major;

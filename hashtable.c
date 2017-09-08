@@ -66,8 +66,7 @@ typedef struct _ht_collector_arg {
   linked_list_t *output;
   size_t count;
 } ht_collector_arg_t;
-static inline uint32_t ht_hash_one_at_a_time(
-    hashtable_t *table, const unsigned char *str, const ssize_t len) {
+static inline uint32_t ht_hash_one_at_a_time( hashtable_t *table, const unsigned char *str, const ssize_t len) {
   const unsigned char * const end = (const unsigned char *)str + len;
   uint32_t hash = table->seed + len;
   while (str < end) {
@@ -278,9 +277,7 @@ static inline ht_items_list_t * ht_set_list(hashtable_t *table, uint32_t hash) {
   // NOTE: the newly created list is already locked
   return list;
 }
-static inline int ht_set_internal(
-    hashtable_t *table, void *key, size_t klen, void *data, size_t dlen,
-    void **prev_data, size_t *prev_len, int copy, int inx ) {
+static inline int ht_set_internal( hashtable_t *table, void *key, size_t klen, void *data, size_t dlen, void **prev_data, size_t *prev_len, int copy, int inx ) {
   void *prev = NULL;
   size_t plen = 0;
   if (!klen)
@@ -401,8 +398,7 @@ int ht_get_and_set(hashtable_t *table, void *key, size_t klen, void *data, size_
 int ht_set_copy(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen, void **prev_data, size_t *prev_len) {
   return ht_set_internal(table, key, klen, data, dlen, prev_data, prev_len, 1, 0);
 }
-static inline int ht_call_internal(
-    hashtable_t *table, void *key, size_t klen, ht_pair_callback_t cb, void *user) {
+static inline int ht_call_internal( hashtable_t *table, void *key, size_t klen, ht_pair_callback_t cb, void *user) {
   int ret = -1;
   uint32_t hash = ht_hash_one_at_a_time(table, key, klen);
   ht_items_list_t *list  = ht_get_list(table, hash);
@@ -529,18 +525,7 @@ int ht_delete_if_equals(hashtable_t *table, void *key, size_t klen, void *match,
 int ht_exists(hashtable_t *table, void *key, size_t klen) {
   return (ht_call_internal(table, key, klen, NULL, NULL) == 0);
 }
-typedef struct {
-  void *data;
-  size_t *dlen;
-  int copy;
-  ht_deep_copy_callback_t copy_cb;
-  void *user;
-} ht_get_helper_arg_t;
-static int ht_get_helper( 
-    hashtable_t *table __attribute__ ((unused)), 
-    void *key __attribute__ ((unused)), 
-    size_t klen __attribute__ ((unused)), 
-    void **value, size_t *vlen, void *user ) {
+static int ht_get_helper( hashtable_t *table __attribute__ ((unused)), void *key __attribute__ ((unused)), size_t klen __attribute__ ((unused)), void **value, size_t *vlen, void *user ) {
   ht_get_helper_arg_t *arg = ( ht_get_helper_arg_t * ) user;
   if (arg->copy) {
     if (arg->copy_cb) {
@@ -560,9 +545,7 @@ static int ht_get_helper(
     arg->dlen = *vlen;
   return 0;
 }
-static inline void * ht_get_internal(
-    hashtable_t *table, void *key, size_t klen, size_t *dlen, int copy, 
-    ht_deep_copy_callback_t copy_cb, void *user) {
+static inline void * ht_get_internal( hashtable_t *table, void *key, size_t klen, size_t *dlen, int copy, ht_deep_copy_callback_t copy_cb, void *user) {
   ht_get_helper_arg_t arg = {
     .data = NULL,
     .dlen = dlen,

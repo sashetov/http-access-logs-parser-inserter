@@ -110,6 +110,17 @@ void h_metrics_free( httpaccess_metrics *h_metrics ) {
   h_metrics_clear_error( h_metrics );
   free( h_metrics );
 }
+void free_logline( logline * ll ){
+  free(ll->host);
+  free(ll->user_hostname);
+  free(ll->date);
+  free(ll->hour);
+  free(ll->timezone);
+  free(ll->req);
+  free(ll->ref);
+  free(ll->agent);
+  free(ll);
+}
 int h_metrics_parse_line(logline *ll, char *l) {
   char *user_hostname, *date, *hour, *timezone, *host, *agent, *req, *ref, *p;
   char *agent_start = NULL, *req_end = NULL, *ref_end = NULL;
@@ -260,14 +271,15 @@ int h_metrics_parse_line(logline *ll, char *l) {
       }
     }
   }
-  ll->host = host;
-  ll->user_hostname = user_hostname;
-  ll->date = date;
-  ll->hour = hour;
-  ll->timezone = timezone;
-  ll->agent = agent;
-  ll->req = req;
-  ll->ref = ref;
+  // need to duplicate these, as otherwise they remain in --p mmaped segment
+  ll->host = strdup(host);
+  ll->user_hostname = strdup(user_hostname);
+  ll->date = strdup(date);
+  ll->hour = strdup(hour);
+  ll->timezone = strdup(timezone);
+  ll->agent = strdup(agent);
+  ll->req = strdup(req);
+  ll->ref = strdup(ref);
   return 0;
 }
 int lines_count( char * filename ){
@@ -324,22 +336,21 @@ int stats_counter_incr( hashtable_t *table, char* key, char * which ) {
   if(strlen(key) == 0){
     return val;
   }
-  //size_t * size = (size_t *)( sizeof(node) + strlen(key) + 1);
   size_t * size = (size_t *) sizeof(node);
-  if (! ht_exists(table, key, strlen(key) + 1 ) ) {
+  if (! ht_exists(table, key, strlen(key) ) ) {
     n = node_init( key, 1 );
-    ht_set(table, key, strlen(key)+1, n, size);
-    //printf("%s node_init0 '%s' %p\n", which, n->name, &n->name);
+    printf("%s node_init0 '%s' %p\n", which, n->name, &n->name);
+    ht_set(table, key, strlen(key), n, size);
+    free_node(n, which);
   }
   else {
-    n = (node *) ht_get( table, key, strlen( key )+1, size);
+    n = (node *) ht_get( table, key, strlen( key ), size);
     //printf("%s node_init1 '%s' node_addr %u node_name_addr %u node_nval %u\n", which, n->name, &n, &n->name, &n->nval);
     n->nval++;
     val = n->nval;
-    ht_set(table, key, strlen( key ) + 1, n, size);
+    ht_set(table, key, strlen( key ), n, size);
   }
   //printf("%s before free '%s' %p\n", which,n->name, &n->name);
-  //free_node( n, which );
   return val;
 }
 int stats_name_version_node_incr( hashtable_t *table, char * name, char * version, char * which ) {
@@ -501,37 +512,39 @@ int stats_process_tvectors( httpaccess_metrics *h_metrics ){
 #endif
 #include <string.h>
 int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
-  logline ll;
-  if (h_metrics_parse_line(&ll, l) == 0) {
-    //print_logline( &ll );
-    if ( stats_process_user_ips( h_metrics, ll.user_hostname ) ) {
+  logline * ll = (logline*)malloc(sizeof(logline));
+  if (h_metrics_parse_line(ll, l) == 0) {
+    print_logline( ll );
+    if ( stats_process_user_ips( h_metrics, ll->user_hostname ) ) {
+      free_logline(ll);
       goto oom;
     }
-    if ( stats_process_geo_locations( h_metrics, ll.user_hostname ) ) {
-      goto oom;
-    }
-    if ( stats_process_ua( h_metrics, ll.agent ) ) {
-      goto oom;
-    }
-    if ( stats_process_page_paths( h_metrics, ll.req ) ) {
-      goto oom;
-    }
-    if ( stats_process_referer_str( h_metrics, ll.ref ) ) {
-      goto oom;
-    }
-    if ( stats_process_hits( h_metrics ) ) {
-      goto oom;
-    }
-    if ( stats_process_visits( h_metrics ) ) {
-      goto oom;
-    }
-    if ( stats_process_pageviews( h_metrics ) ) {
-      goto oom;
-    }
-    if ( stats_process_tvectors( h_metrics ) ) {
-      goto oom;
-    }
+   if ( stats_process_geo_locations( h_metrics, ll.user_hostname ) ) {
+     goto oom;
+   }
+   if ( stats_process_ua( h_metrics, ll.agent ) ) {
+     goto oom;
+   }
+   if ( stats_process_page_paths( h_metrics, ll.req ) ) {
+     goto oom;
+   }
+   if ( stats_process_referer_str( h_metrics, ll.ref ) ) {
+     goto oom;
+   }
+   if ( stats_process_hits( h_metrics ) ) {
+     goto oom;
+   }
+   if ( stats_process_visits( h_metrics ) ) {
+     goto oom;
+   }
+   if ( stats_process_pageviews( h_metrics ) ) {
+     goto oom;
+   }
+   if ( stats_process_tvectors( h_metrics ) ) {
+     goto oom;
+   }
     h_metrics->lines_processed++;
+    free_logline(ll);
     return 0;
   }
   else {
@@ -539,10 +552,12 @@ int h_metrics_process_line(httpaccess_metrics *h_metrics, char *l) {
     if (CONFIG_DEBUG) {
       fprintf( stderr, "Invalid line: %s\n", l);
     }
+    free_logline(ll);
     return 0;
   }
 oom:
   h_metrics_set_error(h_metrics, "Out of memory processing data");
+  free_logline(ll);
   return 1;
 }
 void * logs_scan_parallel(  void * arg ){
@@ -640,7 +655,7 @@ unsigned long get_numeric_ip(char* addr) {
   ipnum <<= 8;
   return ipnum + octet;
 }
-int process_logfile( char* filename ) {
+int pt_process_logfile( char* filename ) {
   int i =0,rc;
   int n = 1; // ideally should be num cpus
   int lines = lines_count(filename);
@@ -694,6 +709,52 @@ int process_logfile( char* filename ) {
   free_shared_args( prog_args );
   free(hostnames[0]);
   free(hostnames);
+  free(search_hostnames);
+}
+int logs_scan( httpaccess_metrics *h_metrics, char *filename){
+  FILE *fp;
+  int i = 0;
+  char buf[LINE_MAX];
+  int use_stdin = 0;
+  if ((fp = fopen(filename, "r")) == NULL) {
+      int errno;
+      h_metrics_set_error( h_metrics, "Unable to open '%s': '%s'", filename, strerror(errno));
+      pthread_exit((void*)1);
+  }
+  while ( fgets(buf, LINE_MAX, fp) != NULL ) {
+    if (h_metrics_process_line(h_metrics, buf)) {
+      fclose(fp);
+      fprintf(stderr, "%s: %s\n", filename, h_metrics_get_error(h_metrics));
+    }
+  }
+  if (!use_stdin) {
+    fclose(fp);
+  }
+  h_metrics->et = time(NULL);
+}
+int process_logfile( char * filename ){
+  int i =0,rc;
+  char * hostname = "atthematch.com";
+  char * search_hostname = "google.com";
+  char ** hostnames = (char **) malloc( sizeof(char *) );
+  hostnames[0] = strdup(hostname);
+  char **search_hostnames = (char **)malloc(sizeof(char*));
+  search_hostnames[0] = strdup(search_hostname);
+  httpaccess_metrics *h_metrics = h_metrics_init( 0, 0, hostnames, 1, search_hostnames, 1 );
+  mysql_domain_resultset_t * drs = get_real_did_uid( hostname );
+  h_metrics->real_did = drs->did;
+  h_metrics->uid      = drs->uid;
+  if( logs_scan(h_metrics, filename)){
+    char *err= h_metrics_get_error( h_metrics );
+    if( err ) {
+      fprintf(stderr, "%s\n", err);
+      exit(2);
+    }
+  }
+  //insert_h_metrics( h_metrics );
+  free(hostnames[0]);
+  free(hostnames);
+  free(search_hostnames[0]);
   free(search_hostnames);
 }
 #endif

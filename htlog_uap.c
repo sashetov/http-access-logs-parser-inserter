@@ -88,51 +88,34 @@ char * get_version_string( char * major, char * minor, char * patch, char * patc
 }
 ua_agent_t * init_ua_agent( char * family, char * major, char * minor, char * patch, char * patch_minor ){
   ua_agent_t * res = (ua_agent_t *) malloc( sizeof(ua_agent_t ) );
-  //res->family = strdup(family);
-  memcpy(res->family, family, strlen(family));
-  res->family[strlen(family)] = '\0';
-  //res->major = strdup(major);
-  memcpy(res->major, major, strlen(major));
-  res->major[strlen(major)] = '\0';
-  //res->minor = strdup(minor);
-  memcpy(res->minor, minor, strlen(minor));
-  res->minor[strlen(minor)] = '\0';
-  //res->patch = strdup(patch);
-  memcpy(res->patch, patch, strlen(patch));
-  res->patch[strlen(patch)] = '\0';
-  //res->patch_minor = strdup(patch_minor);
-  memcpy(res->patch_minor, patch_minor, strlen(patch_minor));
-  res->patch_minor[strlen(patch_minor)] = '\0';
+  res->family = strdup(family);
+  res->major = strdup(major);
+  res->minor = strdup(minor);
+  res->patch = strdup(patch);
+  res->patch_minor = strdup(patch_minor);
 }
 ua_device_t * init_ua_device( char * family, char * model, char * brand ){
   ua_device_t * res = (ua_agent_t *) malloc( sizeof(ua_device_t) );
-  //res->family = strdup(family);
-  memcpy(res->family, family, strlen(family) );
-  res->family[strlen(family)] = '\0';
-  //res->model = strdup(model);
-  memcpy(res->model, model, strlen(model) );
-  res->model[strlen(model)] = '\0';
-  //res->brand = strdup(brand);
-  memcpy(res->brand, brand, strlen(brand) );
-  res->brand[strlen(brand)] = '\0';
-
+  res->family = strdup(family);
+  res->model = strdup(model);
+  res->brand = strdup(brand);
 }
 void free_c_ua( ua_t * user_agent ) {
-  //free(user_agent->device->family);
-  //free(user_agent->device->model);
-  //free(user_agent->device->brand);
+  free(user_agent->device->family);
+  free(user_agent->device->model);
+  free(user_agent->device->brand);
   free(user_agent->device);
-  //free(user_agent->os->family);
-  //free(user_agent->os->major);
-  //free(user_agent->os->minor);
-  //free(user_agent->os->patch);
-  //free(user_agent->os->patch_minor);
+  free(user_agent->os->family);
+  free(user_agent->os->major);
+  free(user_agent->os->minor);
+  free(user_agent->os->patch);
+  free(user_agent->os->patch_minor);
   free(user_agent->os);
-  //free(user_agent->browser->family);
-  //free(user_agent->browser->major);
-  //free(user_agent->browser->minor);
-  //free(user_agent->browser->patch);
-  //free(user_agent->browser->patch_minor);
+  free(user_agent->browser->family);
+  free(user_agent->browser->major);
+  free(user_agent->browser->minor);
+  free(user_agent->browser->patch);
+  free(user_agent->browser->patch_minor);
   free(user_agent->browser);
 }
 /*str_container_t *** matches = get_regex_matches( "___ abc123def ___ ghi456 ___", "[a-z]*([0-9]+)([a-z]*)", 3, 20 );*/

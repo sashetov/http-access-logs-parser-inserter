@@ -68,7 +68,6 @@ char *h_metrics_get_error( httpaccess_metrics *h_metrics );
 void h_metrics_clear_error( httpaccess_metrics *h_metrics);
 void h_metrics_free( httpaccess_metrics *h_metrics);
 int h_metrics_process_line( httpaccess_metrics *h_metrics, char *l); 
-int logs_scan( httpaccess_metrics *h_metrics, char *filename);
 int stats_process_user_ips( httpaccess_metrics *h_metrics, char *user_ip );
 int stats_process_geo_locations( httpaccess_metrics *h_metrics, char *user_ip );
 int stats_process_ua( httpaccess_metrics *h_metrics, char *ua_str );
@@ -121,12 +120,15 @@ void free_shared_args( shared_arg_t * prog_args);
 #include <stdint.h> //uint32_t
 void print_logline_header( );
 int h_metrics_parse_line( logline *ll, char *l);
+void free_logline( logline * ll );
 void print_logline( logline * ll );
 int stats_counter_incr( hashtable_t *table, char *key, char * which );
 int stats_name_version_node_incr( hashtable_t *table, char * name, char * version, char * which );
 uint32_t get_ip_by_dns( char * hostname , char* ip);
 unsigned long get_numeric_ip( char* ip );
-int process_logfile( char* filename  );
+int pt_process_logfile( char* filename  );
+int logs_scan( httpaccess_metrics *h_metrics, char *filename);
+int process_logfile( char * filename );
 #endif
 #ifdef __cplusplus
 }

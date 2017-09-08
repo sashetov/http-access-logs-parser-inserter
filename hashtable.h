@@ -48,7 +48,8 @@ typedef void *(*ht_deep_copy_callback_t)(void *data, size_t dlen, void *user);
 //@param copy_cb : The callback which will take care of deep-copying the data 
 //@param user    : A private pointer which will be passed back to the copy_cb 
 //@return The stored value if any, NULL otherwise 
-//@note The returned value is eventually created by the deep_copy callback hence the caller knows if memory will need to be disposed or not and how to fully release the structured value which has been deep copied
+//@note The returned value is eventually created by the deep_copy callback hence the caller knows if memory
+//will need to be disposed or not and how to fully release the structured value which has been deep copied
 void *ht_get_deep_copy(hashtable_t *table, void *key, size_t klen, size_t *dlen, ht_deep_copy_callback_t copy_cb, void *user);
 //@brief Set the value for a specific key @param table : A valid pointer to an hashtable_t structure @param key   : The key to use @param klen  : The length of the key @param data  : A pointer to the data to store @param dlen  : The size of the data @return 0 on success, -1 otherwise
 int ht_set(hashtable_t *table, void *key, size_t klen, void *data, size_t dlen);
@@ -85,6 +86,13 @@ int ht_call(hashtable_t *table, void *key, size_t klen, ht_pair_callback_t cb, v
 // @brief Return the count of items actually stored in the table @param table : A valid pointer to an hashtable_t structure @return The actual item count
 size_t ht_count(hashtable_t *table);
 // use the following two functions only if the hashtable_t contains a small number of keys, use the iterators otherwise
+typedef struct {
+  void *data;
+  size_t *dlen;
+  int copy;
+  ht_deep_copy_callback_t copy_cb;
+  void *user;
+} ht_get_helper_arg_t;
 typedef struct _hashtable_key_s {
     void  *data;
     size_t len;
