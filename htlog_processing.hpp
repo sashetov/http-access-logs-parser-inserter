@@ -77,9 +77,9 @@ namespace {
     return device;
   }
   AgentStore fill_agent_store(
-    const YAML::Node& node,
-    const std::string& repl, const std::string& major_repl,
-    const std::string& minor_repl, const std::string& patch_repl) {
+      const YAML::Node& node,
+      const std::string& repl, const std::string& major_repl,
+      const std::string& minor_repl, const std::string& patch_repl) {
     AgentStore agent_store;
     //std::cout<< "======== fill agent store\n";
     assert(node.Type() == YAML::NodeType::Map);
@@ -111,10 +111,10 @@ namespace {
       const auto& user_agent_parsers = regexes["user_agent_parsers"];
       for (const YAML::Node &user_agent : user_agent_parsers) {
         AgentStore browser = fill_agent_store( user_agent,
-              "family_replacement",
-              "v1_replacement", 
-              "v2_replacement",
-              "v3_replacement" );
+            "family_replacement",
+            "v1_replacement", 
+            "v2_replacement",
+            "v3_replacement" );
         browserStore.push_back(browser);
       }
       const auto& os_parsers = regexes["os_parsers"];
@@ -311,6 +311,12 @@ typedef struct logline {
   long sizeBytes;
   int statusCode;
 } parsed_logline;
+typedef struct url_parts {
+  std::string protocol;
+  std::string hostname;
+  std::string path;
+  std::string params;
+}url_parts;
 class KeyValueContainer{
   public:
     KeyValueContainer( std::string , std::string );
@@ -349,6 +355,7 @@ class HttpAccessLogMetrics {
     template<typename T> void incrementCount( std::map<T,int>*, T );
     void processUserAgent( std::string );
     void processRefererStrings( std::string );
+    void processRequestUrl( std::string );
     std::string getCountryFromIP( std::string );
     std::vector<KeyValueContainer> parseParamsString( std::string );
   private:
@@ -385,6 +392,8 @@ class HttpAccessLogMetrics {
     std::map<std::string,int> pageviews;                    // needs page_id, ip_id
     //methods
     int getLinesNumber();
+    url_parts getUrlParts( std::string );
+    url_parts getUrlPartsFromReqURL( std::string, std::string, std::string );
 };
 HttpAccessLogMetrics::HttpAccessLogMetrics( int did, int user_id, std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ){
   st = time(NULL);
@@ -404,36 +413,30 @@ HttpAccessLogMetrics::HttpAccessLogMetrics( int did, int user_id, std::vector<st
 HttpAccessLogMetrics::~HttpAccessLogMetrics(){
 }
 int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, long startLine ){
+  std::cout<<"threadNumber "<<threadNumber<<" linesNumber "<<linesNumber<<" startLine "<<startLine<<"\n";
   std::ifstream statsFile;
   int i = 0;
   std::string line;
   try {
     statsFile.exceptions( std::ifstream::badbit | std::ifstream::failbit);
-    /*std::string threadLogString = "./logs/thread-"+std::to_string(threadNumber)+".log";
-    std::ofstream threadLogFile;
-    threadLogFile.open(threadLogString);
-    threadLogFile
-      <<"threadNumber:"<<threadNumber<<"\n"
-      <<"linesNumber:"<<linesNumber<<"\n"
-      <<"startLine:"<<startLine<<"\n";*/
-    // don't use [] operator to check for \0, as it will segfault sometimes... ( BU WHYYYYYYYYY?)
+    statsFile.open(filename);
+    // don't use [] operator to check for \0 - segfaults for some reason..
     if (filename == "-") {
       return 1;
     }
-    statsFile.open(filename);
     while (std::getline(statsFile, line) && i < startLine ) { 
       i++;
     }
     i=0;
     while (!statsFile.eof() && i < linesNumber){
-      std::getline(statsFile, line);
-      //threadLogFile<<"tid:"<<tid<<" "<<filename<<":"<<(i+startLine)<<"\n"<<line;
       parsed_logline ll;
+      std::getline(statsFile, line);
       if (parseLine(line,ll) == 0) {
         incrementCount( &client_ips, ll.userIP);
         incrementCount( &client_geo_locations, getCountryFromIP(ll.userIPStr));
         processUserAgent( ll.agent );
         processRefererStrings( ll.referrer );
+        processRequestUrl(ll.requestURL);
         lines_processed++;
       }
       else {
@@ -443,18 +446,14 @@ int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, l
       i++;
     }
     statsFile.close();
-  } catch (std::exception e) {
-    if( !statsFile.eof()){
-      std::cerr
-        << "Exception opening/reading "
-        <<filename<<":"
-        <<i+startLine<<"\n"
-        <<line<<"\n";
-      return 3;
+    //threadLogFile.close();
+  } catch (const std::exception& e) {
+    if(!statsFile.eof()){
+      std::cout<<"caught exception: "<<e.what()<<"\n";
     }
+    return 6;
   }
   et = time(NULL);
-  //threadLogFile.close();
   return 0;
 }
 int HttpAccessLogMetrics::getLinesNumber(){
@@ -487,6 +486,19 @@ void HttpAccessLogMetrics::parseLogFile( int numThreads ){
   for( i =0; i< numThreads; i++){
     threads[i]->join();
   }
+  std::cout<<"client_ips "<<client_ips.size()<<"\n";
+  std::cout<<"client_geo_locations "<<client_geo_locations.size()<<"\n";
+  std::cout<<"client_devices "<<client_devices.size()<<"\n";
+  std::cout<<"client_oses "<<client_oses.size()<<"\n";
+  std::cout<<"client_browsers "<<client_browsers.size()<<"\n";
+  std::cout<<"page_paths "<<page_paths.size()<<"\n";
+  std::cout<<"referer_hostnames "<<referer_hostnames.size()<<"\n";
+  std::cout<<"referer_pathstrings "<<referer_pathstrings.size()<<"\n";
+  std::cout<<"referer_params "<<referer_params.size()<<"\n";
+  std::cout<<"internref_hostnames "<<internal_hostnames.size()<<"\n";
+  std::cout<<"internref_pathstrings "<<internref_pathstrings.size()<<"\n";
+  std::cout<<"internref_params "<<internref_params.size()<<"\n";
+  std::cout<<"search_queries "<<search_queries.size()<<"\n";
 }
 unsigned long HttpAccessLogMetrics::getNumericIp( std::string addr ){
   uint32_t nbo_addr = inet_addr(addr.c_str());//address in network byte order
@@ -522,7 +534,7 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
       uaCursor0, uaCursor1,
       statusCursor0, statusCursor1,
       sizeCursor0, sizeCursor1
-      ;
+        ;
   //char *agent_start = NULL, *req_end = NULL, *ref_end = NULL;
   int agentIndex = 0, reqEnd = 0, refEnd = 0, agentWithoutParentheses= 0;
   //USER IP
@@ -681,15 +693,13 @@ std::vector<KeyValueContainer> HttpAccessLogMetrics::parseParamsString( std::str
   }
   return results;
 }
-void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
-  std::vector<std::string>::iterator it;
-  std::vector<KeyValueContainer>::iterator params_it;
-  int hostname_type= 0; // 0 nothing found, 1 found internal ref, 2 found external ref, 3 found search ref
-  std::string path_noproto, hostname, page_path, params_str;
-  std::vector<KeyValueContainer> params;
-  std::size_t found = referer.find("://");
+url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string ){
+  url_parts result;
+  std::string proto,path_noproto,hostname,page_path,params_str;
+  std::size_t found = url_string.find("://");
   if(found !=-1){
-    path_noproto = referer.substr(found+3, referer.length()-found);
+    proto = url_string.substr(0,found);
+    path_noproto = url_string.substr(found+3, url_string.length()-found);
   }
   else {
     path_noproto = "";
@@ -701,16 +711,48 @@ void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
     hostname = path_noproto;
     page_path = "";
   }
-  else{
+  else {
     hostname = path_noproto.substr(0,found);
     page_path = path_noproto.substr(found+1, path_noproto.length() - found );
   }
   found = page_path.find("?");
   if(found != -1){
     params_str = page_path.substr(found+1, page_path.length() - found);
+    page_path = page_path.substr(0, found);
   }
+  result.protocol = proto;
+  result.hostname = hostname;
+  result.params = params_str;
+  result.path = page_path;
+  return result;
+}
+url_parts HttpAccessLogMetrics::getUrlPartsFromReqURL( std::string requestURL, std::string proto, std::string hostname ){
+  url_parts result;
+  std::string page_path, params_str;
+  result.protocol = proto;
+  result.hostname = hostname;
+  std::size_t found = requestURL.find("?");
+  if(found != -1){
+    params_str = requestURL.substr(found+1, (requestURL.length()-found-1));
+    page_path = requestURL.substr(0, found);
+  }
+  else{
+    params_str = "";
+    page_path = requestURL;
+  }
+  result.params = params_str;
+  result.path = page_path;
+  return result;
+}
+void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
+  std::vector<std::string>::iterator it;
+  std::vector<KeyValueContainer>::iterator params_it;
+  int hostname_type= 0; // 0 nothing found, 1 found internal ref, 2 found external ref, 3 found search ref
+  url_parts url_parsed = getUrlParts( referer );
+  std::vector<KeyValueContainer> params;
+  std::string hostname;
   for (  it = internal_hostnames.begin(); it != internal_hostnames.end(); it++ ) {
-    if( hostname == *it){
+    if( url_parsed.hostname == *it){
       hostname_type = 1;
       break;
     }
@@ -719,43 +761,43 @@ void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
     }
   }
   for (  it = search_hostnames.begin(); it != search_hostnames.end(); it++ ) {
-    if( hostname == *it ){
+    if( url_parsed.hostname == *it ){
       hostname_type = 3;
       break;
     }
   }
-  if(params_str.length() > 0 ) {
-     params = parseParamsString( params_str );
+  if(url_parsed.params.length() > 0 ) {
+    params = parseParamsString( url_parsed.params );
   }
   if(hostname_type == 1 ) {
-    if( hostname.length() > 0 ) {
-      //std::cout<<"internref_hostname '"<<hostname<<"'\n";
-      incrementCount(&internref_hostnames, hostname);
+    if( url_parsed.hostname.length() > 0 ) {
+      //std::cout<<"internref_hostname '"<<url_parsed.hostname<<"'\n";
+      incrementCount(&internref_hostnames, url_parsed.hostname);
     }
-    if( page_path.length() > 0 ) {
-      //std::cout<<"internref_pathstring: '"<<page_path<<"'\n";
-      incrementCount(&internref_pathstrings, page_path);
+    if( url_parsed.path.length() > 0 ) {
+      //std::cout<<"internref_pathstring: '"<<url_parsed.path<<"'\n";
+      incrementCount(&internref_pathstrings, url_parsed.path );
     }
-    if( params_str.length() > 0) {
-      //std::cout<<"internref_paramstring: '"<<params_str<<"'\n";
+    if( url_parsed.params.length() > 0) {
+      //std::cout<<"internref_paramstring: '"<<url_parsed.params<<"'\n";
       for (  params_it = params.begin() ; params_it != params.end(); params_it++){
-        std::cout<<"internref_param key '"<<(*params_it).getKey()<<"'\n";
-        std::cout<<"internref_param value '"<<(*params_it).getValue()<<"'\n";
+        //std::cout<<"internref_param key '"<<(*params_it).getKey()<<"'\n";
+        //std::cout<<"internref_param value '"<<(*params_it).getValue()<<"'\n";
         incrementCount(&internref_params, (*params_it));
       }
     }
   }
   else if(hostname_type == 2 ) {
-    if( hostname.length() > 0 ) {
-      //std::cout<<"referer_hostname '"<<hostname<<"'\n";
-      incrementCount(&referer_hostnames, hostname);
+    if( url_parsed.hostname.length() > 0 ) {
+      //std::cout<<"referer_hostname '"<<url_parsed.hostname<<"'\n";
+      incrementCount(&referer_hostnames, url_parsed.hostname);
     }
-    if( page_path.length() > 0 ) {
-      //std::cout<<"referer_pathstring: '"<<page_path<<"'\n";
-      incrementCount(&referer_pathstrings, page_path);
+    if( url_parsed.path.length() > 0 ) {
+      //std::cout<<"referer_pathstring: '"<<url_parsed.path<<"'\n";
+      incrementCount(&referer_pathstrings, url_parsed.path);
     }
-    if( params_str.length() > 0) {
-      //std::cout<<"referer_paramstring: '"<<params_str<<"'\n";
+    if( url_parsed.params.length() > 0) {
+      //std::cout<<"referer_paramstring: '"<<url_parsed.params<<"'\n";
       for( params_it = params.begin(); params_it!=params.end(); params_it++){
         //std::cout<<"referer_param key '"<<(*params_it).getKey()<<"'\n";
         //std::cout<<"referer_param value '"<<(*params_it).getValue()<<"'\n";
@@ -773,4 +815,21 @@ void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
     }
   }
 }
-
+void HttpAccessLogMetrics::processRequestUrl( std::string requestURL ){
+  std::vector<KeyValueContainer> params;
+  std::vector<KeyValueContainer>::iterator params_it;
+  url_parts url_parsed = getUrlPartsFromReqURL( requestURL, "http", internal_hostnames[0] );
+  if( url_parsed.path.length()> 0){
+    incrementCount(&page_paths, url_parsed.path);
+    incrementCount(&internref_pathstrings, url_parsed.path);
+  }
+  if( url_parsed.hostname.length()>0){
+    incrementCount(&internref_hostnames, url_parsed.hostname);
+  }
+  if(url_parsed.params.length() > 0 ) {
+    params = parseParamsString( url_parsed.params );
+    for( params_it = params.begin(); params_it!=params.end(); params_it++){
+      incrementCount(&internref_params, (*params_it));
+    }
+  }
+}

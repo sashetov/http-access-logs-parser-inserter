@@ -17,7 +17,7 @@ test_progs:
 dump_cpp_vars:
 	gcc -dM -E - < /dev/null
 clean_local:
-	rm -rf *.d *.o *.so *.a cloudstats logs/*
+	rm -rf *.d *.o *.so *.a cloudstats logs/* core.*
 tags:
 	ctags --language-force=C *.h *.c
 clean: clean_local

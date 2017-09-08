@@ -20,6 +20,6 @@ int main(int argc, char** argv) {
   filename = std::string(argv[1]);
   std::cout<<"logfile: "<<filename<<"\n";
   HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(0,0,user_hostnames,search_hosts,filename);
-  hMetrics.parseLogFile(40);
+  hMetrics.parseLogFile(4);
   return 0;
 }
