@@ -1,9 +1,7 @@
 #include "htlog_processing.hpp"
-//HALM
-HttpAccessLogMetrics::HttpAccessLogMetrics( int did, int user_id, std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ){
+//PUBLIC
+HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ): lm(MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD){
   st = time(NULL);
-  real_did = did;
-  uid = user_id;
   int i =0;
   lines_failed=0;
   lines_processed=0;
@@ -13,6 +11,8 @@ HttpAccessLogMetrics::HttpAccessLogMetrics( int did, int user_id, std::vector<st
   for( i =0; i< (int)search_hosts.size(); i++){
     search_hostnames.push_back( search_hosts[i]);
   }
+  real_did = lm.getDomainsId(internal_hostnames[0]);
+  uid = lm.getUserId(real_did);
   filename = file;
 }
 HttpAccessLogMetrics::~HttpAccessLogMetrics(){
@@ -60,15 +60,6 @@ int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, l
   }
   et = time(NULL);
   return 0;
-}
-int HttpAccessLogMetrics::getLinesNumber(){
-  int i =0;
-  std::string line;
-  std::ifstream statsFile(filename);
-  while(std::getline(statsFile, line)){
-    i++;
-  }
-  return i;
 }
 void HttpAccessLogMetrics::parseLogFile( int numThreads ){
   int i =0;
@@ -123,11 +114,11 @@ void HttpAccessLogMetrics::parseLogFile( int numThreads ){
       int count = str_it->second;
       std::cout<<"client_browsers: "<<key<<" count: "<<count<<"\n";
   }
-  std::cout<<"page_paths "<<page_paths.size()<<"\n";
-  for( str_it = page_paths.begin(); str_it!=page_paths.end(); str_it++){
+  std::cout<<"page_paths_full "<<page_paths_full.size()<<"\n";
+  for( str_it = page_paths_full.begin(); str_it!=page_paths_full.end(); str_it++){
       std::string key = str_it->first;
       int count = str_it->second;
-      std::cout<<"page_paths: "<<key<<" count: "<<count<<"\n";
+      std::cout<<"page_paths_full: "<<key<<" count: "<<count<<"\n";
   }
   std::cout<<"referer_hostnames "<<referer_hostnames.size()<<"\n";
   for( str_it = referer_hostnames.begin(); str_it!=referer_hostnames.end(); str_it++){
@@ -392,6 +383,30 @@ std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::strin
   }
   return results;
 }
+void HttpAccessLogMetrics::insertClientIps(){
+  lm.insertClientIps( client_ips_ids, client_ips );
+}
+std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){
+  return client_ips;
+}
+void HttpAccessLogMetrics::printClientIpsIpds(){
+  std::map<unsigned long,int>::iterator ul_it;
+  for( ul_it = client_ips_ids.begin(); ul_it!=client_ips_ids.end(); ul_it++){
+    std::string ip = getStringIP(ul_it->first);
+    int id = ul_it->second;
+    std::cout<<ip<<":"<<id<<"\n";
+  }
+}
+//PRIVATE
+int HttpAccessLogMetrics::getLinesNumber(){
+  int i =0;
+  std::string line;
+  std::ifstream statsFile(filename);
+  while(std::getline(statsFile, line)){
+    i++;
+  }
+  return i;
+}
 url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string ){
   url_parts result;
   std::string proto,path_noproto,hostname,page_path,params_str;
@@ -527,7 +542,7 @@ void HttpAccessLogMetrics::processRequestUrl( std::string requestURL ){
   url_parts url_parsed = getUrlPartsFromReqURL( requestURL, "http", internal_hostnames[0] );
   int hostname_type = 1;
   if( url_parsed.path.length()> 0){
-    incrementCount(&page_paths, url_parsed.path);
+    incrementCount(&page_paths_full, requestURL);
     incrementCount(&internref_pathstrings, url_parsed.path);
   }
   if( url_parsed.hostname.length()>0){

@@ -11,8 +11,11 @@ int main(int argc, char** argv) {
   search_hosts.push_back("www.google.com");
   search_hosts.push_back("google.com");
   search_hosts.push_back("google.co.uk");
+  search_hosts.push_back("www.google.co.uk");
   search_hosts.push_back("google.co.in");
+  search_hosts.push_back("www.google.co.in");
   search_hosts.push_back("bing.com");
+  search_hosts.push_back("www.bing.com");
   std::string filename;
   int minargc=2;
   if( argc < minargc ) {
@@ -22,7 +25,9 @@ int main(int argc, char** argv) {
   }
   filename = std::string(argv[1]);
   std::cout<<"logfile: "<<filename<<"\n";
-  HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(0,0,user_hostnames,search_hosts,filename);
+  HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(user_hostnames,search_hosts,filename);
   hMetrics.parseLogFile(4);
+  hMetrics.insertClientIps();
+  hMetrics.printClientIpsIpds();
   return 0;
 }

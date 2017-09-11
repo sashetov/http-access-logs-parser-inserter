@@ -11,6 +11,11 @@
 #include <string>
 #include "htlog_uap.hpp"
 #include "htlog_containers.hpp"
+#include "htlog_mysql.hpp"
+#define MYSQL_HOSTNAME "185.52.26.79"
+#define MYSQL_PORT 3308
+#define MYSQL_USER "root"
+#define MYSQL_PASSWORD "qqq"
 typedef struct logline {
   std::string  hostname;
   unsigned long  userIP;
@@ -32,7 +37,7 @@ typedef struct url_parts {
 }url_parts;
 class HttpAccessLogMetrics {
   public:
-    HttpAccessLogMetrics( int, int, std::vector<std::string>, std::vector<std::string>,std::string);
+    HttpAccessLogMetrics( std::vector<std::string>, std::vector<std::string>,std::string);
     ~HttpAccessLogMetrics();
     int logsScanParallel(int,int,long);
     void parseLogFile(int);
@@ -47,6 +52,9 @@ class HttpAccessLogMetrics {
     std::string getCountryFromIP( std::string );
     std::vector<KeyValueContainer> parseParamsString( std::string );
     std::vector<ParamsContainer> parseParamsString( std::string, int, std::string, std::string );
+    void insertClientIps( );
+    std::map<unsigned long,int> getClientIps();
+    void printClientIpsIpds();
   private:
     std::vector<std::thread*> threads;
     int st; // start timestamp
@@ -59,12 +67,13 @@ class HttpAccessLogMetrics {
     std::vector<std::string> internal_hostnames;
     std::vector<std::string> search_hostnames;
     std::string* error;
-    std::map<unsigned long, int> client_ips;                // ip_id
+    std::map<unsigned long, int> client_ips;
+    std::map<unsigned long, int> client_ips_ids;            // ip_id
     std::map<std::string,int> client_geo_locations;         // country_id
     std::map<std::string,int> client_devices;               // with client_devices vers device_id 
     std::map<std::string,int> client_oses;                  // os_id
     std::map<std::string,int> client_browsers;              // browser_id
-    std::map<std::string,int> page_paths;                   // page_id, needs domains_id
+    std::map<std::string,int> page_paths_full;              // full_page_id, needs domains_id
     std::map<std::string,int> referer_hostnames;            // referer_domain_id
     std::map<std::string,int> referer_pathstrings;          // with referer_hostnames: referer_id, referer_domain_id
     std::map<ParamsContainer,int> referer_params;           // with internref_hostnames, internref_pathstrings, internref_PARAMS: DOMAIN_id, page_id, url_param_id
@@ -79,6 +88,8 @@ class HttpAccessLogMetrics {
     std::map<std::string,int> hits;                         // needs page_id
     std::map<std::string,int> visits;                       // needs ip_id entities
     std::map<std::string,int> pageviews;                    // needs page_id, ip_id
+    //mysql
+    LogsMysql lm;
     //methods
     int getLinesNumber();
     url_parts getUrlParts( std::string );
