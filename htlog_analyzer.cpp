@@ -1,15 +1,18 @@
 #include <iostream>
+#include <vector>
 #include "htlog_processing.hpp"
 
 int main(int argc, char** argv) {
-  //rm -f cloudstats; g++ -Wall -g -std=c++0x -pthread htlog_analyzer.cpp  -L /usr/local/lib/ -lgeolite2++ -lmaxminddb  -lboost_regex -lyaml-cpp -o cloudstats 2>&1 | grep -i error: ;rm -f logs/thread-*; ulimit -c unlimited; ./cloudstats logfile
   std::ios_base::sync_with_stdio(true);
   std::vector<std::string> user_hostnames;
   user_hostnames.push_back("atthematch.com");
   user_hostnames.push_back("www.atthematch.com");
   std::vector<std::string> search_hosts;
+  search_hosts.push_back("www.google.com");
   search_hosts.push_back("google.com");
   search_hosts.push_back("google.co.uk");
+  search_hosts.push_back("google.co.in");
+  search_hosts.push_back("bing.com");
   std::string filename;
   int minargc=2;
   if( argc < minargc ) {

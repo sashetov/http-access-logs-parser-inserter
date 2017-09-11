@@ -1,5 +1,5 @@
-#include <cassert>
-#include <cstdlib>
+#ifndef __HTLOG_UAP__
+#include <string>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -7,7 +7,40 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <yaml-cpp/yaml.h>
-#include "uap.hpp"
+struct Generic {
+  std::string family;
+};
+struct Device : Generic {
+  std::string model;
+  std::string brand;
+  std::string toString() const { return model + " " + brand; };
+};
+struct Agent : Generic {
+  std::string major;
+  std::string minor;
+  std::string patch;
+  std::string patch_minor;
+  std::string toString() const { return family + " " + toVersionString(); }
+  std::string toVersionString() const {
+    return (major.empty() ? "0" : major) + "." + (minor.empty() ? "0" : minor) + "." + (patch.empty() ? "0" : patch);
+  }
+};
+struct UserAgent {
+  Device device;
+  Agent os;
+  Agent browser;
+  std::string toFullString() const { return browser.toString() + "/" + os.toString(); }
+  bool isSpider() const { return device.family == "Spider"; }
+};
+class UserAgentParser {
+ public:
+  explicit UserAgentParser(const std::string& regexes_file_path);
+  UserAgent parse(const std::string&) const;
+  ~UserAgentParser();
+ private:
+  const std::string regexes_file_path_;
+  const void* ua_store_;
+};
 namespace {
   typedef std::map<std::string::size_type, size_t> i2tuple;
   struct GenericStore {
@@ -71,9 +104,9 @@ namespace {
     return device;
   }
   AgentStore fill_agent_store(
-    const YAML::Node& node,
-    const std::string& repl, const std::string& major_repl,
-    const std::string& minor_repl, const std::string& patch_repl) {
+      const YAML::Node& node,
+      const std::string& repl, const std::string& major_repl,
+      const std::string& minor_repl, const std::string& patch_repl) {
     AgentStore agent_store;
     //std::cout<< "======== fill agent store\n";
     assert(node.Type() == YAML::NodeType::Map);
@@ -105,10 +138,10 @@ namespace {
       const auto& user_agent_parsers = regexes["user_agent_parsers"];
       for (const YAML::Node &user_agent : user_agent_parsers) {
         AgentStore browser = fill_agent_store( user_agent,
-              "family_replacement",
-              "v1_replacement", 
-              "v2_replacement",
-              "v3_replacement" );
+            "family_replacement",
+            "v1_replacement", 
+            "v2_replacement",
+            "v3_replacement" );
         browserStore.push_back(browser);
       }
       const auto& os_parsers = regexes["os_parsers"];
@@ -279,46 +312,5 @@ namespace {
   }
   const UserAgentParser g_ua_parser("./uap_regexes.yaml");
 }  // namespace
-UserAgentParser::UserAgentParser(const std::string& regexes_file_path) : regexes_file_path_{regexes_file_path} {
-  ua_store_ = (const void *) new UAStore(regexes_file_path);
-}
-UserAgentParser::~UserAgentParser() {
-  delete (ua_store_);
-}
-UserAgent UserAgentParser::parse(const std::string& ua) const {
-  const UAStore * ua_store = (const UAStore*)(ua_store_);
-  Device device = parse_device_impl(ua, ua_store);
-  Agent os = parse_os_impl(ua, ua_store);
-  Agent browser = parse_browser_impl(ua, ua_store);
-  return {device, os, browser};
-}
-void to_cstr( std::string from, char * to){
-  if(strlen(from.c_str())){
-    to = strdup(from.c_str());
-  } else {
-    to = strdup("");
-  }
-}
-ua_agent_t * convert_to_cagent( Agent agent ){
-  ua_agent_t * cagent = init_ua_agent(
-      (char *)agent.family.c_str(),
-      (char *)agent.major.c_str(),
-      (char *)agent.minor.c_str(),
-      (char *)agent.patch.c_str(),
-      (char *)agent.patch_minor.c_str());
-  return cagent;
-}
-ua_device_t * convert_to_cdevice( Device device ){
-  ua_device_t * cdevice = init_ua_device( 
-     (char *) device.family.c_str(), (char *)device.model.c_str(), (char *)device.brand.c_str() );
-  return cdevice;
-}
-ua_t * parse_to_c_ua( char * ua_cstr ) {
-  std::string uastr( ua_cstr );
-  const UserAgent ua = g_ua_parser.parse( uastr );
-  ua_t * user_agent = ( ua_t * ) malloc(sizeof(ua_t));
-  user_agent->device = convert_to_cdevice( ua.device );
-  user_agent->os = convert_to_cagent( ua.os );
-  user_agent->browser  = convert_to_cagent( ua.browser );
-  return user_agent;
-}
+#define __HTLOG_UAP__
+#endif

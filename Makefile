@@ -11,7 +11,7 @@ UAP_LDFLAGS=-lboost_regex -lyaml-cpp
 GEOIP_LDFLAGS=-L /usr/local/lib/ -lgeolite2++ -lmaxminddb 
 all: dump_cpp_vars clean test_progs cloudstats tags
 cloudstats: clean_local
-	$(CXX) $(CXXFLAGS) $(DEBUG) $(PTHREAD_CFLAGS) htlog_analyzer.cpp $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) -o cloudstats
+	$(CXX) $(CXXFLAGS) $(DEBUG) $(PTHREAD_CFLAGS) htlog_containers.cpp htlog_uap.cpp htlog_processing.cpp htlog_analyzer.cpp $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) -o cloudstats
 test_progs:
 	$(MAKE) -C tests/ all
 dump_cpp_vars:
