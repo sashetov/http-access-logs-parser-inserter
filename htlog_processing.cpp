@@ -96,23 +96,24 @@ void HttpAccessLogMetrics::parseLogFile( int numThreads ){
       int count = str_it->second;
       std::cout<<"location : "<<key<<" count: "<<count<<"\n";
   }
+  std::map<KeyValueContainer,int>::iterator kv_it;
   std::cout<<"client_devices "<<client_devices.size()<<"\n";
-  for( str_it = client_devices.begin(); str_it!=client_devices.end(); str_it++){
-      std::string key = str_it->first;
-      int count = str_it->second;
-      std::cout<<"client_devices: "<<key<<" count: "<<count<<"\n";
+  for( kv_it= client_devices.begin(); kv_it!=client_devices.end(); kv_it++){
+      KeyValueContainer name_version = kv_it->first;
+      int count = kv_it->second;
+      std::cout<<"client_devices: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
   }
   std::cout<<"client_oses "<<client_oses.size()<<"\n";
-  for( str_it = client_oses.begin(); str_it!=client_oses.end(); str_it++){
-      std::string key = str_it->first;
-      int count = str_it->second;
-      std::cout<<"client_oses: "<<key<<" count: "<<count<<"\n";
+  for( kv_it = client_oses.begin(); kv_it!=client_oses.end(); kv_it++){
+      KeyValueContainer name_version = kv_it->first;
+      int count = kv_it->second;
+      std::cout<<"client_oses: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
   }
   std::cout<<"client_browsers "<<client_browsers.size()<<"\n";
-  for( str_it = client_browsers.begin(); str_it!=client_browsers.end(); str_it++){
-      std::string key = str_it->first;
-      int count = str_it->second;
-      std::cout<<"client_browsers: "<<key<<" count: "<<count<<"\n";
+  for( kv_it = client_browsers.begin(); kv_it!=client_browsers.end(); kv_it++){
+      KeyValueContainer name_version = kv_it->first;
+      int count = kv_it->second;
+      std::cout<<"client_browsers: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
   }
   std::cout<<"page_paths_full "<<page_paths_full.size()<<"\n";
   for( str_it = page_paths_full.begin(); str_it!=page_paths_full.end(); str_it++){
@@ -126,11 +127,11 @@ void HttpAccessLogMetrics::parseLogFile( int numThreads ){
       int count = str_it->second;
       std::cout<<"referer_hostnames: "<<key<<" count: "<<count<<"\n";
   }
-  std::cout<<"referer_pathstrings "<<referer_pathstrings.size()<<"\n";
-  for( str_it = referer_pathstrings.begin(); str_it!=referer_pathstrings.end(); str_it++){
+  std::cout<<"referer_paths "<<referer_paths.size()<<"\n";
+  for( str_it = referer_paths.begin(); str_it!=referer_paths.end(); str_it++){
       std::string key = str_it->first;
       int count = str_it->second;
-      std::cout<<"referer_pathstrings: "<<key<<" count: "<<count<<"\n";
+      std::cout<<"referer_paths: "<<key<<" count: "<<count<<"\n";
   }
   std::cout<<"referer_params "<<referer_params.size()<<"\n";
   std::map<ParamsContainer,int>::iterator pc_it;
@@ -139,18 +140,15 @@ void HttpAccessLogMetrics::parseLogFile( int numThreads ){
       int count = pc_it->second;
       std::cout<<key.getPageType()<<" referer_hostname "<<key.getHost()<<" referer_page: "<<key.getPage()<<" referer param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
   }
-  std::cout<<"internref_hostnames "<<internal_hostnames.size()<<"\n";
-
-  std::cout<<"internref_pathstrings "<<internref_pathstrings.size()<<"\n";
-
-  std::cout<<"internref_params "<<internref_params.size()<<"\n";
-  for( pc_it = internref_params.begin(); pc_it!=internref_params.end(); pc_it++){
+  std::cout<<"internal_domains"<<internal_domains.size()<<"\n";
+  std::cout<<"internal_paths "<<internal_paths.size()<<"\n";
+  std::cout<<"internal_params "<<internal_params.size()<<"\n";
+  for( pc_it = internal_params.begin(); pc_it!=internal_params.end(); pc_it++){
       ParamsContainer key = pc_it->first;
       int count = pc_it->second;
-      std::cout<<key.getPageType()<<" internref_hostname "<<key.getHost()<<" internref_page: "<<key.getPage()<<" internref param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
+      std::cout<<key.getPageType()<<" internal_hostname "<<key.getHost()<<" internal_page: "<<key.getPage()<<" internref param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
   }
   std::cout<<"search_queries "<<search_queries.size()<<"\n";
-  std::map<KeyValueContainer,int>::iterator kv_it;
   for( kv_it = search_queries.begin(); kv_it!=search_queries.end(); kv_it++){
       KeyValueContainer key = kv_it->first;
       int count = kv_it->second;
@@ -329,9 +327,112 @@ std::string HttpAccessLogMetrics::getCountryFromIP( std::string client_ip){
 }
 void HttpAccessLogMetrics::processUserAgent( std::string uaStr ){
   const UserAgent ua = g_ua_parser.parse( uaStr );
-  incrementCount( &client_devices, (std::string) ua.device.toString() );
-  incrementCount( &client_oses, (std::string)ua.os.toString() );
-  incrementCount( &client_browsers, (std::string)ua.browser.toString() );
+  KeyValueContainer deviceC = KeyValueContainer(ua.device.model, ua.device.brand);
+  incrementCount( &client_devices, deviceC);
+  KeyValueContainer osC = KeyValueContainer(ua.os.family, ua.os.toVersionString());
+  incrementCount( &client_oses, osC );
+  KeyValueContainer browsersC = KeyValueContainer(ua.browser.family, ua.browser.toVersionString());
+  incrementCount( &client_browsers, browsersC );
+}
+void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
+  std::vector<std::string>::iterator it;
+  std::vector<ParamsContainer> params;
+  std::vector<ParamsContainer>::iterator params_it;
+  int hostname_type= 0; // 0 nothing found, 1 found internal ref, 2 found external ref, 3 found search ref
+  incrementCount(&page_paths_full, referer);
+  url_parts url_parsed = getUrlParts( referer );
+  std::string hostname;
+  for (  it = internal_hostnames.begin(); it != internal_hostnames.end(); it++ ) {
+    if( url_parsed.hostname == *it){
+      hostname_type = 1;
+      break;
+    }
+    else {
+      hostname_type = 2;
+    }
+  }
+  for (  it = search_hostnames.begin(); it != search_hostnames.end(); it++ ) {
+    if( url_parsed.hostname == *it ){
+      hostname_type = 3;
+      break;
+    }
+  }
+  if(hostname_type == 1 ) {
+    if( url_parsed.hostname.length() > 0 ) {
+      //std::cout<<"internal_domain '"<<url_parsed.hostname<<"'\n";
+      incrementCount(&internal_domains, url_parsed.hostname);
+    }
+    if( url_parsed.path.length() > 0 ) {
+      //std::cout<<"internal_pathstring: '"<<url_parsed.path<<"'\n";
+      incrementCount(&internal_paths, url_parsed.path );
+    }
+    if( url_parsed.params.length() > 0) {
+      if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
+        params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, referer);
+      }
+      //std::cout<<"internal_paramstring: '"<<url_parsed.params<<"'\n";
+      for (  params_it = params.begin() ; params_it != params.end(); params_it++){
+        //std::cout<<"internal_param key '"<<(*params_it).getKey()<<"'\n";
+        //std::cout<<"internal_param value '"<<(*params_it).getValue()<<"'\n";
+        incrementCount(&internal_params, (*params_it));
+      }
+    }
+  }
+  else if(hostname_type == 2 ) {
+    if( url_parsed.hostname.length() > 0 ) {
+      //std::cout<<"referer_hostname '"<<url_parsed.hostname<<"'\n";
+      incrementCount(&referer_hostnames, url_parsed.hostname);
+    }
+    if( url_parsed.path.length() > 0 ) {
+      //std::cout<<"referer_pathstring: '"<<url_parsed.path<<"'\n";
+      incrementCount(&referer_paths, url_parsed.path);
+    }
+    if( url_parsed.params.length() > 0) {
+      if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
+        params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, referer);
+      }
+      //std::cout<<"referer_paramstring: '"<<url_parsed.params<<"'\n";
+      for( params_it = params.begin(); params_it!=params.end(); params_it++){
+        //std::cout<<"referer_param key '"<<(*params_it).getKey()<<"'\n";
+        //std::cout<<"referer_param value '"<<(*params_it).getValue()<<"'\n";
+        incrementCount(&referer_params, (*params_it));
+      }
+    }
+  }
+  else if(hostname_type == 3 ) {
+    if( url_parsed.params.length() > 0 && url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
+      params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, referer);
+    }
+    for( params_it = params.begin(); params_it!=params.end(); params_it++){
+      if((*params_it).getKey() == "q"){
+        std::cout<<"search_terms_param key '"<<(*params_it).getKey()<<"'\n";
+        std::cout<<"search_terms_param value '"<<(*params_it).getValue()<<"'\n";
+        KeyValueContainer searchContainer((*params_it).getValue(),(*params_it).getHost());
+        incrementCount(&search_queries, searchContainer);
+      }
+    }
+  }
+}
+void HttpAccessLogMetrics::processRequestUrl( std::string requestURL ){
+  std::vector<ParamsContainer> params;
+  std::vector<ParamsContainer>::iterator params_it;
+  url_parts url_parsed = getUrlPartsFromReqURL( requestURL, "http", internal_hostnames[0] );
+  int hostname_type = 1;
+  if( url_parsed.path.length()> 0){
+    incrementCount(&page_paths_full, requestURL);
+    incrementCount(&internal_paths, url_parsed.path);
+  }
+  if( url_parsed.hostname.length()>0){
+    incrementCount(&internal_domains, url_parsed.hostname);
+  }
+  if(url_parsed.params.length() > 0 ) {
+    if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
+      params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, requestURL );
+    }
+    for( params_it = params.begin(); params_it!=params.end(); params_it++){
+      incrementCount(&internal_params, (*params_it));
+    }
+  }
 }
 std::vector<KeyValueContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str ){
   std::vector<KeyValueContainer> results;
@@ -358,7 +459,7 @@ std::vector<KeyValueContainer> HttpAccessLogMetrics::parseParamsString( std::str
   }
   return results;
 }
-std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str, int type, std::string hostname, std::string page_path ){
+std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str, int type, std::string hostname, std::string page_path, std::string page_path_full ){
   std::vector<ParamsContainer> results;
   std::size_t found;
   if( params_str.length() > 0 ) { 
@@ -371,30 +472,94 @@ std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::strin
       if((found = param.find("=")) != -1 ){
         std::string key = param.substr(0,found);
         std::string val = param.substr(found+1, param.length()-found-1);
-        results.push_back(ParamsContainer(type,hostname,page_path,key,val));
+        results.push_back(ParamsContainer(type,hostname,page_path,page_path_full,key,val));
       }
     }
     param = workstring;
     if((found = param.find("=")) != -1 ){
       std::string key = param.substr(0,found);
       std::string val = param.substr(found+1, param.length()-found-1);
-      results.push_back(ParamsContainer(type,hostname,page_path,key,val));
+      results.push_back(ParamsContainer(type,hostname,page_path,page_path_full,key,val));
     }
   }
   return results;
 }
-void HttpAccessLogMetrics::insertClientIps(){
+void HttpAccessLogMetrics::insertEntities(){
   lm.insertClientIps( client_ips_ids, client_ips );
+  lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations );
+  lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices);
+  lm.insertNameVersionEntities( "httpstats_clients", "oses", client_oses_ids, client_oses);
+  lm.insertNameVersionEntities( "httpstats_clients", "browsers", client_browsers_ids, client_browsers );
+  lm.insertStringEntities( "httpstats_pages", "pages_paths_full", page_paths_full_ids, page_paths_full );
+  lm.insertStringEntities( "httpstats_pages", "external_domains", referer_hostnames_ids, referer_hostnames );
+  lm.insertStringEntities( "httpstats_pages", "pages_paths", referer_paths_ids, referer_paths );
+  lm.insertStringEntities( "httpstats_pages", "pages_paths", internal_paths_ids, internal_paths );
+  lm.insertParamsEntities( referer_params_ids, referer_params, referer_paths_ids, page_paths_full_ids);
+  lm.insertParamsEntities( internal_params_ids, internal_params, internal_paths_ids, page_paths_full_ids);
 }
 std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){
   return client_ips;
 }
-void HttpAccessLogMetrics::printClientIpsIpds(){
+void HttpAccessLogMetrics::printAllIdsMaps(){
   std::map<unsigned long,int>::iterator ul_it;
   for( ul_it = client_ips_ids.begin(); ul_it!=client_ips_ids.end(); ul_it++){
     std::string ip = getStringIP(ul_it->first);
     int id = ul_it->second;
     std::cout<<ip<<":"<<id<<"\n";
+  }
+  std::map<std::string,int>::iterator str_it;
+  for( str_it = referer_hostnames_ids.begin(); str_it!=referer_hostnames_ids.end(); str_it++){
+    std::string host = str_it->first;
+    int id = str_it->second;
+    std::cout<<"refhost "<<host<<":"<<id<<"\n";
+  }
+  for( str_it = page_paths_full_ids.begin(); str_it!=page_paths_full_ids.end(); str_it++){
+    std::string path_full = str_it->first;
+    int id = str_it->second;
+    std::cout<<"full page path "<<path_full<<":"<<id<<"\n";
+  }
+  std::map<KeyValueContainer,int>::iterator kv_it;
+  for( kv_it = client_devices_ids.begin(); kv_it!=client_devices_ids.end(); kv_it++){
+    KeyValueContainer kvC = kv_it->first;
+    int id = kv_it->second;
+    std::string name = kvC.getKey();
+    std::string version = kvC.getValue();
+    std::cout<<"devices "<<name<<"+"<<version<<":"<<id<<"\n";
+  }
+  for( kv_it = client_oses_ids.begin(); kv_it!=client_oses_ids.end(); kv_it++){
+    KeyValueContainer kvC = kv_it->first;
+    int id = kv_it->second;
+    std::string name = kvC.getKey();
+    std::string version = kvC.getValue();
+    std::cout<<"os "<<name<<"+"<<version<<":"<<id<<"\n";
+  }
+  for( kv_it = client_browsers_ids.begin(); kv_it!=client_browsers_ids.end(); kv_it++){
+    KeyValueContainer kvC = kv_it->first;
+    int id = kv_it->second;
+    std::string name = kvC.getKey();
+    std::string version = kvC.getValue();
+    std::cout<<"browsers "<<name<<"+"<<version<<":"<<id<<"\n";
+  }
+  for( str_it = referer_paths_ids.begin(); str_it!=referer_paths_ids.end(); str_it++){
+    std::string path = str_it->first;
+    int id = str_it->second;
+    std::cout<<"referer_paths "<<path<<":"<<id<<"\n";
+  }
+  for( str_it = internal_paths_ids.begin(); str_it!=internal_paths_ids.end(); str_it++){
+    std::string path = str_it->first;
+    int id = str_it->second;
+    std::cout<<"internal_paths "<<path<<":"<<id<<"\n";
+  }
+  std::map<ParamsContainer,int>::iterator pc_it;
+  for( pc_it = referer_params_ids.begin(); pc_it!=referer_params_ids.end(); pc_it++){
+    int id = pc_it->second;
+    ParamsContainer pc = pc_it->first;
+    std::cout<<"referer_params "<<pc.toString()<<":"<<id<<"\n";
+  }
+  for( pc_it = internal_params_ids.begin(); pc_it!=internal_params_ids.end(); pc_it++){
+    int id = pc_it->second;
+    ParamsContainer pc = pc_it->first;
+    std::cout<<"internal_params "<<pc.toString()<<":"<<id<<"\n";
   }
 }
 //PRIVATE
@@ -427,7 +592,7 @@ url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string ){
   }
   else {
     hostname = path_noproto.substr(0,found);
-    page_path = path_noproto.substr(found+1, path_noproto.length() - found );
+    page_path = path_noproto.substr(found, path_noproto.length() - found );
   }
   found = page_path.find("?");
   if(found != -1){
@@ -457,103 +622,4 @@ url_parts HttpAccessLogMetrics::getUrlPartsFromReqURL( std::string requestURL, s
   result.params = params_str;
   result.path = page_path;
   return result;
-}
-void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
-  std::vector<std::string>::iterator it;
-  std::vector<ParamsContainer> params;
-  std::vector<ParamsContainer>::iterator params_it;
-  int hostname_type= 0; // 0 nothing found, 1 found internal ref, 2 found external ref, 3 found search ref
-  url_parts url_parsed = getUrlParts( referer );
-  std::string hostname;
-  for (  it = internal_hostnames.begin(); it != internal_hostnames.end(); it++ ) {
-    if( url_parsed.hostname == *it){
-      hostname_type = 1;
-      break;
-    }
-    else {
-      hostname_type = 2;
-    }
-  }
-  for (  it = search_hostnames.begin(); it != search_hostnames.end(); it++ ) {
-    if( url_parsed.hostname == *it ){
-      hostname_type = 3;
-      break;
-    }
-  }
-  if(hostname_type == 1 ) {
-    if( url_parsed.hostname.length() > 0 ) {
-      //std::cout<<"internref_hostname '"<<url_parsed.hostname<<"'\n";
-      incrementCount(&internref_hostnames, url_parsed.hostname);
-    }
-    if( url_parsed.path.length() > 0 ) {
-      //std::cout<<"internref_pathstring: '"<<url_parsed.path<<"'\n";
-      incrementCount(&internref_pathstrings, url_parsed.path );
-    }
-    if( url_parsed.params.length() > 0) {
-      if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-        params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path);
-      }
-      //std::cout<<"internref_paramstring: '"<<url_parsed.params<<"'\n";
-      for (  params_it = params.begin() ; params_it != params.end(); params_it++){
-        //std::cout<<"internref_param key '"<<(*params_it).getKey()<<"'\n";
-        //std::cout<<"internref_param value '"<<(*params_it).getValue()<<"'\n";
-        incrementCount(&internref_params, (*params_it));
-      }
-    }
-  }
-  else if(hostname_type == 2 ) {
-    if( url_parsed.hostname.length() > 0 ) {
-      //std::cout<<"referer_hostname '"<<url_parsed.hostname<<"'\n";
-      incrementCount(&referer_hostnames, url_parsed.hostname);
-    }
-    if( url_parsed.path.length() > 0 ) {
-      //std::cout<<"referer_pathstring: '"<<url_parsed.path<<"'\n";
-      incrementCount(&referer_pathstrings, url_parsed.path);
-    }
-    if( url_parsed.params.length() > 0) {
-      if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-        params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path);
-      }
-      //std::cout<<"referer_paramstring: '"<<url_parsed.params<<"'\n";
-      for( params_it = params.begin(); params_it!=params.end(); params_it++){
-        //std::cout<<"referer_param key '"<<(*params_it).getKey()<<"'\n";
-        //std::cout<<"referer_param value '"<<(*params_it).getValue()<<"'\n";
-        incrementCount(&referer_params, (*params_it));
-      }
-    }
-  }
-  else if(hostname_type == 3 ) {
-    if( url_parsed.params.length() > 0 && url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-      params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path);
-    }
-    for( params_it = params.begin(); params_it!=params.end(); params_it++){
-      if((*params_it).getKey() == "q"){
-        std::cout<<"search_terms_param key '"<<(*params_it).getKey()<<"'\n";
-        std::cout<<"search_terms_param value '"<<(*params_it).getValue()<<"'\n";
-        KeyValueContainer searchContainer((*params_it).getValue(),(*params_it).getHost());
-        incrementCount(&search_queries, searchContainer);
-      }
-    }
-  }
-}
-void HttpAccessLogMetrics::processRequestUrl( std::string requestURL ){
-  std::vector<ParamsContainer> params;
-  std::vector<ParamsContainer>::iterator params_it;
-  url_parts url_parsed = getUrlPartsFromReqURL( requestURL, "http", internal_hostnames[0] );
-  int hostname_type = 1;
-  if( url_parsed.path.length()> 0){
-    incrementCount(&page_paths_full, requestURL);
-    incrementCount(&internref_pathstrings, url_parsed.path);
-  }
-  if( url_parsed.hostname.length()>0){
-    incrementCount(&internref_hostnames, url_parsed.hostname);
-  }
-  if(url_parsed.params.length() > 0 ) {
-    if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-      params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path);
-    }
-    for( params_it = params.begin(); params_it!=params.end(); params_it++){
-      incrementCount(&internref_params, (*params_it));
-    }
-  }
 }

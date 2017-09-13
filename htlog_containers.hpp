@@ -16,20 +16,23 @@ class KeyValueContainer{
 };
 class ParamsContainer : public KeyValueContainer {
   public:
-    ParamsContainer(int, std::string, std::string, std::string, std::string);
+    ParamsContainer(int, std::string, std::string, std::string, std::string, std::string);
     //using KeyValueContainer::getKey;
     //using KeyValueContainer::getValue;
     std::string getHost() const;
     std::string getPage() const;
+    std::string getFullPagePath() const;
     int getPageType() const;
     int operator <( const ParamsContainer & ) const;
     int operator >( const ParamsContainer & ) const;
     int operator ==( const ParamsContainer & ) const;
+    std::string toString() const;
     ~ParamsContainer();
   private:
     int page_type;
     std::string hostname;
     std::string page_path;
+    std::string page_path_full;
     std::string key;
     std::string value;
 };

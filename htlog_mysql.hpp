@@ -7,6 +7,8 @@
 #include <driver/mysql_public_iface.h>
 #include <cppconn/prepared_statement.h>
 #include <boost/scoped_ptr.hpp>
+#include "htlog_containers.hpp"
+ParamsContainer getNthPc( std::map<ParamsContainer,int>, int);
 class LogsMysql {
   public:
     LogsMysql(std::string,int,std::string,std::string);
@@ -14,6 +16,11 @@ class LogsMysql {
     int getDomainsId( std::string );
     int getUserId(int );
     void insertClientIps( std::map<unsigned long,int> &, std::map<unsigned long, int> );
+    void insertDomains();
+    void insertStringEntities( std::string, std::string, std::map<std::string,int> &, std::map<std::string, int> );
+    void insertExternalDomains( std::map<std::string,int> &, std::map<std::string,int> );
+    void insertNameVersionEntities(std::string, std::string, std::map<KeyValueContainer,int> &, std::map<KeyValueContainer,int> );
+    void insertParamsEntities(std::map<ParamsContainer,int> &, std::map<ParamsContainer,int>, std::map<std::string,int>, std::map<std::string,int>);
     ~LogsMysql();
   private:
     std::string host;

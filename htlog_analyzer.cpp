@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
   std::cout<<"logfile: "<<filename<<"\n";
   HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(user_hostnames,search_hosts,filename);
   hMetrics.parseLogFile(4);
-  hMetrics.insertClientIps();
-  hMetrics.printClientIpsIpds();
+  hMetrics.insertEntities();
+  hMetrics.printAllIdsMaps();
   return 0;
 }

@@ -51,10 +51,10 @@ class HttpAccessLogMetrics {
     void processRequestUrl( std::string );
     std::string getCountryFromIP( std::string );
     std::vector<KeyValueContainer> parseParamsString( std::string );
-    std::vector<ParamsContainer> parseParamsString( std::string, int, std::string, std::string );
-    void insertClientIps( );
+    std::vector<ParamsContainer> parseParamsString( std::string, int, std::string, std::string, std::string );
+    void insertEntities( );
     std::map<unsigned long,int> getClientIps();
-    void printClientIpsIpds();
+    void printAllIdsMaps();
   private:
     std::vector<std::thread*> threads;
     int st; // start timestamp
@@ -69,17 +69,27 @@ class HttpAccessLogMetrics {
     std::string* error;
     std::map<unsigned long, int> client_ips;
     std::map<unsigned long, int> client_ips_ids;            // ip_id
-    std::map<std::string,int> client_geo_locations;         // country_id
-    std::map<std::string,int> client_devices;               // with client_devices vers device_id 
-    std::map<std::string,int> client_oses;                  // os_id
-    std::map<std::string,int> client_browsers;              // browser_id
-    std::map<std::string,int> page_paths_full;              // full_page_id, needs domains_id
-    std::map<std::string,int> referer_hostnames;            // referer_domain_id
-    std::map<std::string,int> referer_pathstrings;          // with referer_hostnames: referer_id, referer_domain_id
-    std::map<ParamsContainer,int> referer_params;           // with internref_hostnames, internref_pathstrings, internref_PARAMS: DOMAIN_id, page_id, url_param_id
-    std::map<std::string,int> internref_hostnames;          // domain_id
-    std::map<std::string,int> internref_pathstrings;        // page_id
-    std::map<ParamsContainer,int> internref_params;         // url_param_id
+    std::map<std::string,int> client_geo_locations;
+    std::map<std::string,int> client_geo_locations_ids;     // country_id
+    std::map<KeyValueContainer,int> client_devices;
+    std::map<KeyValueContainer,int> client_devices_ids;     // with client_devices vers device_id 
+    std::map<KeyValueContainer,int> client_oses;
+    std::map<KeyValueContainer,int> client_oses_ids;        // os_id
+    std::map<KeyValueContainer,int> client_browsers;
+    std::map<KeyValueContainer,int> client_browsers_ids;    // browser_id
+    std::map<std::string,int> page_paths_full;
+    std::map<std::string,int> page_paths_full_ids;          // full_page_id
+    std::map<std::string,int> referer_hostnames;
+    std::map<std::string, int> referer_hostnames_ids;       // referer_domain_id
+    std::map<std::string,int> referer_paths;
+    std::map<std::string,int> referer_paths_ids;            // page_id
+    std::map<ParamsContainer,int> referer_params;
+    std::map<ParamsContainer,int> referer_params_ids;       // url_param_id
+    std::map<std::string,int> internal_domains;             // domain_id
+    std::map<std::string,int> internal_paths;
+    std::map<std::string,int> internal_paths_ids;           // page_id
+    std::map<ParamsContainer,int> internal_params;
+    std::map<ParamsContainer,int> internal_params_ids;     // url_param_id
     std::map<KeyValueContainer,int> search_queries;         // search_term_id
     std::map<std::string,int> tvectors_inner;               // needs page_id
     std::map<std::string,int> tvectors_inner_per_hour;      // needs page_id
