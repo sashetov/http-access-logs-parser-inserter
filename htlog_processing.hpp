@@ -22,19 +22,20 @@ typedef struct logline {
   std::string userIPStr;
   std::string  date;
   unsigned long timestamp;
-  std::string  requestURL;
+  std::string  requestPath;
   std::string  requestType;
-  std::string  referrer;
+  std::string  referer;
   std::string  agent;
   long sizeBytes;
   int statusCode;
 } parsed_logline;
 typedef struct url_parts {
   std::string protocol;
+  std::string full_path;
   std::string hostname;
   std::string path;
   std::string params;
-}url_parts;
+} url_parts;
 class HttpAccessLogMetrics {
   public:
     HttpAccessLogMetrics( std::vector<std::string>, std::vector<std::string>,std::string);
@@ -47,7 +48,7 @@ class HttpAccessLogMetrics {
     unsigned long getTimestamp( std::string );
     template<typename T> void incrementCount( std::map<T,int>*, T );
     void processUserAgent( std::string );
-    void processRefererStrings( std::string );
+    void processTrafficVectors( std::string, std::string );
     void processRequestUrl( std::string );
     std::string getCountryFromIP( std::string );
     std::vector<KeyValueContainer> parseParamsString( std::string );
@@ -85,25 +86,26 @@ class HttpAccessLogMetrics {
     std::map<std::string,int> referer_paths_ids;            // page_id
     std::map<ParamsContainer,int> referer_params;
     std::map<ParamsContainer,int> referer_params_ids;       // url_param_id
-    std::map<std::string,int> internal_domains;             // domain_id
+    std::map<std::string,int> internal_domains;             // domain_id ( imported, not inserted )
     std::map<std::string,int> internal_paths;
     std::map<std::string,int> internal_paths_ids;           // page_id
     std::map<ParamsContainer,int> internal_params;
-    std::map<ParamsContainer,int> internal_params_ids;     // url_param_id
-    std::map<KeyValueContainer,int> search_queries;         // search_term_id
-    std::map<std::string,int> tvectors_inner;               // needs page_id
-    std::map<std::string,int> tvectors_inner_per_hour;      // needs page_id
-    std::map<std::string,int> tvectors_incoming;            // needs referer_id
-    std::map<std::string,int> tvectors_inc_per_hour;        // needs referer_id
-    std::map<std::string,int> hits;                         // needs page_id
-    std::map<std::string,int> visits;                       // needs ip_id entities
-    std::map<std::string,int> pageviews;                    // needs page_id, ip_id
+    std::map<ParamsContainer,int> internal_params_ids;      // url_param_id
+    std::map<KeyValueContainer,int> search_queries;
+    std::map<KeyValueContainer,int> search_queries_ids;     // search_terms_ids
+    std::map<TVectorContainer,int> tvectors_inner;
+    std::map<TVectorContainer,int> tvectors_inner_ids;      // tvin_id
+    std::map<TVectorContainer,int> tvectors_incoming;
+    std::map<TVectorContainer,int> tvectors_incoming_ids;   // tvinc_id
+    std::map<std::string,int> hits;
+    std::map<std::string,int> visits;
+    std::map<std::string,int> pageviews;
     //mysql
     LogsMysql lm;
     //methods
     int getLinesNumber();
     url_parts getUrlParts( std::string );
-    url_parts getUrlPartsFromReqURL( std::string, std::string, std::string );
+    url_parts getUrlPartsFromReqPath( std::string, std::string, std::string );
 };
 #define __HTLOG_PROCESSING__
 #endif

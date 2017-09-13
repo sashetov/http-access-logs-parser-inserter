@@ -8,7 +8,7 @@
 #include <cppconn/prepared_statement.h>
 #include <boost/scoped_ptr.hpp>
 #include "htlog_containers.hpp"
-ParamsContainer getNthPc( std::map<ParamsContainer,int>, int);
+template<typename T> T getNthNode( std::map<T,int>, int);
 class LogsMysql {
   public:
     LogsMysql(std::string,int,std::string,std::string);
@@ -20,7 +20,9 @@ class LogsMysql {
     void insertStringEntities( std::string, std::string, std::map<std::string,int> &, std::map<std::string, int> );
     void insertExternalDomains( std::map<std::string,int> &, std::map<std::string,int> );
     void insertNameVersionEntities(std::string, std::string, std::map<KeyValueContainer,int> &, std::map<KeyValueContainer,int> );
+    void insertSearchTerms(std::map<KeyValueContainer,int> &, std::map<KeyValueContainer, int>, std::map<std::string,int>);
     void insertParamsEntities(std::map<ParamsContainer,int> &, std::map<ParamsContainer,int>, std::map<std::string,int>, std::map<std::string,int>);
+    void insertTrafficVectors(bool inner, std::map<TVectorContainer,int> &, std::map<TVectorContainer,int>, std::map<std::string,int>, std::map<std::string,int>);
     ~LogsMysql();
   private:
     std::string host;

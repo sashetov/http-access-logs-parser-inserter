@@ -40,8 +40,8 @@ int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, l
         incrementCount( &client_ips, ll.userIP);
         incrementCount( &client_geo_locations, getCountryFromIP(ll.userIPStr));
         processUserAgent( ll.agent );
-        processRefererStrings( ll.referrer );
-        processRequestUrl(ll.requestURL);
+        processTrafficVectors( ll.requestPath, ll.referer );
+        processRequestUrl(ll.requestPath);
         lines_processed++;
       }
       else {
@@ -180,8 +180,8 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
   //char *user_hostname, *date, *hour, *timezone, *host, *agent, *req, *ref, *p;
   std::string host, userIP, 
     date, hour, timezone,
-    request, requestType, requestURL, requestProtocol,
-    referrer,
+    request, requestType, requestPath, requestProtocol,
+    referer,
     userAgent,
     size,
     status;
@@ -230,7 +230,7 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
   if ((reqUrlCursor1= request.find_last_of(" ")) == -1){
     return 8;
   }
-  requestURL = request.substr(reqUrlCursor0+1, reqUrlCursor1 -reqUrlCursor0 -1);
+  requestPath = request.substr(reqUrlCursor0+1, reqUrlCursor1 -reqUrlCursor0 -1);
   requestType = request.substr(0,reqUrlCursor0);
   requestProtocol= request.substr(reqUrlCursor1+1, request.size()-reqUrlCursor1-1);
   //REFERRER
@@ -240,7 +240,7 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
   if ((refCursor1= line.find_first_of("\"",refCursor0+1)) == -1){
     return 10;
   }
-  referrer= line.substr( refCursor0+1, refCursor1-refCursor0-1 );
+  referer= line.substr( refCursor0+1, refCursor1-refCursor0-1 );
   //USER AGENT
   if ((uaCursor0= line.find_first_of("\"", refCursor1+1)) == -1){
     return 11;
@@ -274,9 +274,9 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
   ll.timestamp = getTimestamp(date);
   //ll->hour= host;
   //ll->timezone= timezone;
-  ll.requestURL = requestURL;
+  ll.requestPath = requestPath;
   ll.requestType = requestType;
-  ll.referrer = referrer;
+  ll.referer = referer;
   ll.agent = userAgent;
   ll.sizeBytes = sizeBytes;
   ll.statusCode= statusCode;
@@ -285,10 +285,10 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
     <<"userIP:"<<userIP<<"\n"
     <<"date:"<<date<<"\n"
     <<"request:"<<request<<"\n"
-    <<"requestURL:"<<requestURL<<"\n"
+    <<"requestPath:"<<requestPath<<"\n"
     <<"requestType:"<<requestType<<"\n"
     <<"requestProtocol:"<<requestProtocol<<"\n"
-    <<"referrer:"<<referrer<<"\n"
+    <<"referer:"<<referer<<"\n"
     <<"userAgent:"<<userAgent<<"\n"
     <<"statusCode:"<<statusCode<<"\n"
     <<"sizeBytes:"<<sizeBytes<<"\n"
@@ -299,9 +299,9 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
     <<"ll->userIP:"<<ll.userIP<<"\n"
     <<"ll->date:"<<ll.date<<"\n"
     <<"ll->timestamp:"<<ll.timestamp<<"\n"
-    <<"ll->requestURL:"<<ll.requestURL<<"\n"
+    <<"ll->requestPath:"<<ll.requestPath<<"\n"
     <<"ll->requestType:"<<ll.requestType<<"\n"
-    <<"ll->referrer:"<<ll.referrer<<"\n"
+    <<"ll->referer:"<<ll.referer<<"\n"
     <<"ll->agent:"<<ll.agent<<"\n"
     <<"ll->sizeBytes:"<<ll.sizeBytes<<"\n"
     <<"ll->statusCode:"<<ll.statusCode<<"\n"
@@ -334,13 +334,13 @@ void HttpAccessLogMetrics::processUserAgent( std::string uaStr ){
   KeyValueContainer browsersC = KeyValueContainer(ua.browser.family, ua.browser.toVersionString());
   incrementCount( &client_browsers, browsersC );
 }
-void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
+void HttpAccessLogMetrics::processTrafficVectors( std::string requestPath, std::string referer ){
   std::vector<std::string>::iterator it;
   std::vector<ParamsContainer> params;
   std::vector<ParamsContainer>::iterator params_it;
   int hostname_type= 0; // 0 nothing found, 1 found internal ref, 2 found external ref, 3 found search ref
-  incrementCount(&page_paths_full, referer);
   url_parts url_parsed = getUrlParts( referer );
+  incrementCount(&page_paths_full, url_parsed.full_path);
   std::string hostname;
   for (  it = internal_hostnames.begin(); it != internal_hostnames.end(); it++ ) {
     if( url_parsed.hostname == *it){
@@ -361,6 +361,8 @@ void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
     if( url_parsed.hostname.length() > 0 ) {
       //std::cout<<"internal_domain '"<<url_parsed.hostname<<"'\n";
       incrementCount(&internal_domains, url_parsed.hostname);
+      TVectorContainer inner_tvc(true,"",url_parsed.full_path,requestPath);
+      incrementCount(&tvectors_inner, inner_tvc);
     }
     if( url_parsed.path.length() > 0 ) {
       //std::cout<<"internal_pathstring: '"<<url_parsed.path<<"'\n";
@@ -382,6 +384,8 @@ void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
     if( url_parsed.hostname.length() > 0 ) {
       //std::cout<<"referer_hostname '"<<url_parsed.hostname<<"'\n";
       incrementCount(&referer_hostnames, url_parsed.hostname);
+      TVectorContainer inner_tvc(false,url_parsed.hostname,url_parsed.full_path,requestPath);
+      incrementCount(&tvectors_incoming, inner_tvc);
     }
     if( url_parsed.path.length() > 0 ) {
       //std::cout<<"referer_pathstring: '"<<url_parsed.path<<"'\n";
@@ -402,24 +406,27 @@ void HttpAccessLogMetrics::processRefererStrings( std::string referer ){
   else if(hostname_type == 3 ) {
     if( url_parsed.params.length() > 0 && url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
       params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, referer);
+      TVectorContainer inner_tvc(false,url_parsed.hostname,url_parsed.full_path,requestPath);
+      incrementCount(&tvectors_incoming, inner_tvc);
     }
     for( params_it = params.begin(); params_it!=params.end(); params_it++){
       if((*params_it).getKey() == "q"){
-        std::cout<<"search_terms_param key '"<<(*params_it).getKey()<<"'\n";
-        std::cout<<"search_terms_param value '"<<(*params_it).getValue()<<"'\n";
+        //std::cout<<"search_terms_param key '"<<(*params_it).getKey()<<"'\n";
+        //std::cout<<"search_terms_param value '"<<(*params_it).getValue()<<"'\n";
         KeyValueContainer searchContainer((*params_it).getValue(),(*params_it).getHost());
         incrementCount(&search_queries, searchContainer);
+        incrementCount(&referer_hostnames, (*params_it).getHost() ); // also add search hostnames to external domains table
       }
     }
   }
 }
-void HttpAccessLogMetrics::processRequestUrl( std::string requestURL ){
+void HttpAccessLogMetrics::processRequestUrl( std::string requestPath ){
   std::vector<ParamsContainer> params;
   std::vector<ParamsContainer>::iterator params_it;
-  url_parts url_parsed = getUrlPartsFromReqURL( requestURL, "http", internal_hostnames[0] );
+  url_parts url_parsed = getUrlPartsFromReqPath( requestPath, "http", internal_hostnames[0] );
   int hostname_type = 1;
   if( url_parsed.path.length()> 0){
-    incrementCount(&page_paths_full, requestURL);
+    incrementCount(&page_paths_full, requestPath);
     incrementCount(&internal_paths, url_parsed.path);
   }
   if( url_parsed.hostname.length()>0){
@@ -427,7 +434,7 @@ void HttpAccessLogMetrics::processRequestUrl( std::string requestURL ){
   }
   if(url_parsed.params.length() > 0 ) {
     if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-      params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, requestURL );
+      params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, requestPath );
     }
     for( params_it = params.begin(); params_it!=params.end(); params_it++){
       incrementCount(&internal_params, (*params_it));
@@ -496,18 +503,24 @@ void HttpAccessLogMetrics::insertEntities(){
   lm.insertStringEntities( "httpstats_pages", "pages_paths", internal_paths_ids, internal_paths );
   lm.insertParamsEntities( referer_params_ids, referer_params, referer_paths_ids, page_paths_full_ids);
   lm.insertParamsEntities( internal_params_ids, internal_params, internal_paths_ids, page_paths_full_ids);
+  lm.insertSearchTerms( search_queries_ids, search_queries, referer_hostnames_ids );
+  lm.insertTrafficVectors( true, tvectors_inner_ids, tvectors_inner, referer_hostnames_ids, page_paths_full_ids);
+  lm.insertTrafficVectors( false, tvectors_incoming_ids, tvectors_incoming, referer_hostnames_ids, page_paths_full_ids);
 }
 std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){
   return client_ips;
 }
 void HttpAccessLogMetrics::printAllIdsMaps(){
   std::map<unsigned long,int>::iterator ul_it;
+  std::map<std::string,int>::iterator str_it;
+  std::map<ParamsContainer,int>::iterator pc_it;
+  std::map<KeyValueContainer,int>::iterator kv_it;
+  std::map<TVectorContainer,int>::iterator tvc_it;
   for( ul_it = client_ips_ids.begin(); ul_it!=client_ips_ids.end(); ul_it++){
     std::string ip = getStringIP(ul_it->first);
     int id = ul_it->second;
     std::cout<<ip<<":"<<id<<"\n";
   }
-  std::map<std::string,int>::iterator str_it;
   for( str_it = referer_hostnames_ids.begin(); str_it!=referer_hostnames_ids.end(); str_it++){
     std::string host = str_it->first;
     int id = str_it->second;
@@ -518,7 +531,6 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
     int id = str_it->second;
     std::cout<<"full page path "<<path_full<<":"<<id<<"\n";
   }
-  std::map<KeyValueContainer,int>::iterator kv_it;
   for( kv_it = client_devices_ids.begin(); kv_it!=client_devices_ids.end(); kv_it++){
     KeyValueContainer kvC = kv_it->first;
     int id = kv_it->second;
@@ -550,7 +562,6 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
     int id = str_it->second;
     std::cout<<"internal_paths "<<path<<":"<<id<<"\n";
   }
-  std::map<ParamsContainer,int>::iterator pc_it;
   for( pc_it = referer_params_ids.begin(); pc_it!=referer_params_ids.end(); pc_it++){
     int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
@@ -560,6 +571,21 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
     int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
     std::cout<<"internal_params "<<pc.toString()<<":"<<id<<"\n";
+  }
+  for( kv_it = search_queries_ids.begin(); kv_it!=search_queries_ids.end(); kv_it++){
+    KeyValueContainer kvC = kv_it->first;
+    int id = kv_it->second;
+    std::cout<<"search_queries "<<kvC.toString()<<":"<<id<<"\n";
+  }
+  for( tvc_it = tvectors_inner_ids.begin(); tvc_it!=tvectors_inner_ids.end(); tvc_it++){
+    TVectorContainer tvC = tvc_it->first;
+    int id = tvc_it->second;
+    std::cout<<"tvectors "<<tvC.toString()<<":"<<id<<"\n";
+  }
+  for( tvc_it = tvectors_incoming_ids.begin(); tvc_it!=tvectors_incoming_ids.end(); tvc_it++){
+    TVectorContainer tvC = tvc_it->first;
+    int id = tvc_it->second;
+    std::cout<<"tvectors "<<tvC.toString()<<":"<<id<<"\n";
   }
 }
 //PRIVATE
@@ -589,10 +615,12 @@ url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string ){
   if(found == -1 ){
     hostname = path_noproto;
     page_path = "";
+    result.full_path = "/";
   }
   else {
     hostname = path_noproto.substr(0,found);
     page_path = path_noproto.substr(found, path_noproto.length() - found );
+    result.full_path = page_path;
   }
   found = page_path.find("?");
   if(found != -1){
@@ -605,21 +633,22 @@ url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string ){
   result.path = page_path;
   return result;
 }
-url_parts HttpAccessLogMetrics::getUrlPartsFromReqURL( std::string requestURL, std::string proto, std::string hostname ){
+url_parts HttpAccessLogMetrics::getUrlPartsFromReqPath( std::string requestPath, std::string proto, std::string hostname ){
   url_parts result;
   std::string page_path, params_str;
   result.protocol = proto;
   result.hostname = hostname;
-  std::size_t found = requestURL.find("?");
+  std::size_t found = requestPath.find("?");
   if(found != -1){
-    params_str = requestURL.substr(found+1, (requestURL.length()-found-1));
-    page_path = requestURL.substr(0, found);
+    params_str = requestPath.substr(found+1, (requestPath.length()-found-1));
+    page_path = requestPath.substr(0, found);
   }
   else{
     params_str = "";
-    page_path = requestURL;
+    page_path = requestPath;
   }
   result.params = params_str;
   result.path = page_path;
+  result.full_path = requestPath;
   return result;
 }

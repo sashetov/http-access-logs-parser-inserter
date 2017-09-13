@@ -2,6 +2,10 @@
 #include "htlog_containers.hpp"
 #endif
 // KVC
+KeyValueContainer::KeyValueContainer( ) {
+  key = "";
+  value = "";
+}
 KeyValueContainer::KeyValueContainer( std::string k, std::string v) {
   key = k;
   value = v;
@@ -29,12 +33,23 @@ int KeyValueContainer::operator >( const KeyValueContainer &rhs) const {
 int KeyValueContainer::operator ==( const KeyValueContainer &rhs) const {
   return key == rhs.getKey() && value == rhs.getValue();
 }
+std::string KeyValueContainer::toString() const {
+  return key+","+value;
+}
 KeyValueContainer::~KeyValueContainer() {
 }
 std::ostream &operator<<(std::ostream &os, KeyValueContainer const &m) { 
   return os << m.getKey()<<" : "<<m.getValue();
 }
 //PC
+ParamsContainer::ParamsContainer( ) : KeyValueContainer(){
+  page_type = 0;
+  hostname = "";
+  page_path = "";
+  page_path_full = "";
+  key = "";
+  value = "";
+}
 ParamsContainer::ParamsContainer( int pageType, std::string host, std::string pagePath, std::string pagePathFull, std::string k, std::string v) : KeyValueContainer(k,v){
   page_type = pageType;
   hostname = host;
@@ -89,4 +104,64 @@ std::string ParamsContainer::toString() const{
 }
 ParamsContainer::~ParamsContainer(){
 }
+//TVC
+TVectorContainer::TVectorContainer(){
+  isInnerVector = true;
+  referer_domain = "";
+  page_path_a = "";
+  page_path_b = "";
 
+}
+TVectorContainer::TVectorContainer(bool inner_vector, std::string external_hostname, std::string full_path_a, std::string full_path_b ){
+  isInnerVector = inner_vector;
+  referer_domain = external_hostname ;
+  page_path_a = full_path_a;
+  page_path_b = full_path_b;
+}
+bool TVectorContainer::vectorIsInner() const {
+  return isInnerVector;
+}
+std::string TVectorContainer::getExternalDomain() const {
+  return referer_domain;
+}
+std::string TVectorContainer::getPagePathA() const {
+  return page_path_a;
+}
+std::string TVectorContainer::getPagePathB() const{
+  return page_path_b;
+}
+int TVectorContainer::operator <( const TVectorContainer & rhs ) const {
+  if( isInnerVector != rhs.vectorIsInner() )
+    return isInnerVector < rhs.vectorIsInner();
+  if( referer_domain != rhs.getExternalDomain() )
+    return referer_domain < rhs.getExternalDomain();
+  if( page_path_a != rhs.getPagePathA() )
+    return page_path_a < rhs.getPagePathA();
+  if( page_path_b != rhs.getPagePathB() )
+    return page_path_b < rhs.getPagePathB();
+  return 0;
+}
+int TVectorContainer::operator >( const TVectorContainer & rhs ) const {
+  if( isInnerVector != rhs.vectorIsInner() )
+    return isInnerVector > rhs.vectorIsInner();
+  if( referer_domain != rhs.getExternalDomain() )
+    return referer_domain > rhs.getExternalDomain();
+  if( page_path_a != rhs.getPagePathA() )
+    return page_path_a > rhs.getPagePathA();
+  if( page_path_b != rhs.getPagePathB() )
+    return page_path_b > rhs.getPagePathB();
+  return 0;
+}
+int TVectorContainer::operator ==( const TVectorContainer & rhs ) const {
+  return isInnerVector == rhs.vectorIsInner() && referer_domain == rhs.getExternalDomain() && page_path_a == rhs.getPagePathA() && page_path_b == rhs.getPagePathB();
+}
+std::string TVectorContainer::toString() const{
+  if(isInnerVector){
+    return "inner("+page_path_a+" -> "+page_path_b+")";
+  }
+  else {
+    return "incoming("+referer_domain+"/"+page_path_a+" -> "+page_path_b+")";
+  }
+}
+TVectorContainer::~TVectorContainer(){
+}
