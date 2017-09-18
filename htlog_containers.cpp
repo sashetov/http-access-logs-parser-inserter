@@ -165,3 +165,131 @@ std::string TVectorContainer::toString() const{
 }
 TVectorContainer::~TVectorContainer(){
 }
+//HH
+HourlyHitsContainer::HourlyHitsContainer(){
+  hour_ts = 0;
+  domain_id = 0;
+}
+HourlyHitsContainer::HourlyHitsContainer( int did, time_t ts_full ){
+  hour_ts = roundTsToHour(&ts_full);
+  domain_id = did;
+}
+time_t HourlyHitsContainer::roundTsToHour( time_t * ts_full ) {
+  struct tm * timeinfo;
+  timeinfo = localtime(ts_full);
+  // null the minutes and seconds
+  timeinfo->tm_sec = 0;
+  timeinfo->tm_min = 0;
+  time_t ts_hourly = mktime(timeinfo);
+  return ts_hourly;
+}
+time_t HourlyHitsContainer::getHourlyTs() const{
+  return hour_ts;
+}
+std::string HourlyHitsContainer::getTsHour( ){
+  struct tm * tm_info;
+  char buffer[26];
+  tm_info = localtime(&hour_ts);
+  strftime(buffer, 26, "%d-%h-%Y %H:%M:%S %Z", tm_info);
+  return std::string(buffer);
+}
+std::string HourlyHitsContainer::getTsMysql( ){
+  struct tm * tm_info;
+  char buffer[26];
+  tm_info = localtime(&hour_ts);
+  strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+  return std::string(buffer);
+}
+int HourlyHitsContainer::getDomainId() const{
+  return domain_id;
+}
+int HourlyHitsContainer::operator <( const HourlyHitsContainer & rhs ) const {
+  if( domain_id != rhs.getDomainId() )
+    return domain_id < rhs.getDomainId();
+  if( hour_ts != rhs.getHourlyTs() )
+    return hour_ts < rhs.getHourlyTs();
+  return 0;
+}
+int HourlyHitsContainer::operator >( const HourlyHitsContainer & rhs ) const {
+  if( domain_id != rhs.getDomainId() )
+    return domain_id > rhs.getDomainId();
+  if( hour_ts != rhs.getHourlyTs() )
+    return hour_ts > rhs.getHourlyTs();
+  return 0;
+}
+int HourlyHitsContainer::operator ==( const HourlyHitsContainer & rhs ) const {
+  return domain_id == rhs.getDomainId() && hour_ts == rhs.getHourlyTs();
+}
+HourlyHitsContainer::~HourlyHitsContainer(){
+}
+
+HourlyVisitsContainer::HourlyVisitsContainer() : HourlyHitsContainer() {
+  client_ip = 0;
+}
+HourlyVisitsContainer::HourlyVisitsContainer(int did, time_t ts_full, unsigned long ip) : HourlyHitsContainer( did, ts_full ) {
+  client_ip = ip;
+}
+unsigned long HourlyVisitsContainer::getIp() const{
+  return client_ip;
+}
+int HourlyVisitsContainer::operator <(const HourlyVisitsContainer & rhs) const {
+  if( domain_id != rhs.getDomainId() )
+    return domain_id < rhs.getDomainId();
+  if( hour_ts != rhs.getHourlyTs() )
+    return hour_ts < rhs.getHourlyTs();
+  if( client_ip != rhs.getIp() )
+    return client_ip < rhs.getIp();
+  return 0;
+}
+int HourlyVisitsContainer::operator >(const HourlyVisitsContainer & rhs) const {
+  if( domain_id != rhs.getDomainId() )
+    return domain_id > rhs.getDomainId();
+  if( hour_ts != rhs.getHourlyTs() )
+    return hour_ts > rhs.getHourlyTs();
+  if( client_ip != rhs.getIp() )
+    return client_ip > rhs.getIp();
+  return 0;
+
+}
+int HourlyVisitsContainer::operator ==(const HourlyVisitsContainer & rhs) const {
+  return domain_id == rhs.getDomainId() && hour_ts == rhs.getHourlyTs() && client_ip == rhs.getIp();
+}
+HourlyVisitsContainer::~HourlyVisitsContainer(){
+}
+
+HourlyPageviewsContainer::HourlyPageviewsContainer() : HourlyVisitsContainer() {
+  page_path = "";
+}
+HourlyPageviewsContainer::HourlyPageviewsContainer(int did, time_t ts_full, unsigned long ip, std::string full_path) : HourlyVisitsContainer( did, ts_full, ip ) {
+  page_path = full_path;
+}
+std::string HourlyPageviewsContainer::getPagePath() const{
+  return page_path;
+}
+int HourlyPageviewsContainer::operator <(const HourlyPageviewsContainer & rhs) const {
+  if( domain_id != rhs.getDomainId() )
+    return domain_id < rhs.getDomainId();
+  if( hour_ts != rhs.getHourlyTs() )
+    return hour_ts < rhs.getHourlyTs();
+  if( client_ip != rhs.getIp() )
+    return client_ip < rhs.getIp();
+  if( page_path != rhs.getPagePath() )
+    return page_path < rhs.getPagePath();
+  return 0;
+}
+int HourlyPageviewsContainer::operator >(const HourlyPageviewsContainer & rhs) const {
+  if( domain_id != rhs.getDomainId() )
+    return domain_id > rhs.getDomainId();
+  if( hour_ts != rhs.getHourlyTs() )
+    return hour_ts > rhs.getHourlyTs();
+  if( client_ip != rhs.getIp() )
+    return client_ip > rhs.getIp();
+  if( page_path != rhs.getPagePath() )
+    return page_path > rhs.getPagePath();
+  return 0;
+}
+int HourlyPageviewsContainer::operator ==(const HourlyPageviewsContainer & rhs) const {
+  return domain_id == rhs.getDomainId() && hour_ts == rhs.getHourlyTs() && client_ip == rhs.getIp() && page_path == rhs.getPagePath();
+}
+HourlyPageviewsContainer::~HourlyPageviewsContainer(){
+}

@@ -361,5 +361,80 @@ void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,int> 
     std::cout << "# ERR: " << e.what() << "\n";
   }
 }
+void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, int real_did){
+  try {
+    std::string database = "httpstats_domains";
+    std::string table = "hits_hourly";
+    std::string insert_sql = "INSERT IGNORE INTO "+table+"(date,domains_id,count) VALUES ";
+    sql::Driver * driver = sql::mysql::get_driver_instance();
+    boost::scoped_ptr< sql::Connection > conn(driver->connect(mysql_url, username, password));
+    conn->setSchema(database);
+    std::map<HourlyHitsContainer,int>::iterator hhc_it;
+    for( hhc_it = hits.begin(); hhc_it!=hits.end(); hhc_it++){
+      HourlyHitsContainer hhC = hhc_it->first;
+      int count = hhc_it->second;
+      insert_sql += "('"+hhC.getTsMysql()+"',"+std::to_string(real_did)+","+std::to_string(count)+"),";
+    }
+    insert_sql = insert_sql.substr(0, insert_sql.size()-1);
+    insert_sql +=";";
+    boost::scoped_ptr< sql::Statement > stmt(conn->createStatement());
+    std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
+    stmt->execute(insert_sql);
+  } catch (sql::SQLException &e) {
+    std::cout << "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+  }
+}
+void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits, int real_did, std::map<unsigned long, int> client_ips_ids ){
+  try {
+    std::string database = "httpstats_clients";
+    std::string table = "visits_hourly";
+    std::string insert_sql = "INSERT IGNORE INTO "+table+"(date,domains_id,ip_id,count) VALUES ";
+    sql::Driver * driver = sql::mysql::get_driver_instance();
+    boost::scoped_ptr< sql::Connection > conn(driver->connect(mysql_url, username, password));
+    conn->setSchema(database);
+    std::map<HourlyVisitsContainer,int>::iterator hvc_it;
+    for( hvc_it = visits.begin(); hvc_it!=visits.end(); hvc_it++){
+      HourlyVisitsContainer hvC = hvc_it->first;
+      unsigned long ip = hvC.getIp();
+      int count = hvc_it->second;
+      int ip_id =  (client_ips_ids.find(ip))->second;
+      insert_sql += "('"+hvC.getTsMysql()+"',"+std::to_string(real_did)+","+std::to_string(ip_id)+","+std::to_string(count)+"),";
+    }
+    insert_sql = insert_sql.substr(0, insert_sql.size()-1);
+    insert_sql +=";";
+    boost::scoped_ptr< sql::Statement > stmt(conn->createStatement());
+    std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
+    stmt->execute(insert_sql);
+  } catch (sql::SQLException &e) {
+    std::cout << "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+  }
+}
+void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> pageviews, int real_did, std::map<unsigned long, int> client_ips_ids, std::map<std::string,int> page_paths_full_ids ){
+  try {
+    std::string database = "httpstats_pages";
+    std::string table = "pageviews_hourly";
+    std::string insert_sql = "INSERT IGNORE INTO "+table+"(date,domains_id,ip_id,page_id,count) VALUES ";
+    sql::Driver * driver = sql::mysql::get_driver_instance();
+    boost::scoped_ptr< sql::Connection > conn(driver->connect(mysql_url, username, password));
+    conn->setSchema(database);
+    std::map<HourlyPageviewsContainer,int>::iterator hpc_it;
+    for( hpc_it = pageviews.begin(); hpc_it!=pageviews.end(); hpc_it++){
+      HourlyPageviewsContainer hpC = hpc_it->first;
+      unsigned long ip = hpC.getIp();
+      std::string page_path = hpC.getPagePath();
+      int count = hpc_it->second;
+      int ip_id =  (client_ips_ids.find(ip))->second;
+      int page_id =  (page_paths_full_ids.find(page_path))->second;
+      insert_sql += "('"+hpC.getTsMysql()+"',"+std::to_string(real_did)+","+std::to_string(ip_id)+","+std::to_string(page_id)+","+std::to_string(count)+"),";
+    }
+    insert_sql = insert_sql.substr(0, insert_sql.size()-1);
+    insert_sql +=";";
+    boost::scoped_ptr< sql::Statement > stmt(conn->createStatement());
+    std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
+    stmt->execute(insert_sql);
+  } catch (sql::SQLException &e) {
+    std::cout << "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+  }
+}
 LogsMysql::~LogsMysql(){
 }

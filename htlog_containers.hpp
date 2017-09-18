@@ -1,6 +1,7 @@
 #ifndef __HTLOG_CONTAINERS__
 #include <iostream>
 #include <string>
+#include <time.h>
 class KeyValueContainer{
   public:
     KeyValueContainer( );
@@ -58,6 +59,47 @@ class TVectorContainer {
     std::string referer_domain;
     std::string page_path_a;
     std::string page_path_b;
+};
+class HourlyHitsContainer {
+  public:
+    HourlyHitsContainer();
+    HourlyHitsContainer( int, time_t );
+    time_t getHourlyTs() const;
+    std::string getTsHour( );
+    std::string getTsMysql( );
+    int getDomainId() const;
+    int operator <( const HourlyHitsContainer &) const;
+    int operator >( const HourlyHitsContainer &) const;
+    int operator ==( const HourlyHitsContainer &) const;
+    ~HourlyHitsContainer();
+  protected:
+    time_t roundTsToHour(time_t *);
+    time_t hour_ts;
+    int domain_id;
+};
+class HourlyVisitsContainer : public HourlyHitsContainer {
+  public:
+    HourlyVisitsContainer();
+    HourlyVisitsContainer( int, time_t, unsigned long);
+    unsigned long getIp() const;
+    int operator <( const HourlyVisitsContainer &) const;
+    int operator >( const HourlyVisitsContainer &) const;
+    int operator ==( const HourlyVisitsContainer &) const;
+    ~HourlyVisitsContainer();
+  protected:
+    unsigned long client_ip;
+};
+class HourlyPageviewsContainer : public HourlyVisitsContainer {
+  public:
+    HourlyPageviewsContainer();
+    HourlyPageviewsContainer( int, time_t, unsigned long, std::string );
+    std::string getPagePath() const;
+    int operator <( const HourlyPageviewsContainer&) const;
+    int operator >( const HourlyPageviewsContainer&) const;
+    int operator ==( const HourlyPageviewsContainer&) const;
+    ~HourlyPageviewsContainer();
+  protected:
+    std::string page_path;
 };
 #define __HTLOG_CONTAINERS__
 #endif

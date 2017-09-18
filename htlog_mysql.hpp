@@ -23,6 +23,9 @@ class LogsMysql {
     void insertSearchTerms(std::map<KeyValueContainer,int> &, std::map<KeyValueContainer, int>, std::map<std::string,int>);
     void insertParamsEntities(std::map<ParamsContainer,int> &, std::map<ParamsContainer,int>, std::map<std::string,int>, std::map<std::string,int>);
     void insertTrafficVectors(bool inner, std::map<TVectorContainer,int> &, std::map<TVectorContainer,int>, std::map<std::string,int>, std::map<std::string,int>);
+    void insertHitsPerHour( std::map<HourlyHitsContainer,int>,int);
+    void insertVisitsPerHour( std::map<HourlyVisitsContainer,int>, int, std::map<unsigned long, int>);
+    void insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int>, int, std::map<unsigned long, int>, std::map<std::string, int> );
     ~LogsMysql();
   private:
     std::string host;

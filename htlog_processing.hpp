@@ -21,7 +21,7 @@ typedef struct logline {
   unsigned long  userIP;
   std::string userIPStr;
   std::string  date;
-  unsigned long timestamp;
+  time_t timestamp;
   std::string  requestPath;
   std::string  requestType;
   std::string  referer;
@@ -45,7 +45,7 @@ class HttpAccessLogMetrics {
     int parseLine(std::string,parsed_logline &);
     unsigned long getNumericIp( std::string );
     std::string getStringIP(unsigned long);
-    unsigned long getTimestamp( std::string );
+    time_t getTimestamp( std::string );
     template<typename T> void incrementCount( std::map<T,int>*, T );
     void processUserAgent( std::string );
     void processTrafficVectors( std::string, std::string );
@@ -97,9 +97,9 @@ class HttpAccessLogMetrics {
     std::map<TVectorContainer,int> tvectors_inner_ids;      // tvin_id
     std::map<TVectorContainer,int> tvectors_incoming;
     std::map<TVectorContainer,int> tvectors_incoming_ids;   // tvinc_id
-    std::map<std::string,int> hits;
-    std::map<std::string,int> visits;
-    std::map<std::string,int> pageviews;
+    std::map<HourlyHitsContainer,int> hits;
+    std::map<HourlyVisitsContainer,int> visits;
+    std::map<HourlyPageviewsContainer,int> pageviews;
     //mysql
     LogsMysql lm;
     //methods

@@ -37,6 +37,12 @@ int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, l
       parsed_logline ll;
       std::getline(statsFile, line);
       if (parseLine(line,ll) == 0) {
+        HourlyHitsContainer hhc = HourlyHitsContainer( real_did , ll.timestamp );
+        HourlyVisitsContainer hvc = HourlyVisitsContainer( real_did, ll.timestamp, ll.userIP);
+        HourlyPageviewsContainer hpc = HourlyPageviewsContainer( real_did, ll.timestamp, ll.userIP, ll.requestPath );
+        incrementCount( &hits, hhc );
+        incrementCount( &visits, hvc );
+        incrementCount( &pageviews, hpc );
         incrementCount( &client_ips, ll.userIP);
         incrementCount( &client_geo_locations, getCountryFromIP(ll.userIPStr));
         processUserAgent( ll.agent );
@@ -154,6 +160,25 @@ void HttpAccessLogMetrics::parseLogFile( int numThreads ){
       int count = kv_it->second;
       std::cout<<"query: "<<key.getKey()<<" search engine:"<<key.getValue()<<" count: "<<count<<"\n";
   }
+  std::map<HourlyHitsContainer,int>::iterator hhc_it;
+  std::cout<<"hits count "<<hits.size()<<"\n";
+  for( hhc_it = hits.begin(); hhc_it!=hits.end(); hhc_it++){
+      HourlyHitsContainer key = hhc_it->first;
+      int count = hhc_it->second;
+      std::cout<<"hits: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<"' count:"<<count<<"\n";
+  }
+  std::map<HourlyVisitsContainer,int>::iterator hvc_it;
+  for( hvc_it = visits.begin(); hvc_it!=visits.end(); hvc_it++){
+      HourlyVisitsContainer key = hvc_it->first;
+      int count = hvc_it->second;
+      std::cout<<"visits: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<" ip : "<< key.getIp() <<"' count:"<<count<<"\n";
+  }
+  std::map<HourlyPageviewsContainer,int>::iterator hpc_it;
+  for( hpc_it = pageviews.begin(); hpc_it!=pageviews.end(); hpc_it++){
+      HourlyPageviewsContainer key = hpc_it->first;
+      int count = hpc_it->second;
+      std::cout<<"pageviews: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<" ip : "<< key.getIp() <<" page_path "<<key.getPagePath()<<"' count:"<<count<<"\n";
+  }
 }
 unsigned long HttpAccessLogMetrics::getNumericIp( std::string addr ){
   uint32_t nbo_addr = inet_addr(addr.c_str());//address in network byte order
@@ -165,7 +190,7 @@ std::string HttpAccessLogMetrics::getStringIP( unsigned long ip ){
   ip_addr.s_addr = hostlong;
   return std::string(inet_ntoa(ip_addr));
 }
-unsigned long HttpAccessLogMetrics::getTimestamp( std::string dateTime ){
+time_t HttpAccessLogMetrics::getTimestamp( std::string dateTime ){
   struct tm tm;
   time_t epoch;
   if ( strptime(dateTime.c_str(), "%d/%h/%Y:%H:%M:%S %Z", &tm) != NULL ){
@@ -174,7 +199,7 @@ unsigned long HttpAccessLogMetrics::getTimestamp( std::string dateTime ){
   else {
     return -1;
   }
-  return (unsigned long) epoch;
+  return epoch;
 }
 int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
   //char *user_hostname, *date, *hour, *timezone, *host, *agent, *req, *ref, *p;
@@ -506,6 +531,9 @@ void HttpAccessLogMetrics::insertEntities(){
   lm.insertSearchTerms( search_queries_ids, search_queries, referer_hostnames_ids );
   lm.insertTrafficVectors( true, tvectors_inner_ids, tvectors_inner, referer_hostnames_ids, page_paths_full_ids);
   lm.insertTrafficVectors( false, tvectors_incoming_ids, tvectors_incoming, referer_hostnames_ids, page_paths_full_ids);
+  lm.insertHitsPerHour( hits, real_did );
+  lm.insertVisitsPerHour( visits, real_did, client_ips_ids );
+  lm.insertPageviewsPerHour( pageviews, real_did, client_ips_ids, page_paths_full_ids );
 }
 std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){
   return client_ips;
