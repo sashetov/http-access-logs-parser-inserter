@@ -1,4 +1,7 @@
 #include "htlog_processing.hpp"
+std::condition_variable cv;
+std::mutex cv_m;
+std::vector<int> lock_signal_vars;
 //misc pre-init
 std::string getHostnameFromLogfile( std::string filename ){
   std::string hostname = "";
@@ -42,9 +45,7 @@ void loadSearchHostnames( std::vector<std::string> &search_engines , std::string
 }
 size_t getFilesize(const std::string filename) {
   struct stat st;
-  int res =stat(filename.c_str(), &st) ;
   if (stat(filename.c_str(), &st) < 0) {
-    int err = errno;
     std::cout<< "stat errno "<<errno<< std::endl;
     return 1;
   }
@@ -73,6 +74,58 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   closedir(dir);
   return result;
 }
+void signals( int signal_num, int chunkSize ) {
+  {
+    std::lock_guard<std::mutex> lk(cv_m);
+    lock_signal_vars[signal_num%chunkSize] = signal_num;
+    std::cerr << "Notifying "<<signal_num<<"\n";
+  }
+  cv.notify_all();
+}
+void launchFileWorkers( int numWorkers, 
+    std::string filename,
+    std::vector<std::string> user_hostnames, 
+    std::vector<std::string> search_hosts, 
+    int cond, int chunkSize, int &numCompleted ){
+  std::cerr << "Waiting for "<<cond<<"\n";
+  std::unique_lock<std::mutex> lk(cv_m);
+  cv.wait(lk, [=]{return lock_signal_vars[cond % chunkSize ] == cond ;}); // c++11 for lambda [](){}
+  HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(user_hostnames,search_hosts,filename);
+  hMetrics.parseLogFile(numWorkers);
+  hMetrics.insertEntities();
+  hMetrics.printAllIdsMaps();
+  numCompleted++;
+  std::cerr << "...finished waiting. j == "<<cond<<" "<<numCompleted <<"\n";
+  lock_signal_vars[cond%chunkSize] =cond+chunkSize;
+  std::cerr<<"lock_signal_vars["<<lock_signal_vars[cond%chunkSize]<<"] reset to "<<lock_signal_vars[cond%chunkSize]<<std::endl;
+  cv.notify_all();
+}
+void parseNLogfilesAtATime( int n, std::string dirname, 
+    std::vector<std::string> filenames, 
+    std::vector<std::string> user_hostnames, 
+    std::vector<std::string> search_hosts ){
+  int max=40, maxParallel=4;
+  std::vector<std::thread> worker_threads;
+  std::vector<std::thread> signaling_threads;
+  int i,completed=0;
+  for(i=0; i<n; i++){
+    lock_signal_vars.push_back(-1);
+  }
+  for(i =0; i<max; i++){
+    std::string filename = dirname+"/"+filenames[i];
+    worker_threads.push_back(std::thread(launchFileWorkers,maxParallel,filename,user_hostnames,search_hosts,i,n,std::ref(completed)));
+  }
+  //std::this_thread::sleep_for(std::chrono::seconds(5));
+  for(i=0; i< n; i++){
+    signaling_threads.push_back(std::thread(signals,i,n));
+  }
+  for(i=0; i<max; i++){
+    worker_threads[i].join();
+  }
+  for(i=0; i< n; i++){
+    signaling_threads[i].join();
+  }
+}
 //PUBLIC
 HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ): lm(MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD){
   st = time(NULL);
@@ -85,8 +138,10 @@ HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts,
   for( i =0; i< (int)search_hosts.size(); i++){
     search_hostnames.push_back( search_hosts[i]);
   }
+  lm.initThread();
   real_did = lm.getDomainsId(internal_hostnames[0]);
   uid = lm.getUserId(real_did);
+  lm.endThread();
   filename = file;
 }
 HttpAccessLogMetrics::~HttpAccessLogMetrics(){
@@ -153,14 +208,14 @@ void HttpAccessLogMetrics::parseLogFile( int numThreads ){
     if( i == numThreads -1 ){
       numLines += remainder;
     }
-    threads.push_back( new std::thread( 
+    per_file_threads.push_back( new std::thread( 
           &HttpAccessLogMetrics::logsScanParallel, this,
           threadNumber, numLines, lineIndex ));
     lineIndex += numLines;
     threadNumber++;
   }
   for( i =0; i< numThreads; i++){
-    threads[i]->join();
+    per_file_threads[i]->join();
   }
   std::cout<<"client_ips "<<client_ips.size()<<"\n";
   std::map<unsigned long,int>::iterator ul_it;
@@ -591,6 +646,7 @@ std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::strin
   return results;
 }
 void HttpAccessLogMetrics::insertEntities(){
+  lm.initThread();
   lm.insertClientIps( client_ips_ids, client_ips );
   lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations );
   lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices);
@@ -608,6 +664,7 @@ void HttpAccessLogMetrics::insertEntities(){
   lm.insertHitsPerHour( hits, real_did );
   lm.insertVisitsPerHour( visits, real_did, client_ips_ids );
   lm.insertPageviewsPerHour( pageviews, real_did, client_ips_ids, page_paths_full_ids );
+  lm.myEndThread();
 }
 std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){
   return client_ips;

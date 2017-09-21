@@ -25,10 +25,6 @@ int main(int argc, char** argv) {
     std::cout<<"No non-empty files found in directory"<<"\n";
   }
   std::cout<<"filenames in dir "<<filenames.size()<<"\n";
-  std::string filename = dirname + "/" + filenames[0];
-  HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(user_hostnames,search_hosts,filename);
-  hMetrics.parseLogFile(4);
-  hMetrics.insertEntities();
-  hMetrics.printAllIdsMaps();
+  parseNLogfilesAtATime(2, dirname, filenames, user_hostnames, search_hosts );
   return 0;
 }

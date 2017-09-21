@@ -11,6 +11,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <condition_variable>
+#include <chrono>
 #include "htlog_uap.hpp"
 #include "htlog_containers.hpp"
 #include "htlog_mysql.hpp"
@@ -43,6 +45,10 @@ typedef struct url_parts {
   std::string path;
   std::string params;
 } url_parts;
+void waits( int, int, int &);
+void signals( int, int);
+void launchFileWorkers( int, std::string, std::vector<std::string>, std::vector<std::string>, int, int, int & );
+void parseNLogfilesAtATime( int n, std::string , std::vector<std::string> , std::vector<std::string> , std::vector<std::string> );
 class HttpAccessLogMetrics {
   public:
     HttpAccessLogMetrics( std::vector<std::string>, std::vector<std::string>,std::string);
@@ -64,7 +70,7 @@ class HttpAccessLogMetrics {
     std::map<unsigned long,int> getClientIps();
     void printAllIdsMaps();
   private:
-    std::vector<std::thread*> threads;
+    std::vector<std::thread*> per_file_threads;
     int st; // start timestamp
     int et; // end timestamp
     int real_did;
