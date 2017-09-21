@@ -8,7 +8,9 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <GeoLite2PP.hpp>
-#include <string>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "htlog_uap.hpp"
 #include "htlog_containers.hpp"
 #include "htlog_mysql.hpp"
@@ -16,6 +18,11 @@
 #define MYSQL_PORT 3308
 #define MYSQL_USER "root"
 #define MYSQL_PASSWORD "qqq"
+std::string getHostnameFromLogfile(std::string);
+void loadSearchHostnames(std::vector<std::string> &, std::string);
+std::vector<std::string> getLogfileNamesFromDirectory( std::string );
+int getdir(std::string dir, std::vector<std::string> &files);
+size_t getFilesize( std::string );
 typedef struct logline {
   std::string  hostname;
   unsigned long  userIP;
@@ -107,5 +114,4 @@ class HttpAccessLogMetrics {
     url_parts getUrlParts( std::string );
     url_parts getUrlPartsFromReqPath( std::string, std::string, std::string );
 };
-#define __HTLOG_PROCESSING__
 #endif
