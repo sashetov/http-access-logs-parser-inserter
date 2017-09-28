@@ -45,10 +45,9 @@ typedef struct url_parts {
   std::string path;
   std::string params;
 } url_parts;
-void waits( int, int, int &);
-void signals( int, int);
-void launchFileWorkers( int, std::string, std::vector<std::string>, std::vector<std::string>, int, int, int & );
-void parseNLogfilesAtATime( int n, std::string , std::vector<std::string> , std::vector<std::string> , std::vector<std::string> );
+void notify( int, int );
+void spawn_when_ready( int, int, int, int &,  std::string , std::vector<std::string> , std::vector<std::string> );
+void start_thread_pool( int, int, std::string, std::vector<std::string>, std::vector<std::string>, std::vector<std::string> );
 class HttpAccessLogMetrics {
   public:
     HttpAccessLogMetrics( std::vector<std::string>, std::vector<std::string>,std::string);

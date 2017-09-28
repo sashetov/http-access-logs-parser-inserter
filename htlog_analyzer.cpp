@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
     std::cout<<"No non-empty files found in directory"<<"\n";
   }
   std::cout<<"filenames in dir "<<filenames.size()<<"\n";
-  parseNLogfilesAtATime(2, dirname, filenames, user_hostnames, search_hosts );
+  //parseNLogfilesAtATime(20, dirname, filenames, user_hostnames, search_hosts );
+  start_thread_pool(20,1000,dirname,filenames,user_hostnames,search_hosts);
   return 0;
 }

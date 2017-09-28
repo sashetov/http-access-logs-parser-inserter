@@ -1,7 +1,10 @@
 #include "htlog_processing.hpp"
+std::vector<int> lock_signal_vars;
 std::condition_variable cv;
 std::mutex cv_m;
-std::vector<int> lock_signal_vars;
+std::mutex m;
+std::vector<std::thread> worker_threads;
+std::vector<std::thread> signaling_threads;
 //misc pre-init
 std::string getHostnameFromLogfile( std::string filename ){
   std::string hostname = "";
@@ -74,56 +77,65 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   closedir(dir);
   return result;
 }
-void signals( int signal_num, int chunkSize ) {
-  {
-    std::lock_guard<std::mutex> lk(cv_m);
-    lock_signal_vars[signal_num%chunkSize] = signal_num;
-    std::cerr << "Notifying "<<signal_num<<"\n";
-  }
+void notify( int tid, int tpool_size ) {
+  int lid = tid % tpool_size;
+  std::lock_guard<std::mutex> lk(m);
+  std::cerr << "notifying "<<lid<<"="<<tid<<"\n";
+  lock_signal_vars[lid] = tid;
   cv.notify_all();
 }
-void launchFileWorkers( int numWorkers, 
-    std::string filename,
-    std::vector<std::string> user_hostnames, 
-    std::vector<std::string> search_hosts, 
-    int cond, int chunkSize, int &numCompleted ){
-  std::cerr << "Waiting for "<<cond<<"\n";
-  std::unique_lock<std::mutex> lk(cv_m);
-  cv.wait(lk, [=]{return lock_signal_vars[cond % chunkSize ] == cond ;}); // c++11 for lambda [](){}
+void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted, std::string filename, std::vector<std::string> user_hostnames, std::vector<std::string> search_hosts ) {
+  int lid = tid % tpool_size;
+  std::unique_lock<std::mutex> lk(m);
+  cv.wait( lk, [=] { // c++11 for lambda [](){}
+    std::cerr << "waiting on lsv["<<lid<<"]=="<<tid<<"\n";
+    return lock_signal_vars[lid] == tid;
+  });
   HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(user_hostnames,search_hosts,filename);
-  hMetrics.parseLogFile(numWorkers);
+  hMetrics.parseLogFile(1); // number of file workers set to 1 as more tends to segfault, map increment not thread safe
   hMetrics.insertEntities();
   hMetrics.printAllIdsMaps();
-  numCompleted++;
-  std::cerr << "...finished waiting. j == "<<cond<<" "<<numCompleted <<"\n";
-  lock_signal_vars[cond%chunkSize] =cond+chunkSize;
-  std::cerr<<"lock_signal_vars["<<lock_signal_vars[cond%chunkSize]<<"] reset to "<<lock_signal_vars[cond%chunkSize]<<std::endl;
-  cv.notify_all();
+  ncompleted++;
+  std::cerr <<"condition reached lsv["<<lid<<"]=="<< tid <<" ncompleted: "<<ncompleted<<"\n";
+  /*int new_tid = worker_threads.size();
+  lid = new_tid % tpool_size;
+  if( new_tid < tmax ){
+    lock_signal_vars[lid] = -1;
+    worker_threads.push_back(( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)) ));
+    signaling_threads.push_back(( std::thread( notify, new_tid, tpool_size ) ));
+  }*/
 }
-void parseNLogfilesAtATime( int n, std::string dirname, 
-    std::vector<std::string> filenames, 
-    std::vector<std::string> user_hostnames, 
-    std::vector<std::string> search_hosts ){
-  int max=40, maxParallel=4;
-  std::vector<std::thread> worker_threads;
-  std::vector<std::thread> signaling_threads;
-  int i,completed=0;
-  for(i=0; i<n; i++){
+void start_thread_pool( int tpool_size, int nt_total, std::string dirname, std::vector<std::string> filenames, std::vector<std::string> user_hostnames, std::vector<std::string> search_hosts ){
+  int i, completed=0;
+  int iteration = 0;
+  std::string filename;
+  for(i=0; i< tpool_size; i++){
     lock_signal_vars.push_back(-1);
+    filename = dirname+"/"+filenames[i];
+    worker_threads.push_back( std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed), filename, user_hostnames, search_hosts ));
+    signaling_threads.push_back( std::thread( notify, i, tpool_size ) );
   }
-  for(i =0; i<max; i++){
-    std::string filename = dirname+"/"+filenames[i];
-    worker_threads.push_back(std::thread(launchFileWorkers,maxParallel,filename,user_hostnames,search_hosts,i,n,std::ref(completed)));
-  }
-  //std::this_thread::sleep_for(std::chrono::seconds(5));
-  for(i=0; i< n; i++){
-    signaling_threads.push_back(std::thread(signals,i,n));
-  }
-  for(i=0; i<max; i++){
+  for(i=0; i< tpool_size; i++){
     worker_threads[i].join();
   }
-  for(i=0; i< n; i++){
+  for(i=0; i< tpool_size; i++){
     signaling_threads[i].join();
+  }
+  while( completed < nt_total ) {
+    iteration++;
+    std::cout<<"at start of while"<<std::endl;
+    for(i=0; i< tpool_size; i++){
+      int cid = iteration * tpool_size + i;
+      lock_signal_vars[cid]=-1;
+      worker_threads[i]=( std::thread( spawn_when_ready, cid, tpool_size, nt_total, std::ref(completed),dirname,filenames,user_hostnames) );
+      signaling_threads[i]=( std::thread( notify, cid, tpool_size ) );
+    }
+    for(i=0; i< tpool_size; i++){
+      worker_threads[i].join();
+    }
+    for(i=0; i< tpool_size; i++){
+      signaling_threads[i].join();
+    }
   }
 }
 //PUBLIC
