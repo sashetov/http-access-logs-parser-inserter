@@ -5,7 +5,12 @@ std::mutex cv_m;
 std::mutex m;
 std::vector<std::thread> worker_threads;
 std::vector<std::thread> signaling_threads;
-//misc pre-init
+extern std::string dirname;
+extern std::vector<std::string> user_hostnames;
+extern std::vector<std::string> search_hosts;
+extern std::vector<std::string> filenames;
+
+//MISC PRE-INIT
 std::string getHostnameFromLogfile( std::string filename ){
   std::string hostname = "";
   std::string line;
@@ -26,7 +31,7 @@ std::string getHostnameFromLogfile( std::string filename ){
     }
     statsFile.close();
   } catch( const std::exception& e ){
-    std::cout<<"caught exception: "<<e.what()<<"\n";
+    std::cerr<<"caught exception: "<<e.what()<<"\n";
   }
   return hostname;
 }
@@ -43,13 +48,13 @@ void loadSearchHostnames( std::vector<std::string> &search_engines , std::string
     }
     statsFile.close();
   } catch( const std::exception& e ){
-    std::cout<<"caught exception: "<<e.what()<<"\n";
+    std::cerr<<"caught exception: "<<e.what()<<"\n";
   }
 }
 size_t getFilesize(const std::string filename) {
   struct stat st;
   if (stat(filename.c_str(), &st) < 0) {
-    std::cout<< "stat errno "<<errno<< std::endl;
+    std::cerr<< "stat errno "<<errno<< std::endl;
     return 1;
   }
   return st.st_size;
@@ -60,7 +65,7 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   std::vector<std::string> result;
   std::string filename="";
   if((dir = opendir(directory.c_str())) == NULL) {
-    std::cout << "Error(" << errno << ") opening " << directory << "\n";
+    std::cerr<< "Error(" << errno << ") opening " << directory << "\n";
     return result;
   }
   while((entry = readdir(dir)) != NULL){
@@ -77,79 +82,19 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   closedir(dir);
   return result;
 }
-void notify( int tid, int tpool_size ) {
-  int lid = tid % tpool_size;
-  std::lock_guard<std::mutex> lk(m);
-  std::cerr << "notifying "<<lid<<"="<<tid<<"\n";
-  lock_signal_vars[lid] = tid;
-  cv.notify_all();
-}
-void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted, std::string filename, std::vector<std::string> user_hostnames, std::vector<std::string> search_hosts ) {
-  int lid = tid % tpool_size;
-  std::unique_lock<std::mutex> lk(m);
-  cv.wait( lk, [=] { // c++11 for lambda [](){}
-    std::cerr << "waiting on lsv["<<lid<<"]=="<<tid<<"\n";
-    return lock_signal_vars[lid] == tid;
-  });
-  HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics(user_hostnames,search_hosts,filename);
-  hMetrics.parseLogFile(1); // number of file workers set to 1 as more tends to segfault, map increment not thread safe
-  hMetrics.insertEntities();
-  hMetrics.printAllIdsMaps();
-  ncompleted++;
-  std::cerr <<"condition reached lsv["<<lid<<"]=="<< tid <<" ncompleted: "<<ncompleted<<"\n";
-  /*int new_tid = worker_threads.size();
-  lid = new_tid % tpool_size;
-  if( new_tid < tmax ){
-    lock_signal_vars[lid] = -1;
-    worker_threads.push_back(( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)) ));
-    signaling_threads.push_back(( std::thread( notify, new_tid, tpool_size ) ));
-  }*/
-}
-void start_thread_pool( int tpool_size, int nt_total, std::string dirname, std::vector<std::string> filenames, std::vector<std::string> user_hostnames, std::vector<std::string> search_hosts ){
-  int i, completed=0;
-  int iteration = 0;
-  std::string filename;
-  for(i=0; i< tpool_size; i++){
-    lock_signal_vars.push_back(-1);
-    filename = dirname+"/"+filenames[i];
-    worker_threads.push_back( std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed), filename, user_hostnames, search_hosts ));
-    signaling_threads.push_back( std::thread( notify, i, tpool_size ) );
-  }
-  for(i=0; i< tpool_size; i++){
-    worker_threads[i].join();
-  }
-  for(i=0; i< tpool_size; i++){
-    signaling_threads[i].join();
-  }
-  while( completed < nt_total ) {
-    iteration++;
-    std::cout<<"at start of while"<<std::endl;
-    for(i=0; i< tpool_size; i++){
-      int cid = iteration * tpool_size + i;
-      lock_signal_vars[cid]=-1;
-      worker_threads[i]=( std::thread( spawn_when_ready, cid, tpool_size, nt_total, std::ref(completed),dirname,filenames,user_hostnames) );
-      signaling_threads[i]=( std::thread( notify, cid, tpool_size ) );
-    }
-    for(i=0; i< tpool_size; i++){
-      worker_threads[i].join();
-    }
-    for(i=0; i< tpool_size; i++){
-      signaling_threads[i].join();
-    }
-  }
-}
 //PUBLIC
-HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ): lm(MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD){
+ HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ): internal_hostnames(user_hosts), search_hostnames(search_hosts), lm(MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD){
   st = time(NULL);
-  int i =0;
   lines_failed=0;
   lines_processed=0;
+  /*
+  int i =0;
   for( i =0; i< (int)user_hosts.size(); i++){
     internal_hostnames.push_back( user_hosts[i]);
   }
   for( i =0; i< (int)search_hosts.size(); i++){
     search_hostnames.push_back( search_hosts[i]);
-  }
+  }*/
   lm.initThread();
   real_did = lm.getDomainsId(internal_hostnames[0]);
   uid = lm.getUserId(real_did);
@@ -158,10 +103,9 @@ HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts,
 }
 HttpAccessLogMetrics::~HttpAccessLogMetrics(){
 }
-int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, long startLine ){
-  std::cout<<"threadNumber "<<threadNumber<<" linesNumber "<<linesNumber<<" startLine "<<startLine<<"\n";
+int HttpAccessLogMetrics::logsScan( ){
+  //std::cout<<"threadNumber "<<threadNumber<<" linesNumber "<<linesNumber<<" startLine "<<startLine<<"\n";
   std::ifstream statsFile;
-  int i = 0;
   std::string line;
   try {
     statsFile.exceptions( std::ifstream::badbit | std::ifstream::failbit);
@@ -170,11 +114,7 @@ int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, l
     if (filename == "-") {
       return 1;
     }
-    while (std::getline(statsFile, line) && i < startLine ) { 
-      i++;
-    }
-    i=0;
-    while (!statsFile.eof() && i < linesNumber){
+    while ( !statsFile.eof() ){
       parsed_logline ll;
       std::getline(statsFile, line);
       if (parseLine(line,ll) == 0) {
@@ -195,130 +135,109 @@ int HttpAccessLogMetrics::logsScanParallel( int threadNumber, int linesNumber, l
         lines_failed++;
         std::cerr<<"Invalid line: "<< line<<"\n";
       }
-      i++;
     }
     statsFile.close();
-    //threadLogFile.close();
   } catch (const std::exception& e) {
     if(!statsFile.eof()){
-      std::cout<<"caught exception: "<<e.what()<<"\n";
+      std::cerr<<"caught exception: "<<e.what()<<"\n while processing filename "<<filename<<std::endl;
     }
     return 6;
   }
   et = time(NULL);
   return 0;
 }
-void HttpAccessLogMetrics::parseLogFile( int numThreads ){
-  int i =0;
-  int lines = getLinesNumber();
-  int remainder = lines % numThreads;
-  int chunkLines = lines / numThreads;
-  long lineIndex = 0;
-  int threadNumber = 0;
-  for( i= 0; i < numThreads ; i++ ){
-    int numLines = chunkLines;
-    if( i == numThreads -1 ){
-      numLines += remainder;
-    }
-    per_file_threads.push_back( new std::thread( 
-          &HttpAccessLogMetrics::logsScanParallel, this,
-          threadNumber, numLines, lineIndex ));
-    lineIndex += numLines;
-    threadNumber++;
-  }
-  for( i =0; i< numThreads; i++){
-    per_file_threads[i]->join();
-  }
-  std::cout<<"client_ips "<<client_ips.size()<<"\n";
+void HttpAccessLogMetrics::parseLogFile( ){
+  logsScan();
+  //std::cout<<"client_ips "<<client_ips.size()<<"\n";
   std::map<unsigned long,int>::iterator ul_it;
   for( ul_it = client_ips.begin(); ul_it!=client_ips.end(); ul_it++){
     unsigned long ip= ul_it->first;
     int count = ul_it->second;
-    std::cout<<"ip: "<<getStringIP(ip)<<" count: "<<count<<"\n";
+   //std::cout<<"ip: "<<getStringIP(ip)<<" count: "<<count<<"\n";
   }
-  std::cout<<"client_geo_locations "<<client_geo_locations.size()<<"\n";
+ //std::cout<<"client_geo_locations "<<client_geo_locations.size()<<"\n";
   std::map<std::string,int>::iterator str_it;
   for( str_it = client_geo_locations.begin(); str_it!=client_geo_locations.end(); str_it++){
     std::string key = str_it->first;
     int count = str_it->second;
-    std::cout<<"location : "<<key<<" count: "<<count<<"\n";
+   //std::cout<<"location : "<<key<<" count: "<<count<<"\n";
   }
   std::map<KeyValueContainer,int>::iterator kv_it;
-  std::cout<<"client_devices "<<client_devices.size()<<"\n";
+ //std::cout<<"client_devices "<<client_devices.size()<<"\n";
   for( kv_it= client_devices.begin(); kv_it!=client_devices.end(); kv_it++){
     KeyValueContainer name_version = kv_it->first;
     int count = kv_it->second;
-    std::cout<<"client_devices: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
+   //std::cout<<"client_devices: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
   }
-  std::cout<<"client_oses "<<client_oses.size()<<"\n";
+ //std::cout<<"client_oses "<<client_oses.size()<<"\n";
   for( kv_it = client_oses.begin(); kv_it!=client_oses.end(); kv_it++){
     KeyValueContainer name_version = kv_it->first;
     int count = kv_it->second;
-    std::cout<<"client_oses: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
+   //std::cout<<"client_oses: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
   }
-  std::cout<<"client_browsers "<<client_browsers.size()<<"\n";
+ //std::cout<<"client_browsers "<<client_browsers.size()<<"\n";
   for( kv_it = client_browsers.begin(); kv_it!=client_browsers.end(); kv_it++){
     KeyValueContainer name_version = kv_it->first;
     int count = kv_it->second;
-    std::cout<<"client_browsers: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
+   //std::cout<<"client_browsers: "<<name_version.getKey()<<":"<<name_version.getValue()<<" count: "<<count<<"\n";
   }
-  std::cout<<"page_paths_full "<<page_paths_full.size()<<"\n";
+ //std::cout<<"page_paths_full "<<page_paths_full.size()<<"\n";
   for( str_it = page_paths_full.begin(); str_it!=page_paths_full.end(); str_it++){
     std::string key = str_it->first;
     int count = str_it->second;
-    std::cout<<"page_paths_full: "<<key<<" count: "<<count<<"\n";
+   //std::cout<<"page_paths_full: "<<key<<" count: "<<count<<"\n";
   }
-  std::cout<<"referer_hostnames "<<referer_hostnames.size()<<"\n";
+ //std::cout<<"referer_hostnames "<<referer_hostnames.size()<<"\n";
   for( str_it = referer_hostnames.begin(); str_it!=referer_hostnames.end(); str_it++){
     std::string key = str_it->first;
     int count = str_it->second;
-    std::cout<<"referer_hostnames: "<<key<<" count: "<<count<<"\n";
+   //std::cout<<"referer_hostnames: "<<key<<" count: "<<count<<"\n";
   }
-  std::cout<<"referer_paths "<<referer_paths.size()<<"\n";
+ //std::cout<<"referer_paths "<<referer_paths.size()<<"\n";
   for( str_it = referer_paths.begin(); str_it!=referer_paths.end(); str_it++){
     std::string key = str_it->first;
     int count = str_it->second;
-    std::cout<<"referer_paths: "<<key<<" count: "<<count<<"\n";
+   //std::cout<<"referer_paths: "<<key<<" count: "<<count<<"\n";
   }
-  std::cout<<"referer_params "<<referer_params.size()<<"\n";
+ //std::cout<<"referer_params "<<referer_params.size()<<"\n";
   std::map<ParamsContainer,int>::iterator pc_it;
   for( pc_it = referer_params.begin(); pc_it!=referer_params.end(); pc_it++){
     ParamsContainer key = pc_it->first;
     int count = pc_it->second;
-    std::cout<<key.getPageType()<<" referer_hostname "<<key.getHost()<<" referer_page: "<<key.getPage()<<" referer param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
+   //std::cout<<key.getPageType()<<" referer_hostname "<<key.getHost()<<" referer_page: "<<key.getPage()<<" referer param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
   }
-  std::cout<<"internal_domains"<<internal_domains.size()<<"\n";
-  std::cout<<"internal_paths "<<internal_paths.size()<<"\n";
-  std::cout<<"internal_params "<<internal_params.size()<<"\n";
+ //std::cout<<"internal_domains"<<internal_domains.size()<<"\n";
+ //std::cout<<"internal_paths "<<internal_paths.size()<<"\n";
+ //std::cout<<"internal_params "<<internal_params.size()<<"\n";
   for( pc_it = internal_params.begin(); pc_it!=internal_params.end(); pc_it++){
     ParamsContainer key = pc_it->first;
     int count = pc_it->second;
-    std::cout<<key.getPageType()<<" internal_hostname "<<key.getHost()<<" internal_page: "<<key.getPage()<<" internref param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
+   //std::cout<<key.getPageType()<<" internal_hostname "<<key.getHost()<<" internal_page: "<<key.getPage()<<" internref param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
   }
-  std::cout<<"search_queries "<<search_queries.size()<<"\n";
+ //std::cout<<"search_queries "<<search_queries.size()<<"\n";
   for( kv_it = search_queries.begin(); kv_it!=search_queries.end(); kv_it++){
     KeyValueContainer key = kv_it->first;
     int count = kv_it->second;
-    std::cout<<"query: "<<key.getKey()<<" search engine:"<<key.getValue()<<" count: "<<count<<"\n";
+   //std::cout<<"query: "<<key.getKey()<<" search engine:"<<key.getValue()<<" count: "<<count<<"\n";
   }
   std::map<HourlyHitsContainer,int>::iterator hhc_it;
-  std::cout<<"hits count "<<hits.size()<<"\n";
+ //std::cout<<"hits count "<<hits.size()<<"\n";
   for( hhc_it = hits.begin(); hhc_it!=hits.end(); hhc_it++){
     HourlyHitsContainer key = hhc_it->first;
     int count = hhc_it->second;
-    std::cout<<"hits: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<"' count:"<<count<<"\n";
+   //std::cout<<"hits: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<"' count:"<<count<<"\n";
   }
   std::map<HourlyVisitsContainer,int>::iterator hvc_it;
   for( hvc_it = visits.begin(); hvc_it!=visits.end(); hvc_it++){
     HourlyVisitsContainer key = hvc_it->first;
     int count = hvc_it->second;
-    std::cout<<"visits: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<" ip : "<< key.getIp() <<"' count:"<<count<<"\n";
+   //std::cout<<"visits: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<" ip : "<< key.getIp() <<"' count:"<<count<<"\n";
   }
   std::map<HourlyPageviewsContainer,int>::iterator hpc_it;
   for( hpc_it = pageviews.begin(); hpc_it!=pageviews.end(); hpc_it++){
     HourlyPageviewsContainer key = hpc_it->first;
     int count = hpc_it->second;
-    std::cout<<"pageviews: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<" ip : "<< key.getIp() <<" page_path "<<key.getPagePath()<<"' count:"<<count<<"\n";
+   //std::cout<<"pageviews: "<<key.getHourlyTs()<<" '"<<key.getTsHour()<<" ip : "<< key.getIp() <<" page_path "<<key.getPagePath()<<"' count:"<<count<<"\n";
   }
 }
 unsigned long HttpAccessLogMetrics::getNumericIp( std::string addr ){
@@ -690,73 +609,73 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
   for( ul_it = client_ips_ids.begin(); ul_it!=client_ips_ids.end(); ul_it++){
     std::string ip = getStringIP(ul_it->first);
     int id = ul_it->second;
-    std::cout<<ip<<":"<<id<<"\n";
+    //std::cout<<ip<<":"<<id<<"\n";
   }
   for( str_it = referer_hostnames_ids.begin(); str_it!=referer_hostnames_ids.end(); str_it++){
     std::string host = str_it->first;
     int id = str_it->second;
-    std::cout<<"refhost "<<host<<":"<<id<<"\n";
+    //std::cout<<"refhost "<<host<<":"<<id<<"\n";
   }
   for( str_it = page_paths_full_ids.begin(); str_it!=page_paths_full_ids.end(); str_it++){
     std::string path_full = str_it->first;
     int id = str_it->second;
-    std::cout<<"full page path "<<path_full<<":"<<id<<"\n";
+    //std::cout<<"full page path "<<path_full<<":"<<id<<"\n";
   }
   for( kv_it = client_devices_ids.begin(); kv_it!=client_devices_ids.end(); kv_it++){
     KeyValueContainer kvC = kv_it->first;
     int id = kv_it->second;
     std::string name = kvC.getKey();
     std::string version = kvC.getValue();
-    std::cout<<"devices "<<name<<"+"<<version<<":"<<id<<"\n";
+    //std::cout<<"devices "<<name<<"+"<<version<<":"<<id<<"\n";
   }
   for( kv_it = client_oses_ids.begin(); kv_it!=client_oses_ids.end(); kv_it++){
     KeyValueContainer kvC = kv_it->first;
     int id = kv_it->second;
     std::string name = kvC.getKey();
     std::string version = kvC.getValue();
-    std::cout<<"os "<<name<<"+"<<version<<":"<<id<<"\n";
+    //std::cout<<"os "<<name<<"+"<<version<<":"<<id<<"\n";
   }
   for( kv_it = client_browsers_ids.begin(); kv_it!=client_browsers_ids.end(); kv_it++){
     KeyValueContainer kvC = kv_it->first;
     int id = kv_it->second;
     std::string name = kvC.getKey();
     std::string version = kvC.getValue();
-    std::cout<<"browsers "<<name<<"+"<<version<<":"<<id<<"\n";
+    //std::cout<<"browsers "<<name<<"+"<<version<<":"<<id<<"\n";
   }
   for( str_it = referer_paths_ids.begin(); str_it!=referer_paths_ids.end(); str_it++){
     std::string path = str_it->first;
     int id = str_it->second;
-    std::cout<<"referer_paths "<<path<<":"<<id<<"\n";
+    //std::cout<<"referer_paths "<<path<<":"<<id<<"\n";
   }
   for( str_it = internal_paths_ids.begin(); str_it!=internal_paths_ids.end(); str_it++){
     std::string path = str_it->first;
     int id = str_it->second;
-    std::cout<<"internal_paths "<<path<<":"<<id<<"\n";
+    //std::cout<<"internal_paths "<<path<<":"<<id<<"\n";
   }
   for( pc_it = referer_params_ids.begin(); pc_it!=referer_params_ids.end(); pc_it++){
     int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
-    std::cout<<"referer_params "<<pc.toString()<<":"<<id<<"\n";
+    //std::cout<<"referer_params "<<pc.toString()<<":"<<id<<"\n";
   }
   for( pc_it = internal_params_ids.begin(); pc_it!=internal_params_ids.end(); pc_it++){
     int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
-    std::cout<<"internal_params "<<pc.toString()<<":"<<id<<"\n";
+    //std::cout<<"internal_params "<<pc.toString()<<":"<<id<<"\n";
   }
   for( kv_it = search_queries_ids.begin(); kv_it!=search_queries_ids.end(); kv_it++){
     KeyValueContainer kvC = kv_it->first;
     int id = kv_it->second;
-    std::cout<<"search_queries "<<kvC.toString()<<":"<<id<<"\n";
+    //std::cout<<"search_queries "<<kvC.toString()<<":"<<id<<"\n";
   }
   for( tvc_it = tvectors_inner_ids.begin(); tvc_it!=tvectors_inner_ids.end(); tvc_it++){
     TVectorContainer tvC = tvc_it->first;
     int id = tvc_it->second;
-    std::cout<<"tvectors "<<tvC.toString()<<":"<<id<<"\n";
+    //std::cout<<"tvectors "<<tvC.toString()<<":"<<id<<"\n";
   }
   for( tvc_it = tvectors_incoming_ids.begin(); tvc_it!=tvectors_incoming_ids.end(); tvc_it++){
     TVectorContainer tvC = tvc_it->first;
     int id = tvc_it->second;
-    std::cout<<"tvectors "<<tvC.toString()<<":"<<id<<"\n";
+    //std::cout<<"tvectors "<<tvC.toString()<<":"<<id<<"\n";
   }
 }
 //PRIVATE
@@ -822,4 +741,59 @@ url_parts HttpAccessLogMetrics::getUrlPartsFromReqPath( std::string requestPath,
   result.path = page_path;
   result.full_path = requestPath;
   return result;
+}
+//OTHER
+void notify( int tid ) {
+  std::lock_guard<std::mutex> lk(m);
+  std::cerr<< "notifying "<<tid<<"\n";
+  lock_signal_vars[tid] = tid;
+  cv.notify_all();
+}
+void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
+  try {
+    std::string filename = dirname + "/" + filenames[tid];
+    std::unique_lock<std::mutex> lk(m);
+    cv.wait( lk, [=] { // c++11 for lambda [](){}
+        std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
+        return lock_signal_vars[tid] == tid;
+        });
+    std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
+    std::cout<<"user_hosts: "<<user_hostnames.size()<<" search_hosts: "<<search_hosts.size()<<" filename: "<<filename<<"\n";
+    HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostnames, search_hosts, filename );
+    hMetrics.parseLogFile( );
+    hMetrics.insertEntities( );
+    //hMetrics.printAllIdsMaps( );
+    ncompleted++;
+    std::cerr<<" ncompleted: "<<ncompleted<<"\n";
+    int new_tid = tid + tpool_size;
+    if( new_tid < tmax ){
+      lock_signal_vars[new_tid] = -1;
+      filename = dirname+"/"+filenames[new_tid];
+      worker_threads[new_tid]=( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)));
+      signaling_threads[new_tid]=( std::thread( notify, new_tid ) );
+    }
+  } catch( const std::exception& e ){
+    std::cerr<<"caught exception(spawn_when_ready): "<<e.what()<<"\n";
+  }
+}
+void start_thread_pool( int tpool_size ){
+  int i, completed=0;
+  std::string filename;
+  int nt_total= filenames.size();
+  worker_threads.resize(nt_total);
+  signaling_threads.resize(nt_total);
+  for(i=0; i< tpool_size; i++){
+    lock_signal_vars.push_back(-1);
+    filename = dirname+"/"+filenames[i];
+    worker_threads[i]=std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed) );
+    signaling_threads[i]=std::thread( notify, i );
+  }
+  i=0;
+  while( completed < nt_total ) {
+    int last = i;
+    for(i=last; i<nt_total; i++){
+      worker_threads[i].join();
+      signaling_threads[i].join();
+    }
+  }
 }

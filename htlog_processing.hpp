@@ -45,15 +45,12 @@ typedef struct url_parts {
   std::string path;
   std::string params;
 } url_parts;
-void notify( int, int );
-void spawn_when_ready( int, int, int, int &,  std::string , std::vector<std::string> , std::vector<std::string> );
-void start_thread_pool( int, int, std::string, std::vector<std::string>, std::vector<std::string>, std::vector<std::string> );
 class HttpAccessLogMetrics {
   public:
     HttpAccessLogMetrics( std::vector<std::string>, std::vector<std::string>,std::string);
     ~HttpAccessLogMetrics();
-    int logsScanParallel(int,int,long);
-    void parseLogFile(int);
+    int logsScan( );
+    void parseLogFile( );
     int parseLine(std::string,parsed_logline &);
     unsigned long getNumericIp( std::string );
     std::string getStringIP(unsigned long);
@@ -119,4 +116,7 @@ class HttpAccessLogMetrics {
     url_parts getUrlParts( std::string );
     url_parts getUrlPartsFromReqPath( std::string, std::string, std::string );
 };
+void notify( int );
+void spawn_when_ready( int, int, int, int& );
+void start_thread_pool( int );
 #endif

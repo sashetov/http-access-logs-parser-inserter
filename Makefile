@@ -1,6 +1,6 @@
 export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig'
 DEBUG=-g
-CXXFLAGS=-std=c++0x -Wall -fno-strict-aliasing -fno-omit-frame-pointer -v # -fPIC -O3
+CXXFLAGS=-O3 -std=c++0x -Wall -fno-strict-aliasing -fno-omit-frame-pointer -v # -fPIC 
 #MYSQLC_LDFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs mysqlclient)
 #MYSQLC_CFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags mysqlclient)
 PTHREAD_CFLAGS=-pthread
