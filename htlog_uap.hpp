@@ -6,12 +6,12 @@
 #include <map>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
-#include <regex>
+//#include <regex>
 #include <yaml-cpp/yaml.h>
 struct RegexContainer {
   std::string re_str;
-  //boost::regex  re;
-  std::regex re;
+  boost::regex  re;
+  //std::regex re;
 };
 struct Generic {
   std::string family;
@@ -68,11 +68,11 @@ class UAStore {
   std::vector<AgentStore> browserStore;
 };
 void trim(std::string& str);
-//void replace_all_placeholders( std::string&, const boost::smatch&, std::map<std::string::size_type, size_t>);
-void replace_all_placeholders( std::string&, const std::smatch&, std::map<std::string::size_type, size_t>);
+//void replace_all_placeholders( std::string&, const std::smatch&, std::map<std::string::size_type, size_t>);
+void replace_all_placeholders( std::string&, const boost::smatch&, std::map<std::string::size_type, size_t>);
 Device parse_device_impl(const std::string&, const UAStore* );
-//template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const boost::smatch& , const bool );
-template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const std::smatch& , const bool );
+//template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const std::smatch& , const bool );
+template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const boost::smatch& , const bool );
 Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store);
 Agent parse_os_impl(const std::string& ua, const UAStore* ua_store);
 class UserAgentParser {

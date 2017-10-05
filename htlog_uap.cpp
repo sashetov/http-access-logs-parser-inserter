@@ -63,12 +63,12 @@ AgentStore fill_agent_store( const YAML::Node node, const std::string repl, cons
     const std::string value = it->second.as<std::string>();
     if (key == "regex") {
       agent_store.regExpr.re_str = value;
-      //agent_store.regExpr.re.assign(value, boost::regex::optimize | boost::regex::normal);
-      try {
+      agent_store.regExpr.re.assign(value, boost::regex::optimize | boost::regex::normal);
+      /*try {
         agent_store.regExpr.re = std::regex( value, std::regex::optimize | std::regex::ECMAScript );
       } catch (std::regex_error& e) {
         print_regexp_error(agent_store.regExpr.re_str,e);
-      }
+      }*/
     } else if (key == repl) {
       agent_store.replacement = value;
       mark_placeholders(agent_store.replacementMap, agent_store.replacement);
@@ -92,12 +92,12 @@ DeviceStore fill_device_store(const YAML::Node& device_parser) {
     const std::string value = it->second.as<std::string>();
     if (key == "regex") {
       device.regExpr.re_str = value;
-      //device.regExpr.re.assign(value, boost::regex::optimize | boost::regex::normal);
-      try {
+      device.regExpr.re.assign(value, boost::regex::optimize | boost::regex::normal);
+      /*try {
         device.regExpr.re = std::regex( value, std::regex::optimize | std::regex::ECMAScript );
       } catch (std::regex_error& e) {
         print_regexp_error(device.regExpr.re_str,e);
-      }
+      }*/
     } else if (key == "regex_flag" && value == "i") {
       regex_flag = true;
     } else if (key == "device_replacement") {
@@ -114,12 +114,12 @@ DeviceStore fill_device_store(const YAML::Node& device_parser) {
     }
   }
   if (regex_flag == true) {
-    //device.regExpr.re.assign(device.regExpr.re_str, boost::regex::optimize | boost::regex::icase | boost::regex::normal);
-    try {
+    device.regExpr.re.assign(device.regExpr.re_str, boost::regex::optimize | boost::regex::icase | boost::regex::normal);
+    /*try {
       device.regExpr.re = std::regex(device.regExpr.re_str, std::regex::optimize | std::regex::icase | std::regex::ECMAScript );
     } catch (std::regex_error& e) {
       print_regexp_error(device.regExpr.re_str,e);
-    }
+    }*/
   }
   return device;
 }
@@ -150,8 +150,8 @@ void trim(std::string& str) {
   size_t last = str.find_last_not_of(' ');
   str = str.substr(first, (last - first + 1));
 }
-//void replace_all_placeholders( std::string& ua_property, const boost::smatch& result, std::map<std::string::size_type, size_t> replacement_map) {
-void replace_all_placeholders( std::string& ua_property, const std::smatch& result, std::map<std::string::size_type, size_t> replacement_map) {
+//void replace_all_placeholders( std::string& ua_property, const std::smatch& result, std::map<std::string::size_type, size_t> replacement_map) {
+void replace_all_placeholders( std::string& ua_property, const boost::smatch& result, std::map<std::string::size_type, size_t> replacement_map) {
   for ( std::map<std::string::size_type, size_t>::reverse_iterator iter = replacement_map.rbegin(); iter != replacement_map.rend(); ++iter ) {
     ua_property.replace(iter->first, 2, result[iter->second].str());
   }
@@ -161,10 +161,10 @@ void replace_all_placeholders( std::string& ua_property, const std::smatch& resu
 Device parse_device_impl(const std::string& ua, const UAStore* ua_store) {
   Device device;
   for (const auto& d : ua_store->deviceStore) {
-    //boost::smatch m;
-    std::smatch m;
-    //if ( boost::regex_search(ua, m, d.regExpr.re)) {
-    if ( std::regex_search(ua, m, d.regExpr.re)) {
+    //std::smatch m;
+    //if ( std::regex_search(ua, m, d.regExpr.re)) {
+    boost::smatch m;
+    if ( boost::regex_search(ua, m, d.regExpr.re)) {
       if (d.replacement.empty() && m.size() > 1) {
         device.family = m[1].str();
       } else {
@@ -194,8 +194,8 @@ Device parse_device_impl(const std::string& ua, const UAStore* ua_store) {
   }
   return device;
 }
-//template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& agent, const AGENT_STORE& store, const boost::smatch& m, const bool os ) {
-template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& agent, const AGENT_STORE& store, const std::smatch& m, const bool os ) {
+//template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& agent, const AGENT_STORE& store, const std::smatch& m, const bool os ) {
+template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& agent, const AGENT_STORE& store, const boost::smatch& m, const bool os ) {
   if (m.size() > 1) {
     agent.family = !store.replacement.empty() ?  std::regex_replace( store.replacement, std::regex("\\$1"), m[1].str()) : m[1];
   } else {
@@ -224,10 +224,10 @@ template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& agent, const A
 Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store) {
   Agent browser;
   for (const auto& b : ua_store->browserStore) {
-    //boost::smatch m;
-    std::smatch m;
-    //if (boost::regex_search(ua, m, b.regExpr.re)) {
-    if (std::regex_search(ua, m, b.regExpr.re)) {
+    //std::smatch m;
+    //if (std::regex_search(ua, m, b.regExpr.re)) {
+    boost::smatch m;
+    if (boost::regex_search(ua, m, b.regExpr.re)) {
       fill_agent(browser, b, m, false);
       break;
     } else {
@@ -239,10 +239,10 @@ Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store) {
 Agent parse_os_impl(const std::string& ua, const UAStore* ua_store) {
   Agent os;
   for (const auto& o : ua_store->osStore) {
-    //boost::smatch m;
-    std::smatch m;
-    //if (boost::regex_search(ua, m, o.regExpr.re)) {
-    if (std::regex_search(ua, m, o.regExpr.re)) {
+    //std::smatch m;
+    //if (std::regex_search(ua, m, o.regExpr.re)) {
+    boost::smatch m;
+    if (boost::regex_search(ua, m, o.regExpr.re)) {
       fill_agent(os, o, m, true);
       break;
     } else {
