@@ -24,12 +24,14 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
   std::cout<<"."<<std::endl;
   ncompleted++;
   std::cerr <<"condition reached lsv["<<tid<<"]=="<< tid <<" ncompleted: "<<ncompleted<<"\n";
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   int new_tid = tid + tpool_size;//worker_threads.size();
   if( new_tid < tmax ){
     lock_signal_vars[new_tid] = -1;
     worker_threads[new_tid]= std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted));
     signaling_threads[new_tid]= std::thread( notify, new_tid );
+    worker_threads[new_tid].detach();
+    signaling_threads[new_tid].detach();
   }
 }
 void start_thread_pool( int tpool_size, int nt_total ){
@@ -41,16 +43,10 @@ void start_thread_pool( int tpool_size, int nt_total ){
     lock_signal_vars[i] = -1;
     worker_threads[i] = std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed));
     signaling_threads[i] = std::thread( notify, i );
+    worker_threads[i].join();
+    signaling_threads[i].join();
   }
-  i=0;
-  while( completed < nt_total ){
-    int last = i;
-    std::cout<<" ncompleted "<<completed<<std::endl;
-    for(i=last; i<nt_total; i++){
-      worker_threads[i].join();
-      signaling_threads[i].join();
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  while(completed< nt_total ){
   }
 }
 int main(int argc, char** argv) {

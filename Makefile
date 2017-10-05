@@ -1,12 +1,7 @@
 export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig'
 DEBUG=-g
-CXXFLAGS=-O3 -std=c++0x -Wall -fno-strict-aliasing -fno-omit-frame-pointer -v # -fPIC 
-#MYSQLC_LDFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs mysqlclient)
-#MYSQLC_CFLAGS=$(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags mysqlclient)
+CXXFLAGS=-O0 -std=c++11 -Wall -fno-strict-aliasing -fno-omit-frame-pointer -v # -fPIC 
 PTHREAD_CFLAGS=-pthread
-PTHREAD_LDFLAGS=-lpthread
-TCMALLOC_LDFLAGS=-ltcmalloc
-#PTMALLOC_CFLAGS=-g -O2 -Wall -Wstrict-prototypes -lpthread -Isysdeps/generic
 UAP_LDFLAGS=-lboost_regex -lyaml-cpp
 GEOIP_LDFLAGS=-L /usr/local/lib/ -lgeolite2++ -lmaxminddb 
 MYSQL_CONN_LDFLAGS=-lmysqlcppconn

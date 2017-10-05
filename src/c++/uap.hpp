@@ -4,14 +4,11 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
 #include <regex>
 #include <yaml-cpp/yaml.h>
 struct RegexContainer {
   std::string re_str;
-  //boost::regex  re;
-  std::regex re;
+  std::regex  re;
 };
 struct Generic {
   std::string family;
@@ -56,7 +53,6 @@ struct UserAgent {
   bool isSpider() const { return device.family == "Spider"; }
 };
 void mark_placeholders(std::map<std::string::size_type, size_t>&, const std::string);
-void print_regexp_error( std::string,std::regex_error );
 AgentStore fill_agent_store( const YAML::Node, const std::string, const std::string, const std::string, const std::string);
 DeviceStore fill_device_store(const YAML::Node& device_parser);
 class UAStore {
@@ -68,10 +64,8 @@ class UAStore {
   std::vector<AgentStore> browserStore;
 };
 void trim(std::string& str);
-//void replace_all_placeholders( std::string&, const boost::smatch&, std::map<std::string::size_type, size_t>);
-void replace_all_placeholders( std::string&, const std::smatch&, std::map<std::string::size_type, size_t>);
+void replace_all_placeholders( std::string&, std::smatch, std::map<std::string::size_type, size_t>);
 Device parse_device_impl(const std::string&, const UAStore* );
-//template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const boost::smatch& , const bool );
 template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const std::smatch& , const bool );
 Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store);
 Agent parse_os_impl(const std::string& ua, const UAStore* ua_store);
@@ -84,5 +78,6 @@ class UserAgentParser {
   const std::string regexes_file_path_;
   const void* ua_store_;
 };
+//const UserAgentParser g_ua_parser("./uap_regexes.yaml");
 #define __HTLOG_UAP__
 #endif

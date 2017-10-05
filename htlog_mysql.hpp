@@ -31,7 +31,6 @@ class LogsMysql {
     void insertHitsPerHour( std::map<HourlyHitsContainer,int>,int);
     void insertVisitsPerHour( std::map<HourlyVisitsContainer,int>, int, std::map<unsigned long, int>);
     void insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int>, int, std::map<unsigned long, int>, std::map<std::string, int> );
-    void myEndThread();
     ~LogsMysql();
 private:
   std::string host;

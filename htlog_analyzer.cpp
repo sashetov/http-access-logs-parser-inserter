@@ -1,12 +1,10 @@
 #include <iostream>
 #include <vector>
 #include "htlog_processing.hpp"
-
 std::string dirname;
 std::vector<std::string> user_hostnames;
 std::vector<std::string> search_hosts;
 std::vector<std::string> filenames;
-
 int main(int argc, char** argv) {
   std::ios_base::sync_with_stdio(true);
   int minargc=2;

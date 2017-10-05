@@ -1,5 +1,4 @@
 #include "htlog_mysql.hpp"
-
 template<typename T> T getNthNode( std::map<T,int> pcs, int n ) {
   int i =0;
   typename std::map<T,int>::iterator it;
@@ -465,9 +464,6 @@ void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> p
   } catch (sql::SQLException &e) {
     std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
-}
-void LogsMysql::myEndThread(){
-  handler->driver->threadEnd();
 }
 LogsMysql::~LogsMysql(){
 }

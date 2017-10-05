@@ -9,7 +9,6 @@ extern std::string dirname;
 extern std::vector<std::string> user_hostnames;
 extern std::vector<std::string> search_hosts;
 extern std::vector<std::string> filenames;
-
 //MISC PRE-INIT
 std::string getHostnameFromLogfile( std::string filename ){
   std::string hostname = "";
@@ -411,6 +410,7 @@ std::string HttpAccessLogMetrics::getCountryFromIP( std::string client_ip){
   return m["country_iso_code"];
 }
 void HttpAccessLogMetrics::processUserAgent( std::string uaStr ){
+  const UserAgentParser g_ua_parser("./uap_regexes.yaml");
   const UserAgent ua = g_ua_parser.parse( uaStr );
   KeyValueContainer deviceC = KeyValueContainer(ua.device.model, ua.device.brand);
   incrementCount( &client_devices, deviceC);
@@ -595,7 +595,7 @@ void HttpAccessLogMetrics::insertEntities(){
   lm.insertHitsPerHour( hits, real_did );
   lm.insertVisitsPerHour( visits, real_did, client_ips_ids );
   lm.insertPageviewsPerHour( pageviews, real_did, client_ips_ids, page_paths_full_ids );
-  lm.myEndThread();
+  lm.endThread();
 }
 std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){
   return client_ips;
@@ -771,6 +771,8 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
       filename = dirname+"/"+filenames[new_tid];
       worker_threads[new_tid]=( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)));
       signaling_threads[new_tid]=( std::thread( notify, new_tid ) );
+      worker_threads[new_tid].detach(); // should prevent memory leaks...
+      signaling_threads[new_tid].detach();
     }
   } catch( const std::exception& e ){
     std::cerr<<"caught exception(spawn_when_ready): "<<e.what()<<"\n";
@@ -787,13 +789,9 @@ void start_thread_pool( int tpool_size ){
     filename = dirname+"/"+filenames[i];
     worker_threads[i]=std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed) );
     signaling_threads[i]=std::thread( notify, i );
+    worker_threads[i].join(); //should prevent memory leaks
+    signaling_threads[i].join();
   }
-  i=0;
-  while( completed < nt_total ) {
-    int last = i;
-    for(i=last; i<nt_total; i++){
-      worker_threads[i].join();
-      signaling_threads[i].join();
-    }
+  while( completed < nt_total ) { // wait out in this thread till completion
   }
 }
