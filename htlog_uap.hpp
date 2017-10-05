@@ -6,7 +6,7 @@
 #include <map>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
-//#include <regex>
+#include <regex>
 #include <yaml-cpp/yaml.h>
 struct RegexContainer {
   std::string re_str;
@@ -84,5 +84,6 @@ class UserAgentParser {
   const std::string regexes_file_path_;
   const void* ua_store_;
 };
+const UserAgentParser g_ua_parser("./uap_regexes.yaml");
 #define __HTLOG_UAP__
 #endif

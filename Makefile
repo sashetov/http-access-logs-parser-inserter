@@ -1,6 +1,6 @@
 export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig'
 DEBUG=-g
-CXXFLAGS=-O0 -std=c++11 -Wall -fno-strict-aliasing -fno-omit-frame-pointer -v # -fPIC 
+CXXFLAGS=-O3 -std=c++11 -Wall -fno-strict-aliasing -fno-omit-frame-pointer -v # -fPIC 
 PTHREAD_CFLAGS=-pthread
 UAP_LDFLAGS=-lboost_regex -lyaml-cpp
 GEOIP_LDFLAGS=-L /usr/local/lib/ -lgeolite2++ -lmaxminddb 

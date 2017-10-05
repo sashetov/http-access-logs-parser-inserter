@@ -410,7 +410,6 @@ std::string HttpAccessLogMetrics::getCountryFromIP( std::string client_ip){
   return m["country_iso_code"];
 }
 void HttpAccessLogMetrics::processUserAgent( std::string uaStr ){
-  const UserAgentParser g_ua_parser("./uap_regexes.yaml");
   const UserAgent ua = g_ua_parser.parse( uaStr );
   KeyValueContainer deviceC = KeyValueContainer(ua.device.model, ua.device.brand);
   incrementCount( &client_devices, deviceC);
@@ -793,5 +792,6 @@ void start_thread_pool( int tpool_size ){
     signaling_threads[i].join();
   }
   while( completed < nt_total ) { // wait out in this thread till completion
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 }
