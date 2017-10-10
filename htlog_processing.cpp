@@ -81,12 +81,7 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   return result;
 }
 //PUBLIC
- HttpAccessLogMetrics::HttpAccessLogMetrics(
-     std::vector<std::string> user_hosts, 
-     std::vector<std::string> search_hosts, std::string file ) : 
-   internal_hostnames(user_hosts), search_hostnames(search_hosts),
-   lm(user_hosts[0],MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD)
-{
+ HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ) : internal_hostnames(user_hosts), search_hostnames(search_hosts), lm(user_hosts[0],MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD) {
   st = time(NULL);
   lines_failed=0;
   lines_processed=0;

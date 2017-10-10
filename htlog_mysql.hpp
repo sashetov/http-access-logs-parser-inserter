@@ -9,6 +9,7 @@
 #include <cppconn/prepared_statement.h>
 #include <boost/scoped_ptr.hpp>
 #include "htlog_containers.hpp"
+#define LOG_SQL_STMTS 1
 template<typename T> T getNthNode( std::map<T,int>, int);
 struct st_worker_thread_param {
   sql::Driver *driver;
@@ -19,7 +20,7 @@ class LogsMysql {
     LogsMysql(std::string,std::string,int,std::string,std::string);
     void initThread();
     void endThread();
-    sql::ResultSet * runQuery(boost::scoped_ptr< sql::Statement > &, std::string );
+    sql::ResultSet * runSelectQuery(boost::scoped_ptr< sql::Statement > &, std::string );
     void runInsertQuery(boost::scoped_ptr< sql::Statement > &, std::string);
     int getDomainsId( std::string );
     int getUserId(int );
