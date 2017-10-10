@@ -2,19 +2,19 @@ let SessionLoad = 1
 if &cp | set nocp | endif
 let s:cpo_save=&cpo
 set cpo&vim
-inoremap <C-Space> 
-imap <Nul> <C-Space>
-inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
-inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
 inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
+inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
+inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
+imap <Nul> <C-Space>
+inoremap <C-Space> 
 inoremap <silent> <C-Tab> =UltiSnips#ListSnippets()
 map  :call JsBeautify()
 snoremap <silent>  c
 xnoremap <silent> 	 :call UltiSnips#SaveLastVisualSelection()gvs
 snoremap <silent> 	 :call UltiSnips#ExpandSnippet()
 snoremap  "_c
-nnoremap <silent> w :CCTreeWindowToggle
 nnoremap <silent> y :CCTreeWindowSaveCopy
+nnoremap <silent> w :CCTreeWindowToggle
 nnoremap \d :YcmShowDetailedDiagnostic
 nnoremap <silent> \pcf :call PhpCsFixerFixFile()
 nnoremap <silent> \pcd :call PhpCsFixerFixDirectory()
@@ -66,7 +66,7 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +3 Makefile
+badd +16 Makefile
 badd +1 htlog_analyzer.cpp
 badd +30 htlog_processing.hpp
 badd +1 src/sql/schemas/httpstats_api.sql
@@ -75,14 +75,14 @@ badd +9 src/sql/schemas/httpstats_domains.sql
 badd +13 src/sql/schemas/httpstats_jobs.sql
 badd +18 src/sql/schemas/httpstats_pages.sql
 badd +1 htlog_processing.cpp
-badd +66 htlog_uap.cpp
+badd +1 htlog_uap.cpp
 badd +1 htlog_uap.hpp
 badd +14 uap.hpp
 badd +1 uap.cpp
 badd +1 htlog_uap.h
 badd +1 htlog_containers.cpp
 badd +1 htlog_containers.hpp
-badd +479 htlog_mysql.cpp
+badd +1 htlog_mysql.cpp
 badd +1 htlog_mysql.hpp
 badd +75 src/example-code/mysql-connector-cpp/examples.h
 badd +177 src/example-code/mysql-connector-cpp/prepared_statement.cpp
@@ -236,12 +236,12 @@ set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 2 - ((1 * winheight(0) + 36) / 73)
+let s:l = 2 - ((1 * winheight(0) + 36) / 72)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 2
-normal! 02|
+normal! 075|
 tabedit Makefile
 set splitbelow splitright
 wincmd t
@@ -613,80 +613,12 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-104
-normal! zo
-108
-normal! zo
-112
-normal! zo
-750
-normal! zo
-751
-normal! zo
-756
-normal! zo
-757
-normal! zo
-757
-normal! zo
-775
-normal! zo
-764
-normal! zo
-768
-normal! zo
-771
-normal! zo
-778
-normal! zo
-774
-normal! zo
-783
-normal! zo
-780
-normal! zo
-780
-normal! zo
-780
-normal! zo
-781
-normal! zo
-789
-normal! zo
-792
-normal! zo
-795
-normal! zo
-805
-normal! zo
-811
-normal! zo
-819
-normal! zo
-804
-normal! zo
-810
-normal! zo
-818
-normal! zo
-804
-normal! zo
-810
-normal! zo
-818
-normal! zo
-804
-normal! zo
-810
-normal! zo
-818
-normal! zo
-let s:l = 798 - ((48 * winheight(0) + 36) / 72)
+let s:l = 2 - ((1 * winheight(0) + 36) / 72)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-798
-normal! 066|
+2
+normal! 0
 wincmd w
 argglobal
 3argu
@@ -931,12 +863,12 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 38 - ((37 * winheight(0) + 36) / 72)
+let s:l = 1 - ((0 * winheight(0) + 36) / 72)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-38
-normal! 01|
+1
+normal! 0
 wincmd w
 argglobal
 edit htlog_mysql.hpp
@@ -1185,11 +1117,11 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 66 - ((54 * winheight(0) + 36) / 72)
+let s:l = 1 - ((0 * winheight(0) + 36) / 72)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-66
+1
 normal! 0
 wincmd w
 argglobal
@@ -1427,11 +1359,11 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 23 - ((22 * winheight(0) + 36) / 72)
+let s:l = 1 - ((0 * winheight(0) + 36) / 72)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-23
+1
 normal! 0
 tabedit htlog_containers.cpp
 set splitbelow splitright
@@ -1799,11 +1731,11 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 51 - ((49 * winheight(0) + 36) / 72)
+let s:l = 1 - ((0 * winheight(0) + 36) / 72)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-51
+1
 normal! 0
 tabedit src/c++/uap.cpp
 set splitbelow splitright
@@ -2055,7 +1987,7 @@ normal! 0
 wincmd w
 exe 'vert 1resize ' . ((&columns * 113 + 106) / 212)
 exe 'vert 2resize ' . ((&columns * 98 + 106) / 212)
-tabnext 4
+tabnext 2
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif

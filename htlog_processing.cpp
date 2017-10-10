@@ -775,12 +775,24 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
     int new_tid = tid + tpool_size;
     if( new_tid < tmax ){
       try{
-          lock_signal_vars[new_tid] = -1;
-          filename = dirname+"/"+filenames[new_tid];
-          user_hostname = getHostnameFromLogfile(filename);
-          user_hostnames.clear();
-          user_hostnames.push_back(user_hostname);
-          user_hostnames.push_back("www."+user_hostname);
+        try{
+            lock_signal_vars[new_tid] = -1;
+        } catch(const std::exception& e){ std::runtime_error newexctp("lock_signal_vars_new_tid_exception:"+std::string(e.what())); throw newexctp; }
+        try{
+            filename = dirname+"/"+filenames[new_tid];
+        } catch(const std::exception& e){ std::runtime_error newexctp("new_tid_filename_exception:"+std::string(e.what())); throw newexctp; }
+        try{
+            user_hostname = getHostnameFromLogfile(filename);
+        } catch(const std::exception& e){ std::runtime_error newexctp("user_hostname_from_file_exception:"+std::string(e.what())); throw newexctp; }
+        try{
+            user_hostnames.clear();
+        } catch(const std::exception& e){ std::runtime_error newexctp("user_hostnames_clear_exception:"+std::string(e.what())); throw newexctp; }
+        try{
+            user_hostnames.push_back(user_hostname);
+        } catch(const std::exception& e){ std::runtime_error newexctp("user_hostnames_push1_exception:"+std::string(e.what())); throw newexctp; }
+        try{
+            user_hostnames.push_back("www."+user_hostname);
+        } catch(const std::exception& e){ std::runtime_error newexctp("user_hostnames_push2_exception:"+std::string(e.what())); throw newexctp; }
       } catch(const std::exception& e){ std::runtime_error newexctp("hmetrics_insert_entities_exception:"+std::string(e.what())); throw newexctp; }
       try{
         worker_threads[new_tid]=( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)));
@@ -795,6 +807,7 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
     }
   } catch( const std::exception& e ){
     std::cerr<<e.what()<<"\n";
+    exit(1);
   }
 }
 void start_thread_pool( int tpool_size ){

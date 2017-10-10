@@ -1,5 +1,5 @@
 DOING:
-[ ] - htlog_uap.cpp regex code segfaults in a lot of different ways ( fix this ):
+[ ] - fix segfaults in multithread and bad_alloc when running single thread
 
 
 QUESTIONABLE:

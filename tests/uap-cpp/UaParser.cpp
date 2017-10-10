@@ -152,12 +152,6 @@ namespace {
     boost::algorithm::trim(ua_property);
     return;
   }
-  void print_all_matches( boost::smatch m ){
-    unsigned int i =0;
-    for(i=0; i< m.size(); i++ ){
-      //std::cout<<"m["<<i<<"]: "<<m[i]<<"\n";
-    }
-  }
   Device parse_device_impl(const std::string& ua, const UAStore* ua_store) {
     Device device;
     //std::cout<< "======== parse device \n";
@@ -165,7 +159,6 @@ namespace {
       boost::smatch m;
       if (boost::regex_search(ua, m, d.regExpr)) {
         //std::cout<<"d.regexp:"<<d.regExpr<<"\n";
-        //print_all_matches(m);
         if (d.replacement.empty() && m.size() > 1) {
           device.family = m[1].str();
           //std::cout<< "device.family = m1"<< device.family << "\n";
