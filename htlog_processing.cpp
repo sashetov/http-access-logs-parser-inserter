@@ -753,34 +753,48 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
     std::string filename = dirname + "/" + filenames[tid];
     std::string user_hostname = getHostnameFromLogfile(filename);
     std::unique_lock<std::mutex> lk(m);
-    cv.wait( lk, [=] { // c++11 for lambda [](){}
-        std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
-        return lock_signal_vars[tid] == tid;
-        });
-    std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
-    int i =0;
-    user_hostnames.push_back(user_hostname);
-    user_hostnames.push_back("www."+user_hostname);
-    HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostnames, search_hosts, filename );
-    hMetrics.parseLogFile( );
-    hMetrics.insertEntities( );
-    ncompleted++;
-    std::cerr<<" ncompleted: "<<ncompleted<<"\n";
-    int new_tid = tid + tpool_size;
-    if( new_tid < tmax ){
-      lock_signal_vars[new_tid] = -1;
-      filename = dirname+"/"+filenames[new_tid];
-      user_hostname = getHostnameFromLogfile(filename);
-      user_hostnames.clear();
+    try{
+      cv.wait( lk, [=] { // c++11 for lambda [](){}
+          std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
+          return lock_signal_vars[tid] == tid;
+          });
+      std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
+      int i =0;
+    } catch(const std::exception& e){ std::runtime_error newexctp("cv_wait_condition_reached:"+std::string(e.what())); throw newexctp; }
+    try{
       user_hostnames.push_back(user_hostname);
       user_hostnames.push_back("www."+user_hostname);
-      worker_threads[new_tid]=( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)));
-      signaling_threads[new_tid]=( std::thread( notify, new_tid ) );
-      worker_threads[new_tid].detach(); // should prevent memory leaks...
-      signaling_threads[new_tid].detach();
+    } catch(const std::exception& e){ std::runtime_error newexctp("user_hostnames_pushback_exception:"+std::string(e.what())); throw newexctp; }
+    try{
+      HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostnames, search_hosts, filename );
+      hMetrics.parseLogFile( );
+      hMetrics.insertEntities( );
+      ncompleted++;
+      std::cerr<<" ncompleted: "<<ncompleted<<"\n";
+    } catch(const std::exception& e){ std::runtime_error newexctp("hmetrics_job_exception:"+std::string(e.what())); throw newexctp; }
+    int new_tid = tid + tpool_size;
+    if( new_tid < tmax ){
+      try{
+          lock_signal_vars[new_tid] = -1;
+          filename = dirname+"/"+filenames[new_tid];
+          user_hostname = getHostnameFromLogfile(filename);
+          user_hostnames.clear();
+          user_hostnames.push_back(user_hostname);
+          user_hostnames.push_back("www."+user_hostname);
+      } catch(const std::exception& e){ std::runtime_error newexctp("hmetrics_insert_entities_exception:"+std::string(e.what())); throw newexctp; }
+      try{
+        worker_threads[new_tid]=( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)));
+      } catch(const std::exception& e){ std::runtime_error newexctp("spawn_when_ready_exception:"+std::string(e.what())); throw newexctp; }
+      try{
+        signaling_threads[new_tid]=( std::thread( notify, new_tid ) );
+      } catch(const std::exception& e){ std::runtime_error newexctp("notify_exception:"+std::string(e.what())); throw newexctp; }
+      try{
+        worker_threads[new_tid].detach(); // should prevent memory leaks...
+        signaling_threads[new_tid].detach();
+      } catch(const std::exception& e){ std::runtime_error newexctp("detach_threads_exception:"+std::string(e.what())); throw newexctp; }
     }
   } catch( const std::exception& e ){
-    std::cerr<<"caught exception(spawn_when_ready): "<<e.what()<<"\n";
+    std::cerr<<e.what()<<"\n";
   }
 }
 void start_thread_pool( int tpool_size ){
