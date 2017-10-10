@@ -1,20 +1,25 @@
-#include <stdio.h>
-#include <locale.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <time.h>
-#include "htlog_processing.h"
-int main(int argc, char **argv) {
-  char *filename;
+#include <iostream>
+#include <vector>
+#include "htlog_processing.hpp"
+std::string dirname;
+std::vector<std::string> search_hosts;
+std::vector<std::string> filenames;
+int main(int argc, char** argv) {
+  std::ios_base::sync_with_stdio(true);
   int minargc=2;
   if( argc < minargc ) {
-    printf("Usage:\n%s HTTPACCESS_LOG_FILENAME\n",argv[0]);
+    std::cout<<"Usage:\n"<< argv[0] <<" LOGDIR_NAME/\n";
     fprintf(stderr, "ERROR: Insufficient args %d<%d\n",argc, minargc);
     exit(-1);
   }
-  filename = argv[1];
-  printf("logfile: %s\n", filename);
-  setlocale(LC_ALL, "C");
-  process_logfile( filename );
+  dirname= std::string(argv[1]);
+  std::cout<<"directory name : "<<dirname<<"\n";
+  loadSearchHostnames(search_hosts,"search_engines");
+  filenames = getLogfileNamesFromDirectory(dirname);
+  if( filenames.size() == 0){
+    std::cout<<"No non-empty files found in directory"<<"\n";
+  }
+  std::cout<<"filenames in dir "<<filenames.size()<<"\n";
+  start_thread_pool(1);
   return 0;
 }

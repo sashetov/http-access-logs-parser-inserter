@@ -9,15 +9,15 @@ extern "C" {
 #ifndef __HT_NODE__
 typedef struct node {
   size_t nval;
-  char  name[1000];
+  char  * name;
 } node;
 typedef struct name_version_node {
   size_t nval;
-  char  name[1000];
-  char  version[1000];
+  char  * name;
+  char  * version;
 } name_version_node_t;
 #define __HT_NODE__
-node *                node_init ( const char *s, int val );
+node *                node_init ( char *s, int val );
 name_version_node_t * name_version_node_init(char *name, char *version, int val );
 void free_node( node * n, char * which );
 void free_node_cb( node * n );
