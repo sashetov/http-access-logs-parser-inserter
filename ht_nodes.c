@@ -48,8 +48,7 @@ size_t ht_kget_nval( hashtable_t *table, const char *key, char * which ){
   int nval = n->nval;
   return (size_t) nval;
 }
-void ht_add_nvers_to_k_nval(
-    hashtable_t *table, char *key, char *name, char *vers, int val, char * which ) {
+void ht_add_nvers_to_k_nval( hashtable_t *table, char *key, char *name, char *vers, int val, char * which ) {
   name_version_node_t * n;
   //size_t * size =(size_t *)( sizeof(name_version_node_t) + strlen(name) +1 + strlen(vers) + 1 );
   size_t * size = ( size_t * ) sizeof(name_version_node_t);
