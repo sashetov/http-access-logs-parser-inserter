@@ -6,7 +6,6 @@ std::mutex m;
 std::vector<std::thread> worker_threads;
 std::vector<std::thread> signaling_threads;
 extern std::string dirname;
-extern std::vector<std::string> user_hostnames;
 extern std::vector<std::string> search_hosts;
 extern std::vector<std::string> filenames;
 //MISC PRE-INIT
@@ -82,7 +81,12 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   return result;
 }
 //PUBLIC
- HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ): internal_hostnames(user_hosts), search_hostnames(search_hosts), lm(MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD){
+ HttpAccessLogMetrics::HttpAccessLogMetrics(
+     std::vector<std::string> user_hosts, 
+     std::vector<std::string> search_hosts, std::string file ) : 
+   internal_hostnames(user_hosts), search_hostnames(search_hosts),
+   lm(user_hosts[0],MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD)
+{
   st = time(NULL);
   lines_failed=0;
   lines_processed=0;
@@ -750,24 +754,31 @@ void notify( int tid ) {
 }
 void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
   try {
+    std::vector<std::string> user_hostnames;
     std::string filename = dirname + "/" + filenames[tid];
+    std::string user_hostname = getHostnameFromLogfile(filename);
     std::unique_lock<std::mutex> lk(m);
     cv.wait( lk, [=] { // c++11 for lambda [](){}
         std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
         return lock_signal_vars[tid] == tid;
         });
     std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
-    std::cout<<"user_hosts: "<<user_hostnames.size()<<" search_hosts: "<<search_hosts.size()<<" filename: "<<filename<<"\n";
+    int i =0;
+    user_hostnames.push_back(user_hostname);
+    user_hostnames.push_back("www."+user_hostname);
     HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostnames, search_hosts, filename );
     hMetrics.parseLogFile( );
     hMetrics.insertEntities( );
-    //hMetrics.printAllIdsMaps( );
     ncompleted++;
     std::cerr<<" ncompleted: "<<ncompleted<<"\n";
     int new_tid = tid + tpool_size;
     if( new_tid < tmax ){
       lock_signal_vars[new_tid] = -1;
       filename = dirname+"/"+filenames[new_tid];
+      user_hostname = getHostnameFromLogfile(filename);
+      user_hostnames.clear();
+      user_hostnames.push_back(user_hostname);
+      user_hostnames.push_back("www."+user_hostname);
       worker_threads[new_tid]=( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)));
       signaling_threads[new_tid]=( std::thread( notify, new_tid ) );
       worker_threads[new_tid].detach(); // should prevent memory leaks...
