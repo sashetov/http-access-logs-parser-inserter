@@ -1,40 +1,32 @@
 #include "UaParser.h"
-
 #include <cassert>
 #include <cstdlib>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <map>
-
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <yaml-cpp/yaml.h>
-
 namespace {
-
   typedef std::map<std::string::size_type, size_t> i2tuple;
-
   struct GenericStore {
     std::string replacement;
     i2tuple replacementMap;
     boost::regex regExpr;
   };
-
   struct DeviceStore : GenericStore {
     std::string brandReplacement;
     std::string modelReplacement;
     i2tuple brandReplacementMap;
     i2tuple modelReplacementMap;
   };
-
   struct AgentStore : GenericStore {
     std::string majorVersionReplacement;
     std::string minorVersionReplacement;
     std::string patchVersionReplacement;
     std::string patchMinorVersionReplacement;
   };
-
   void mark_placeholders(i2tuple& replacement_map, const std::string& device_property) {
     auto loc = device_property.rfind("$");
     while (loc != std::string::npos) {
@@ -48,7 +40,6 @@ namespace {
     }
     return;
   }
-
   DeviceStore fill_device_store(const YAML::Node& device_parser) {
     DeviceStore device;
     bool regex_flag = false;
@@ -80,12 +71,7 @@ namespace {
     }
     return device;
   }
-
-  AgentStore fill_agent_store(const YAML::Node& node,
-                              const std::string& repl,
-                              const std::string& major_repl,
-                              const std::string& minor_repl,
-                              const std::string& patch_repl) {
+  AgentStore fill_agent_store(const YAML::Node& node, const std::string& repl, const std::string& major_repl, const std::string& minor_repl, const std::string& patch_repl) {
     AgentStore agent_store;
     //std::cout<< "======== fill agent store\n";
     assert(node.Type() == YAML::NodeType::Map);
@@ -111,7 +97,6 @@ namespace {
     }
     return agent_store;
   }
-
   struct UAStore {
     explicit UAStore(const std::string& regexes_file_path) {
       auto regexes = YAML::LoadFile(regexes_file_path);
@@ -140,11 +125,6 @@ namespace {
     std::vector<AgentStore> osStore;
     std::vector<AgentStore> browserStore;
   };
-
-  /////////////
-  // HELPERS //
-  /////////////
-
   void replace_all_placeholders(std::string& ua_property, const boost::smatch& result, const i2tuple& replacement_map) {
     for (auto iter = replacement_map.rbegin(); iter != replacement_map.rend(); ++iter) {
       ua_property.replace(iter->first, 2, result[iter->second].str());
@@ -201,9 +181,7 @@ namespace {
 
     return device;
   }
-
-  template <class AGENT, class AGENT_STORE >
-  void fill_agent(AGENT& agent, const AGENT_STORE& store, const boost::smatch& m, const bool os) {
+  template <class AGENT, class AGENT_STORE > void fill_agent(AGENT& agent, const AGENT_STORE& store, const boost::smatch& m, const bool os) {
     //std::cout<< "======== fill agent (os="<< std::boolalpha<<os<<") \n";
     //std::cout<<"m.size(): "<<m.size()<<"\n";
     if (m.size() > 1) {
@@ -258,7 +236,6 @@ namespace {
       //std::cout<<"agent.patch_minor m5 "<< m[5] <<"\n";
     }
   }
-
   Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store) {
     //std::cout<<"parse browser\n";
     Agent browser;
@@ -276,7 +253,6 @@ namespace {
 
     return browser;
   }
-
   Agent parse_os_impl(const std::string& ua, const UAStore* ua_store) {
     //std::cout<<"parse os\n";
     Agent os;
@@ -295,17 +271,13 @@ namespace {
 
     return os;
   }
-
-}  // namespace
-
+}
 UserAgentParser::UserAgentParser(const std::string& regexes_file_path) : regexes_file_path_{regexes_file_path} {
   ua_store_ = new UAStore(regexes_file_path);
 }
-
 UserAgentParser::~UserAgentParser() {
   delete static_cast<const UAStore*>(ua_store_);
 }
-
 UserAgent UserAgentParser::parse(const std::string& ua) const {
   const auto ua_store = static_cast<const UAStore*>(ua_store_);
   const auto device = parse_device_impl(ua, ua_store);

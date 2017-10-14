@@ -6,9 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 namespace {
-
   static const std::string UA_CORE_DIR = ".";
-
   const UserAgentParser g_ua_parser(UA_CORE_DIR + "/regexes_new.yaml");
 /*
   TEST(UserAgentParser, basic) {
@@ -105,15 +103,12 @@ namespace {
   TEST(OsVersion, test_os) {
     test_browser_or_os(UA_CORE_DIR + "/tests/test_os3.yaml", false);
   }
-
   TEST(OsVersion, test_ua) {
     test_browser_or_os(UA_CORE_DIR + "/tests/test_ua3.yaml", true);
   }
-
   TEST(BrowserVersion, firefox_user_agent_strings) {
     test_browser_or_os(UA_CORE_DIR + "/test_resources/firefox_user_agent_strings.yaml", true);
   }
-
   TEST(BrowserVersion, opera_mini_user_agent_strings) {
     test_browser_or_os(UA_CORE_DIR + "/test_resources/opera_mini_user_agent_strings.yaml", true);
   }
@@ -129,7 +124,6 @@ namespace {
     test_device(UA_CORE_DIR + "/tests/test_device2.yaml");
   }
 }
-
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

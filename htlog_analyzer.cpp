@@ -1,10 +1,24 @@
 #include <iostream>
 #include <vector>
 #include "htlog_processing.hpp"
+#include <sys/resource.h>
 std::string dirname;
 std::vector<std::string> search_hosts;
 std::vector<std::string> filenames;
 int main(int argc, char** argv) {
+  const rlim_t k_stack_size = 512 * 1024 * 1024;
+  struct rlimit rl;
+  int result;
+  result = getrlimit(RLIMIT_STACK, &rl);
+  if (result == 0) {
+    if (rl.rlim_cur < k_stack_size ) {
+      rl.rlim_cur = k_stack_size;
+      result = setrlimit(RLIMIT_STACK, &rl);
+      if (result != 0) {
+        fprintf(stderr, "setrlimit returned result = %d\n", result);
+      }
+    }
+  }
   std::ios_base::sync_with_stdio(true);
   int minargc=2;
   if( argc < minargc ) {
