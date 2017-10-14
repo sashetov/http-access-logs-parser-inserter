@@ -5,7 +5,8 @@
 std::string dirname;
 std::vector<std::string> search_hosts;
 std::vector<std::string> filenames;
-int main(int argc, char** argv) {
+
+void reset_rlimit_stack(){
   const rlim_t k_stack_size = 512 * 1024 * 1024;
   struct rlimit rl;
   int result;
@@ -19,6 +20,10 @@ int main(int argc, char** argv) {
       }
     }
   }
+}
+
+int main(int argc, char** argv) {
+  reset_rlimit_stack();
   std::ios_base::sync_with_stdio(true);
   int minargc=2;
   if( argc < minargc ) {
@@ -34,6 +39,6 @@ int main(int argc, char** argv) {
     std::cout<<"No non-empty files found in directory"<<"\n";
   }
   std::cout<<"filenames in dir "<<filenames.size()<<"\n";
-  start_thread_pool(1);
+  start_thread_pool(20);
   return 0;
 }

@@ -1,8 +1,10 @@
 export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig'
 DEBUG_FLAGS=-g -ggdb
 WARNING_FLAGS=-Wall -Wextra -Werror -pedantic -v
-MEMLEAK_FLAGS=-L/usr/local/lib64/ -Wl,-R/usr/local/lib64/  -lasan -fsanitize=address -fstrict-aliasing -fno-omit-frame-pointer #-O3
-CXXFLAGS=-std=c++11 $(WARNING_FLAGS) $(DEBUG_FLAGS) $(MEMLEAK_FLAGS)
+SANITIZE_FLAGS=-L/usr/local/lib64/ -Wl,-R/usr/local/lib64/ -lasan -fsanitize=address -fsanitize=undefined -fsanitize=shift -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow #-fsanitize=thread 
+LANGUAGE_FLAGS=-std=c++11 -fstrict-aliasing #-O3
+STACKTRACE_FLAGS=-fno-omit-frame-pointer -fno-optimize-sibling-calls
+CXXFLAGS=$(LANGUAGE_FLAGS) $(STACKTRACE_FLAGS) $(WARNING_FLAGS) $(DEBUG_FLAGS) $(SANITIZE_FLAGS)
 PTHREAD_CFLAGS=-pthread
 UAP_LDFLAGS=-lboost_regex -lyaml-cpp
 GEOIP_LDFLAGS=-L/usr/local/lib/ -lgeolite2++ -lmaxminddb

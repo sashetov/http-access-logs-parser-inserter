@@ -2,19 +2,19 @@ let SessionLoad = 1
 if &cp | set nocp | endif
 let s:cpo_save=&cpo
 set cpo&vim
-inoremap <C-Space> 
-imap <Nul> <C-Space>
-inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
-inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
 inoremap <expr> <Down> pumvisible() ? "\" : "\<Down>"
+inoremap <expr> <S-Tab> pumvisible() ? "\" : "\<S-Tab>"
+inoremap <expr> <Up> pumvisible() ? "\" : "\<Up>"
+imap <Nul> <C-Space>
+inoremap <C-Space> 
 inoremap <silent> <C-Tab> =UltiSnips#ListSnippets()
 map  :call JsBeautify()
 snoremap <silent>  c
 xnoremap <silent> 	 :call UltiSnips#SaveLastVisualSelection()gvs
 snoremap <silent> 	 :call UltiSnips#ExpandSnippet()
 snoremap  "_c
-nnoremap <silent> w :CCTreeWindowToggle
 nnoremap <silent> y :CCTreeWindowSaveCopy
+nnoremap <silent> w :CCTreeWindowToggle
 nnoremap \d :YcmShowDetailedDiagnostic
 nnoremap <silent> \pcf :call PhpCsFixerFixFile()
 nnoremap <silent> \pcd :call PhpCsFixerFixDirectory()
@@ -33,6 +33,7 @@ unlet s:cpo_save
 set backspace=indent,eol,start
 set completefunc=youcompleteme#Complete
 set completeopt=preview,menuone
+set cpoptions=aAceFsB
 set cscopeprg=/usr/bin/cscope
 set cscopetag
 set cscopeverbose
@@ -57,7 +58,6 @@ set termencoding=utf-8
 set timeoutlen=40
 set updatetime=2000
 set viminfo='20,\"50
-set window=76
 let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0
 let v:this_session=expand("<sfile>:p")
 silent only
@@ -74,7 +74,7 @@ badd +13 src/sql/schemas/httpstats_clients.sql
 badd +9 src/sql/schemas/httpstats_domains.sql
 badd +13 src/sql/schemas/httpstats_jobs.sql
 badd +18 src/sql/schemas/httpstats_pages.sql
-badd +2 htlog_processing.cpp
+badd +1 htlog_processing.cpp
 badd +1 htlog_uap.cpp
 badd +1 htlog_uap.hpp
 badd +14 uap.hpp
@@ -120,20 +120,20 @@ badd +1 src/c++/uap-cpp/
 badd +1 src/c++/regex.list
 badd +14 compile
 badd +5 comp
-badd +0 tests/Makefile
-badd +0 tests/combined-c-c++-test/Makefile
-badd +0 tests/worker-pool/Makefile
-badd +0 tests/uap-cpp/Makefile
-badd +0 tests/uap-cpp/UaParserTest.cpp
-badd +0 tests/uap-cpp/UaParser.h
-badd +0 tests/uap-cpp/UaParser.cpp
-badd +0 tests/uap-cpp/uap
-badd +0 tests/uap-cpp/uap.cpp
-badd +0 tests/uap-cpp/uap.hpp
-badd +0 tests/worker-pool/worker-pool.cpp
-badd +0 tests/combined-c-c++-test/square.cpp
-badd +0 tests/combined-c-c++-test/square.h
-badd +0 tests/combined-c-c++-test/square.c
+badd +1 tests/Makefile
+badd +1 tests/combined-c-c++-test/Makefile
+badd +1 tests/worker-pool/Makefile
+badd +1 tests/uap-cpp/Makefile
+badd +1 tests/uap-cpp/UaParserTest.cpp
+badd +1 tests/uap-cpp/UaParser.h
+badd +1 tests/uap-cpp/UaParser.cpp
+badd +1 tests/uap-cpp/uap
+badd +1 tests/uap-cpp/uap.cpp
+badd +1 tests/uap-cpp/uap.hpp
+badd +1 tests/worker-pool/worker-pool.cpp
+badd +1 tests/combined-c-c++-test/square.cpp
+badd +1 tests/combined-c-c++-test/square.h
+badd +1 tests/combined-c-c++-test/square.c
 badd +2 errs
 badd +4 err
 args Makefile htlog_analyzer.cpp htlog_processing.hpp
@@ -252,24 +252,23 @@ set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
 silent! normal! zE
-6,184fold
-186,187fold
-5,188fold
-1,189fold
-191,193fold
-190,193fold
-195,196fold
-197,198fold
-199,200fold
-194,200fold
-1
+4,5fold
+6,7fold
+10,11fold
+14,16fold
+17,18fold
+19,20fold
+13,21fold
+13
 normal! zo
-let s:l = 3 - ((2 * winheight(0) + 37) / 74)
+13
+normal! zc
+let s:l = 2 - ((1 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-3
-normal! 04|
+2
+normal! 0
 tabedit Makefile
 set splitbelow splitright
 wincmd t
@@ -384,12 +383,12 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 5 - ((4 * winheight(0) + 37) / 74)
+let s:l = 14 - ((13 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5
-normal! 09|
+14
+normal! 038|
 tabedit htlog_analyzer.cpp
 set splitbelow splitright
 wincmd t
@@ -438,7 +437,7 @@ setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
 set foldlevel=99
-setlocal foldlevel=4
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
 set foldmethod=syntax
 setlocal foldmethod=syntax
@@ -506,12 +505,12 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 13 - ((12 * winheight(0) + 37) / 74)
+let s:l = 9 - ((8 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-13
-normal! 08|
+9
+normal! 0
 tabedit htlog_processing.cpp
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -567,8 +566,9 @@ setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
 set foldlevel=99
-setlocal foldlevel=5
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
+set foldmethod=syntax
 setlocal foldmethod=manual
 setlocal foldminlines=1
 setlocal foldnestmax=20
@@ -783,19 +783,15 @@ silent! normal! zE
 780,780fold
 753,781fold
 750,782fold
-789,796fold
-797,799fold
-783,800fold
-601
-normal! zo
-689
-normal! zo
-let s:l = 689 - ((38 * winheight(0) + 37) / 74)
+790,797fold
+798,800fold
+783,801fold
+let s:l = 1 - ((0 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-689
-normal! 06|
+1
+normal! 0
 wincmd w
 argglobal
 3argu
@@ -926,8 +922,8 @@ vsplit
 wincmd w
 wincmd t
 set winheight=1 winwidth=1
-exe 'vert 1resize ' . ((&columns * 110 + 106) / 212)
-exe 'vert 2resize ' . ((&columns * 208 + 106) / 212)
+exe 'vert 1resize ' . ((&columns * 120 + 106) / 212)
+exe 'vert 2resize ' . ((&columns * 91 + 106) / 212)
 argglobal
 edit htlog_mysql.cpp
 nnoremap <buffer> <silent> - :CCTreeRecurseDepthMinus
@@ -972,7 +968,7 @@ setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
 set foldlevel=99
-setlocal foldlevel=4
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
 set foldmethod=syntax
 setlocal foldmethod=syntax
@@ -1040,86 +1036,12 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-78
-normal! zo
-81
-normal! zo
-201
-normal! zo
-202
-normal! zo
-225
-normal! zo
-249
-normal! zo
-250
-normal! zo
-276
-normal! zo
-302
-normal! zo
-303
-normal! zo
-322
-normal! zo
-337
-normal! zo
-338
-normal! zo
-351
-normal! zo
-373
-normal! zo
-399
-normal! zo
-400
-normal! zo
-424
-normal! zo
-425
-normal! zo
-451
-normal! zo
-452
-normal! zo
-249
-normal! zo
-250
-normal! zo
-276
-normal! zo
-298
-normal! zo
-299
-normal! zo
-318
-normal! zo
-333
-normal! zo
-334
-normal! zo
-347
-normal! zo
-369
-normal! zo
-391
-normal! zo
-392
-normal! zo
-416
-normal! zo
-417
-normal! zo
-443
-normal! zo
-444
-normal! zo
-let s:l = 294 - ((73 * winheight(0) + 37) / 74)
+let s:l = 2 - ((1 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-294
-normal! 020|
+2
+normal! 0
 wincmd w
 argglobal
 edit htlog_mysql.hpp
@@ -1233,19 +1155,15 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-14
-normal! zo
-18
-normal! zo
-let s:l = 31 - ((30 * winheight(0) + 37) / 74)
+let s:l = 1 - ((0 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-31
-normal! 011|
+1
+normal! 0
 wincmd w
-exe 'vert 1resize ' . ((&columns * 110 + 106) / 212)
-exe 'vert 2resize ' . ((&columns * 208 + 106) / 212)
+exe 'vert 1resize ' . ((&columns * 120 + 106) / 212)
+exe 'vert 2resize ' . ((&columns * 91 + 106) / 212)
 tabedit htlog_uap.cpp
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -1254,8 +1172,8 @@ vsplit
 wincmd w
 wincmd t
 set winheight=1 winwidth=1
-exe 'vert 1resize ' . ((&columns * 119 + 106) / 212)
-exe 'vert 2resize ' . ((&columns * 199 + 106) / 212)
+exe 'vert 1resize ' . ((&columns * 110 + 106) / 212)
+exe 'vert 2resize ' . ((&columns * 101 + 106) / 212)
 argglobal
 edit htlog_uap.cpp
 nnoremap <buffer> <silent> - :CCTreeRecurseDepthMinus
@@ -1300,7 +1218,7 @@ setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
 set foldlevel=99
-setlocal foldlevel=5
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
 set foldmethod=syntax
 setlocal foldmethod=syntax
@@ -1372,18 +1290,12 @@ setlocal wrapmargin=0
 normal! zo
 12
 normal! zc
-87
-normal! zo
-116
-normal! zo
-154
-normal! zo
-let s:l = 251 - ((58 * winheight(0) + 37) / 74)
+let s:l = 1 - ((0 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-251
-normal! 03|
+1
+normal! 0
 wincmd w
 argglobal
 edit htlog_uap.hpp
@@ -1497,33 +1409,15 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-11
-normal! zo
-16
-normal! zo
-19
-normal! zo
-24
-normal! zo
-30
-normal! zo
-34
-normal! zo
-39
-normal! zo
-45
-normal! zo
-51
-normal! zo
-let s:l = 57 - ((56 * winheight(0) + 37) / 74)
+let s:l = 1 - ((0 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-57
+1
 normal! 0
 wincmd w
-exe 'vert 1resize ' . ((&columns * 119 + 106) / 212)
-exe 'vert 2resize ' . ((&columns * 199 + 106) / 212)
+exe 'vert 1resize ' . ((&columns * 110 + 106) / 212)
+exe 'vert 2resize ' . ((&columns * 101 + 106) / 212)
 tabedit htlog_containers.cpp
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -1533,6 +1427,7 @@ wincmd w
 wincmd t
 set winheight=1 winwidth=1
 exe 'vert 1resize ' . ((&columns * 100 + 106) / 212)
+exe 'vert 2resize ' . ((&columns * 111 + 106) / 212)
 argglobal
 edit htlog_containers.cpp
 nnoremap <buffer> <silent> - :CCTreeRecurseDepthMinus
@@ -1577,7 +1472,7 @@ setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
 set foldlevel=99
-setlocal foldlevel=2
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
 set foldmethod=syntax
 setlocal foldmethod=syntax
@@ -1645,12 +1540,12 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 7 - ((6 * winheight(0) + 37) / 74)
+let s:l = 1 - ((0 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-7
-normal! 03|
+1
+normal! 0
 wincmd w
 argglobal
 edit htlog_containers.hpp
@@ -1696,7 +1591,7 @@ setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
 set foldlevel=99
-setlocal foldlevel=1
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
 set foldmethod=syntax
 setlocal foldmethod=syntax
@@ -1764,14 +1659,15 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 95 - ((63 * winheight(0) + 37) / 74)
+let s:l = 1 - ((0 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-95
+1
 normal! 0
 wincmd w
 exe 'vert 1resize ' . ((&columns * 100 + 106) / 212)
+exe 'vert 2resize ' . ((&columns * 111 + 106) / 212)
 tabedit uap_regexes.yaml
 set splitbelow splitright
 wincmd t
@@ -1886,11 +1782,11 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 2 - ((1 * winheight(0) + 37) / 74)
+let s:l = 1 - ((0 * winheight(0) + 37) / 74)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-2
+1
 normal! 0
 tabedit tests/combined-c-c++-test/Makefile
 set splitbelow splitright
@@ -1907,11 +1803,12 @@ wincmd w
 wincmd w
 wincmd t
 set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 23 + 38) / 77)
-exe '2resize ' . ((&lines * 23 + 38) / 77)
+exe '1resize ' . ((&lines * 1 + 38) / 77)
+exe '2resize ' . ((&lines * 70 + 38) / 77)
 exe 'vert 2resize ' . ((&columns * 105 + 106) / 212)
-exe '3resize ' . ((&lines * 23 + 38) / 77)
-exe '4resize ' . ((&lines * 26 + 38) / 77)
+exe '3resize ' . ((&lines * 70 + 38) / 77)
+exe 'vert 3resize ' . ((&columns * 106 + 106) / 212)
+exe '4resize ' . ((&lines * 1 + 38) / 77)
 argglobal
 edit tests/combined-c-c++-test/Makefile
 setlocal keymap=
@@ -2022,11 +1919,11 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 1 - ((0 * winheight(0) + 11) / 23)
+let s:l = 4 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+4
 normal! 0
 wincmd w
 argglobal
@@ -2141,7 +2038,7 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 2 - ((1 * winheight(0) + 11) / 23)
+let s:l = 2 - ((1 * winheight(0) + 35) / 70)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -2260,7 +2157,7 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 2 - ((1 * winheight(0) + 11) / 23)
+let s:l = 2 - ((1 * winheight(0) + 35) / 70)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -2379,18 +2276,19 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 1 - ((0 * winheight(0) + 13) / 26)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 1
 normal! 0
 wincmd w
-exe '1resize ' . ((&lines * 23 + 38) / 77)
-exe '2resize ' . ((&lines * 23 + 38) / 77)
+exe '1resize ' . ((&lines * 1 + 38) / 77)
+exe '2resize ' . ((&lines * 70 + 38) / 77)
 exe 'vert 2resize ' . ((&columns * 105 + 106) / 212)
-exe '3resize ' . ((&lines * 23 + 38) / 77)
-exe '4resize ' . ((&lines * 26 + 38) / 77)
+exe '3resize ' . ((&lines * 70 + 38) / 77)
+exe 'vert 3resize ' . ((&columns * 106 + 106) / 212)
+exe '4resize ' . ((&lines * 1 + 38) / 77)
 tabedit tests/worker-pool/Makefile
 set splitbelow splitright
 wincmd _ | wincmd |
@@ -2511,11 +2409,11 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 1 - ((0 * winheight(0) + 0) / 1)
+let s:l = 3 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+3
 normal! 0
 wincmd w
 argglobal
@@ -2562,7 +2460,7 @@ setlocal foldenable
 setlocal foldexpr=0
 setlocal foldignore=#
 set foldlevel=99
-setlocal foldlevel=2
+setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
 set foldmethod=syntax
 setlocal foldmethod=syntax
@@ -2630,11 +2528,11 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 52 - ((51 * winheight(0) + 36) / 72)
+let s:l = 10 - ((9 * winheight(0) + 36) / 72)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-52
+10
 normal! 0
 wincmd w
 exe '1resize ' . ((&lines * 1 + 38) / 77)
@@ -2661,14 +2559,16 @@ vsplit
 wincmd w
 wincmd t
 set winheight=1 winwidth=1
-exe '1resize ' . ((&lines * 66 + 38) / 77)
-exe '2resize ' . ((&lines * 1 + 38) / 77)
+exe '1resize ' . ((&lines * 1 + 38) / 77)
+exe '2resize ' . ((&lines * 68 + 38) / 77)
 exe 'vert 2resize ' . ((&columns * 106 + 106) / 212)
-exe '3resize ' . ((&lines * 1 + 38) / 77)
+exe '3resize ' . ((&lines * 68 + 38) / 77)
+exe 'vert 3resize ' . ((&columns * 105 + 106) / 212)
 exe '4resize ' . ((&lines * 1 + 38) / 77)
-exe '5resize ' . ((&lines * 3 + 38) / 77)
+exe '5resize ' . ((&lines * 1 + 38) / 77)
 exe 'vert 5resize ' . ((&columns * 105 + 106) / 212)
-exe '6resize ' . ((&lines * 3 + 38) / 77)
+exe '6resize ' . ((&lines * 1 + 38) / 77)
+exe 'vert 6resize ' . ((&columns * 106 + 106) / 212)
 argglobal
 edit tests/uap-cpp/Makefile
 setlocal keymap=
@@ -2779,7 +2679,7 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 25 - ((24 * winheight(0) + 33) / 66)
+let s:l = 25 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -2832,6 +2732,7 @@ setlocal foldignore=#
 set foldlevel=99
 setlocal foldlevel=0
 setlocal foldmarker={{{,}}}
+set foldmethod=syntax
 setlocal foldmethod=manual
 setlocal foldminlines=1
 setlocal foldnestmax=20
@@ -2944,11 +2845,89 @@ silent! normal! zE
 281,287fold
 11
 normal! zo
-let s:l = 275 - ((0 * winheight(0) + 0) / 1)
+30
+normal! zo
+30
+normal! zc
+43
+normal! zo
+47
+normal! zo
+47
+normal! zc
+43
+normal! zc
+74
+normal! zo
+78
+normal! zo
+78
+normal! zc
+74
+normal! zc
+100
+normal! zo
+101
+normal! zo
+101
+normal! zc
+100
+normal! zc
+128
+normal! zo
+128
+normal! zc
+135
+normal! zo
+138
+normal! zo
+140
+normal! zo
+142
+normal! zo
+142
+normal! zc
+155
+normal! zo
+155
+normal! zc
+164
+normal! zo
+164
+normal! zc
+140
+normal! zc
+138
+normal! zc
+135
+normal! zc
+184
+normal! zo
+184
+normal! zc
+239
+normal! zo
+243
+normal! zo
+243
+normal! zc
+239
+normal! zc
+256
+normal! zo
+260
+normal! zo
+260
+normal! zc
+256
+normal! zc
+11
+normal! zc
+let s:l = 11 - ((10 * winheight(0) + 34) / 68)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-275
+11
 normal! 0
 wincmd w
 argglobal
@@ -3063,7 +3042,7 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 2 - ((0 * winheight(0) + 0) / 1)
+let s:l = 2 - ((0 * winheight(0) + 34) / 68)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -3301,7 +3280,7 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 1 - ((0 * winheight(0) + 1) / 3)
+let s:l = 1 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
@@ -3420,22 +3399,24 @@ setlocal nowinfixwidth
 set nowrap
 setlocal nowrap
 setlocal wrapmargin=0
-let s:l = 2 - ((0 * winheight(0) + 1) / 3)
+let s:l = 2 - ((0 * winheight(0) + 0) / 1)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
 2
 normal! 0
 wincmd w
-exe '1resize ' . ((&lines * 66 + 38) / 77)
-exe '2resize ' . ((&lines * 1 + 38) / 77)
+exe '1resize ' . ((&lines * 1 + 38) / 77)
+exe '2resize ' . ((&lines * 68 + 38) / 77)
 exe 'vert 2resize ' . ((&columns * 106 + 106) / 212)
-exe '3resize ' . ((&lines * 1 + 38) / 77)
+exe '3resize ' . ((&lines * 68 + 38) / 77)
+exe 'vert 3resize ' . ((&columns * 105 + 106) / 212)
 exe '4resize ' . ((&lines * 1 + 38) / 77)
-exe '5resize ' . ((&lines * 3 + 38) / 77)
+exe '5resize ' . ((&lines * 1 + 38) / 77)
 exe 'vert 5resize ' . ((&columns * 105 + 106) / 212)
-exe '6resize ' . ((&lines * 3 + 38) / 77)
-tabnext 1
+exe '6resize ' . ((&lines * 1 + 38) / 77)
+exe 'vert 6resize ' . ((&columns * 106 + 106) / 212)
+tabnext 3
 if exists('s:wipebuf')
   silent exe 'bwipe ' . s:wipebuf
 endif

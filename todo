@@ -1,20 +1,21 @@
 DOING:
-
 [ ] - fix bugs
   [ ] - fix everything that address sanitizer flags
   [ ] - fix bad alloc with thread pool size 1
     TASKS=$(ls -l /proc/`pgrep cloudstats`/task | grep -v total | wc -l); STACKS=$(pmap `pgrep cloudstats` | grep `ulimit -s` | wc -l); echo $TASKS $STACKS;
   [ ] - fix segfaults with larger thread pool size
 
+
 QUESTIONABLE:
   [?] - I think I'm still leaking memory due to threads:
+
 
 DONE:
 [x] - fix all warnings
 
 [x] - make it launch another max threads once the max number of threads is completed until all files are done
-
 [x] - add code to load search engine domains from a file
 
 [x] - figure out why multithreaded code segfaults
+
 
