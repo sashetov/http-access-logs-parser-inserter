@@ -746,12 +746,6 @@ void notify( int tid ) {
   cv.notify_all();
 }
 void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
-  std::unique_lock<std::mutex> lk(m);
-  cv.wait( lk, [=] { // c++11 for lambda [](){}
-      //std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
-      return lock_signal_vars[tid] == tid;
-      });
-  //std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
   std::vector<std::string> user_hostnames;
   std::string filename; 
   if( (long long) filenames.size() > tid){
@@ -768,6 +762,12 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
   long long new_tid = tid + tpool_size;
   std::cerr<<"ncompleted/nfiles: "<<ncompleted<<"/"<<tmax<<"\n";
   if( new_tid < tmax ) {
+    std::unique_lock<std::mutex> lk(m);
+    cv.wait( lk, [=] { // c++11 for lambda [](){}
+        //std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
+        return lock_signal_vars[tid] == tid;
+        });
+    //std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
     std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)).detach();
     std::thread( notify, new_tid ).detach();
   }

@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     std::cout<<"No non-empty files found in directory"<<"\n";
   }
   std::cout<<"filenames in dir "<<filenames.size()<<"\n";
-  int num_threads = 10; std::thread::hardware_concurrency();
+  int num_threads = std::thread::hardware_concurrency();
   start_thread_pool(num_threads);
   return 0;
 }

@@ -1,16 +1,22 @@
 DOING:
-[ ] - fix bugs
-  [ ] - fix everything that address sanitizer flags
-  [ ] - fix bad alloc with thread pool size 1
-    TASKS=$(ls -l /proc/`pgrep cloudstats`/task | grep -v total | wc -l); STACKS=$(pmap `pgrep cloudstats` | grep `ulimit -s` | wc -l); echo $TASKS $STACKS;
-  [ ] - fix segfaults with larger thread pool size
-
 
 QUESTIONABLE:
-  [?] - I think I'm still leaking memory due to threads:
+[?] - the program still seems to stall for reason not being sql...
 
+[?] - am I still leaking memory??
 
 DONE:
+[x] - only one thread is running at a time!!!!
+   top -H -p `pgrep cloudstats`
+  the rest are in futex_wait state...
+  moving the wait to right before launching replacement threads seems to fix it ...
+
+[x] - fix everything that address sanitizer flags
+
+[x] - fix bad alloc with thread pool size 1
+  TASKS=$(ls -l /proc/`pgrep cloudstats`/task | grep -v total | wc -l); STACKS=$(pmap `pgrep cloudstats` | grep `ulimit -s` | wc -l); echo $TASKS $STACKS;
+[x] - fix segfaults with larger thread pool size
+
 [x] - fix all warnings
 
 [x] - make it launch another max threads once the max number of threads is completed until all files are done
