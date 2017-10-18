@@ -5,8 +5,8 @@
 #include <condition_variable>
 #include <chrono>
 std::vector<int> lock_signal_vars;
-std::vector<std::thread> worker_threads;
-std::vector<std::thread> signaling_threads;
+//std::vector<std::thread> worker_threads;
+//std::vector<std::thread> signaling_threads;
 std::condition_variable cv;
 std::mutex m;
 void notify( int tid ) {
@@ -28,25 +28,30 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
   int new_tid = tid + tpool_size;//worker_threads.size();
   if( new_tid < tmax ){
     lock_signal_vars[new_tid] = -1;
-    worker_threads[new_tid]= std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted));
+    /*worker_threads[new_tid]= std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted));
     signaling_threads[new_tid]= std::thread( notify, new_tid );
     worker_threads[new_tid].detach();
-    signaling_threads[new_tid].detach();
+    signaling_threads[new_tid].detach();*/
+    std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)).detach();
+    std::thread( notify, new_tid ).detach();
   }
 }
 void start_thread_pool( int tpool_size, int nt_total ){
   int i, completed=0;
   lock_signal_vars.resize(nt_total);
-  worker_threads.resize(nt_total);
-  signaling_threads.resize(nt_total);
+  /*worker_threads.resize(nt_total);
+  signaling_threads.resize(nt_total);*/
   for(i=0; i< tpool_size; i++){
     lock_signal_vars[i] = -1;
-    worker_threads[i] = std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed));
+    /*worker_threads[i] = std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed));
     signaling_threads[i] = std::thread( notify, i );
     worker_threads[i].join();
-    signaling_threads[i].join();
+    signaling_threads[i].join();*/
+    std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed)).detach();
+    std::thread( notify, i ).detach();
   }
   while(completed< nt_total ){
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 }
 int main(int argc, char** argv) {

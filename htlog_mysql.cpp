@@ -72,7 +72,7 @@ int LogsMysql::getDomainsId(  std::string domain_name ){
       break; // should only be one, break on first
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::getDomainsId caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
   return did;
 }
@@ -92,7 +92,7 @@ int LogsMysql::getUserId( int real_did ){
       break; // should only be one, break on first
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::getUserId caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
   return uid;
 }
@@ -128,7 +128,7 @@ void LogsMysql::insertClientIps(std::map<unsigned long,int> &client_ips_ids, std
       }
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertClientIps caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
 void LogsMysql::insertStringEntities(std::string database, std::string table, std::map<std::string,int> &entity_ids_map, std::map<std::string, int> entities ) {
@@ -162,7 +162,7 @@ void LogsMysql::insertStringEntities(std::string database, std::string table, st
       }
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertStringEntities caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
 void LogsMysql::insertNameVersionEntities(std::string database, std::string table, std::map<KeyValueContainer,int> &entity_ids_map, std::map<KeyValueContainer, int> entities) {
@@ -200,7 +200,7 @@ void LogsMysql::insertNameVersionEntities(std::string database, std::string tabl
       }
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertNameVersionEntities caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
 void LogsMysql::insertSearchTerms(std::map<KeyValueContainer,int> &entity_ids_map, std::map<KeyValueContainer, int> entities, std::map<std::string,int> referer_hostnames_ids) {
@@ -246,7 +246,7 @@ void LogsMysql::insertSearchTerms(std::map<KeyValueContainer,int> &entity_ids_ma
       }
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertSearchTerms caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
   //} catch ( std::runtime_error &e) {
   //std::cerr<< "# ERR: " << e.what() << "\n";
@@ -297,7 +297,7 @@ void LogsMysql::insertParamsEntities(std::map<ParamsContainer,int> &entity_ids_m
       }
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertParamsEntities caught exception: "<< e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }/* catch ( std::runtime_error &e) {
     std::cerr<< "# ERR: " << e.what() << "\n";
   }*/
@@ -335,7 +335,7 @@ void LogsMysql::insertExternalDomains(std::map<std::string,int> &referer_hostnam
       }
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertExternalDomains caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
 void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,int> &tvectors_ids, std::map<TVectorContainer,int> tvectors, std::map<std::string,int> referer_hostnames_ids, std::map<std::string,int> page_paths_full_ids){
@@ -392,7 +392,7 @@ void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,int> 
       }
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertTrafficVectors caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }/* catch ( std::runtime_error &e) {
     std::cerr<< "# ERR: " << e.what() << "\n";
   }*/
@@ -420,7 +420,7 @@ void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, int re
       runInsertQuery(stmt,insert_sql);
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertHitsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
 void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits, int real_did, std::map<unsigned long, int> client_ips_ids ){
@@ -448,7 +448,7 @@ void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits,
       runInsertQuery(stmt,insert_sql);
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertVisitsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
 void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> pageviews, int real_did, std::map<unsigned long, int> client_ips_ids, std::map<std::string,int> page_paths_full_ids ){
@@ -478,7 +478,7 @@ void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> p
       runInsertQuery(stmt,insert_sql);
     }
   } catch (sql::SQLException &e) {
-    std::cerr<< "# ERR: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+    std::cerr<< "LogsMysql::insertPageviewsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
 LogsMysql::~LogsMysql(){

@@ -9,7 +9,7 @@
 #include <cppconn/prepared_statement.h>
 #include <boost/scoped_ptr.hpp>
 #include "htlog_containers.hpp"
-#define LOG_SQL_STMTS 1
+#define LOG_SQL_STMTS 0
 template<typename T> T getNthNode( std::map<T,int>, int);
 struct st_worker_thread_param {
   sql::Driver *driver;

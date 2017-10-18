@@ -3,8 +3,6 @@ std::vector<int> lock_signal_vars;
 std::condition_variable cv;
 std::mutex cv_m;
 std::mutex m;
-std::vector<std::thread> worker_threads;
-std::vector<std::thread> signaling_threads;
 extern std::string dirname;
 extern std::vector<std::string> search_hosts;
 extern std::vector<std::string> filenames;
@@ -29,7 +27,7 @@ std::string getHostnameFromLogfile( std::string filename ){
     }
     statsFile.close();
   } catch( const std::exception& e ){
-    std::cerr<<"caught exception: "<<e.what()<<"\n";
+    std::cerr<<"getHostnameFromLogfile caught exception: "<<e.what()<<"\n";
   }
   return hostname;
 }
@@ -46,7 +44,7 @@ void loadSearchHostnames( std::vector<std::string> &search_engines , std::string
     }
     statsFile.close();
   } catch( const std::exception& e ){
-    std::cerr<<"caught exception: "<<e.what()<<"\n";
+    std::cerr<<"loadSearchHostnames caught exception: "<<e.what()<<"\n";
   }
 }
 size_t getFilesize(const std::string filename) {
@@ -137,7 +135,7 @@ int HttpAccessLogMetrics::logsScan( ){
     statsFile.close();
   } catch (const std::exception& e) {
     if(!statsFile.eof()){
-      std::cerr<<"caught exception: "<<e.what()<<"\n while processing filename "<<filename<<std::endl;
+      std::cerr<<"HttpAccessLogMetrics::logsScan caught exception: "<<e.what()<<"\n while processing filename "<<filename<<std::endl;
     }
     return 6;
   }
@@ -585,8 +583,8 @@ void HttpAccessLogMetrics::insertEntities(){
   lm.insertStringEntities( "httpstats_pages", "external_domains", referer_hostnames_ids, referer_hostnames );
   lm.insertStringEntities( "httpstats_pages", "pages_paths", referer_paths_ids, referer_paths );
   lm.insertStringEntities( "httpstats_pages", "pages_paths", internal_paths_ids, internal_paths );
-  lm.insertParamsEntities( referer_params_ids, referer_params, referer_paths_ids, page_paths_full_ids);
-  lm.insertParamsEntities( internal_params_ids, internal_params, internal_paths_ids, page_paths_full_ids);
+  //lm.insertParamsEntities( referer_params_ids, referer_params, referer_paths_ids, page_paths_full_ids);
+  //lm.insertParamsEntities( internal_params_ids, internal_params, internal_paths_ids, page_paths_full_ids);
   lm.insertSearchTerms( search_queries_ids, search_queries, referer_hostnames_ids );
   lm.insertTrafficVectors( true, tvectors_inner_ids, tvectors_inner, referer_hostnames_ids, page_paths_full_ids);
   lm.insertTrafficVectors( false, tvectors_incoming_ids, tvectors_incoming, referer_hostnames_ids, page_paths_full_ids);
@@ -650,7 +648,7 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
     //int id = str_it->second;
     //std::cout<<"internal_paths "<<path<<":"<<id<<"\n";
   }
-  for( pc_it = referer_params_ids.begin(); pc_it!=referer_params_ids.end(); pc_it++){
+  /*for( pc_it = referer_params_ids.begin(); pc_it!=referer_params_ids.end(); pc_it++){
     //int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
     //std::cout<<"referer_params "<<pc.toString()<<":"<<id<<"\n";
@@ -659,7 +657,7 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
     //int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
     //std::cout<<"internal_params "<<pc.toString()<<":"<<id<<"\n";
-  }
+  }*/
   for( kv_it = search_queries_ids.begin(); kv_it!=search_queries_ids.end(); kv_it++){
     KeyValueContainer kvC = kv_it->first;
     //int id = kv_it->second;
@@ -743,59 +741,47 @@ url_parts HttpAccessLogMetrics::getUrlPartsFromReqPath( std::string requestPath,
 //OTHER
 void notify( int tid ) {
   std::lock_guard<std::mutex> lk(m);
-  std::cerr<< "notifying "<<tid<<"\n";
+  //std::cerr<< "notifying "<<tid<<"\n";
   lock_signal_vars[tid] = tid;
   cv.notify_all();
 }
 void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
-  std::vector<std::string> user_hostnames;
-  long long new_tid = tid + tpool_size;
-  std::string filename = dirname + "/" + filenames[tid];
-  std::string user_hostname = getHostnameFromLogfile(filename);
   std::unique_lock<std::mutex> lk(m);
   cv.wait( lk, [=] { // c++11 for lambda [](){}
-      std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
+      //std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
       return lock_signal_vars[tid] == tid;
       });
-  std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
+  //std::cerr <<"condition reached lsv["<<tid<<"]=="<<tid<<"\n";
+  std::vector<std::string> user_hostnames;
+  std::string filename; 
+  if( (long long) filenames.size() > tid){
+    filename = dirname+"/"+filenames[tid];
+  }
+  std::string user_hostname = getHostnameFromLogfile(filename);
   user_hostnames.push_back(user_hostname);
   user_hostnames.push_back("www."+user_hostname);
+  std::cerr<<"thread "<<std::this_thread::get_id()<<" processing "<<filename<<std::endl;
   HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostnames, search_hosts, filename );
   hMetrics.parseLogFile( );
   hMetrics.insertEntities( );
   ncompleted++;
-  std::cerr<<" ncompleted: "<<ncompleted<<"\n";
+  long long new_tid = tid + tpool_size;
+  std::cerr<<"ncompleted/nfiles: "<<ncompleted<<"/"<<tmax<<"\n";
   if( new_tid < tmax ) {
-      lock_signal_vars[new_tid] = -1;
-      if( (long long) filenames.size() > new_tid ){
-        filename = dirname+"/"+filenames[new_tid];
-      }
-      user_hostname = getHostnameFromLogfile(filename);
-      user_hostnames.clear();
-      user_hostnames.push_back(user_hostname);
-      user_hostnames.push_back("www."+user_hostname);
+    std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)).detach();
+    std::thread( notify, new_tid ).detach();
   }
-  worker_threads[new_tid]=( std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)));
-  signaling_threads[new_tid]=( std::thread( notify, new_tid ) );
-  worker_threads[new_tid].detach();
-  signaling_threads[new_tid].detach();
 }
 void start_thread_pool( int tpool_size ){
-  int i, completed=0;
-  std::string filename;
+  int i, ncompleted=0;
   int nt_total= filenames.size();
-  worker_threads.resize(nt_total); //to avoid heap-buffer-overflow
-  signaling_threads.resize(nt_total);
   lock_signal_vars.resize(nt_total);
   for(i=0; i< tpool_size; i++){
     lock_signal_vars.push_back(-1);
-    filename = dirname+"/"+filenames[i];
-    worker_threads[i]=std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed) );
-    signaling_threads[i]=std::thread( notify, i );
-    worker_threads[i].join(); //should prevent memory leaks
-    signaling_threads[i].join();
+    std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(ncompleted) ).detach();
+    std::thread( notify, i ).detach();
   }
-  while( completed < nt_total ) { // wait out in this thread till completion
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  while( ncompleted < nt_total ) { // wait out in this thread till completion
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }
