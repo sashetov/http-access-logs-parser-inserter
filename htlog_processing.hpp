@@ -16,6 +16,7 @@
 #include "htlog_uap.hpp"
 #include "htlog_containers.hpp"
 #include "htlog_mysql.hpp"
+#include "htlog_timer.hpp"
 #define MYSQL_HOSTNAME "185.52.26.79"
 #define MYSQL_PORT 3308
 #define MYSQL_USER "root"
@@ -50,7 +51,7 @@ class HttpAccessLogMetrics {
     HttpAccessLogMetrics( std::vector<std::string>, std::vector<std::string>,std::string);
     ~HttpAccessLogMetrics();
     int logsScan( );
-    void parseLogFile( );
+    void iterateAllMetrics( );
     int parseLine(std::string,parsed_logline &);
     unsigned long getNumericIp( std::string );
     std::string getStringIP(unsigned long);
@@ -65,10 +66,9 @@ class HttpAccessLogMetrics {
     void insertEntities( );
     std::map<unsigned long,int> getClientIps();
     void printAllIdsMaps();
+    Timer * timer;
   private:
-    std::vector<std::thread*> per_file_threads;
-    int st; // start timestamp
-    int et; // end timestamp
+    LogsMysql lm;
     int real_did;
     int uid;
     int lines_failed;
@@ -109,13 +109,12 @@ class HttpAccessLogMetrics {
     std::map<HourlyHitsContainer,int> hits;
     std::map<HourlyVisitsContainer,int> visits;
     std::map<HourlyPageviewsContainer,int> pageviews;
-    //mysql
-    LogsMysql lm;
     //methods
     int getLinesNumber();
     url_parts getUrlParts( std::string );
     url_parts getUrlPartsFromReqPath( std::string, std::string, std::string );
 };
+void set_id_safely( int );
 void notify( int );
 void spawn_when_ready( int, int, int, int& );
 void start_thread_pool( int );

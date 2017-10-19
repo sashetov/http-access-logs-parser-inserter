@@ -40,7 +40,11 @@ void LogsMysql::runInsertQuery(boost::scoped_ptr< sql::Statement > & stmt, std::
     logfile<<sql<<std::endl;
     logfile.close();
   }
-  stmt->execute(sql);
+  try {
+    stmt->execute(sql);
+  } catch (sql::SQLException &e) {
+    std::cerr<< "exception during insert query : " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )"<<std::endl<<" for SQL:"<<sql<<std::endl;
+  }
 }
 int LogsMysql::getDomainsId(  std::string domain_name ){
   int did=-1;
