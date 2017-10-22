@@ -39,6 +39,7 @@ function __main__ {
     }; done;
     printdo "scp cloudstats $SSH_URL:$PROGRAM_BASEDIR/bin/;";
     printdo "scp uap_regexes.yaml $SSH_URL:$PROGRAM_BASEDIR/bin/;";
+    printdo "scp search_engines $SSH_URL:$PROGRAM_BASEDIR/bin/;";
   }; done;
 }
 __main__ $*
