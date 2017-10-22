@@ -253,27 +253,10 @@ time_t HttpAccessLogMetrics::getTimestamp( std::string dateTime ){
   return epoch;
 }
 int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
-  //char *user_hostname, *date, *hour, *timezone, *host, *agent, *req, *ref, *p;
-  std::string host, userIP, 
-    date, hour, timezone,
-    request, requestType, requestPath, requestProtocol,
-    referer,
-    userAgent,
-    size,
-    status;
+  std::string host, userIP, date, hour, timezone, request, requestType, requestPath, requestProtocol, referer, userAgent, size, status;
   int statusCode;
   long sizeBytes;
-  int uIPCursor0, uIPCursor1,
-      dateCursor0, dateCursor1,
-      reqCursor0, reqCursor1,
-      reqUrlCursor0, reqUrlCursor1,
-      refCursor0, refCursor1,
-      uaCursor0, uaCursor1,
-      statusCursor0, statusCursor1,
-      sizeCursor0, sizeCursor1
-        ;
-  //char *agent_start = NULL, *req_end = NULL, *ref_end = NULL;
-
+  int uIPCursor0, uIPCursor1, dateCursor0, dateCursor1, reqCursor0, reqCursor1, reqUrlCursor0, reqUrlCursor1, refCursor0, refCursor1, uaCursor0, uaCursor1, statusCursor0, statusCursor1, sizeCursor0, sizeCursor1;
   //USER IP
   if ((uIPCursor0= line.find_first_of(" ")) == -1){
     return 1;
@@ -356,32 +339,8 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){
   ll.agent = userAgent;
   ll.sizeBytes = sizeBytes;
   ll.statusCode= statusCode;
-  /*std::cout
-    <<"hostname:"<<host<<"\n"
-    <<"userIP:"<<userIP<<"\n"
-    <<"date:"<<date<<"\n"
-    <<"request:"<<request<<"\n"
-    <<"requestPath:"<<requestPath<<"\n"
-    <<"requestType:"<<requestType<<"\n"
-    <<"requestProtocol:"<<requestProtocol<<"\n"
-    <<"referer:"<<referer<<"\n"
-    <<"userAgent:"<<userAgent<<"\n"
-    <<"statusCode:"<<statusCode<<"\n"
-    <<"sizeBytes:"<<sizeBytes<<"\n"
-    ;*/
-  /*std::cout
-    <<"ll->hostname:"<<ll.hostname<<"\n"
-    <<"userIP:"<<userIP<<"\n"
-    <<"ll->userIP:"<<ll.userIP<<"\n"
-    <<"ll->date:"<<ll.date<<"\n"
-    <<"ll->timestamp:"<<ll.timestamp<<"\n"
-    <<"ll->requestPath:"<<ll.requestPath<<"\n"
-    <<"ll->requestType:"<<ll.requestType<<"\n"
-    <<"ll->referer:"<<ll.referer<<"\n"
-    <<"ll->agent:"<<ll.agent<<"\n"
-    <<"ll->sizeBytes:"<<ll.sizeBytes<<"\n"
-    <<"ll->statusCode:"<<ll.statusCode<<"\n"
-    ;*/
+  /*std::cout <<"hostname:"<<host<<"\n" <<"userIP:"<<userIP<<"\n" <<"date:"<<date<<"\n" <<"request:"<<request<<"\n" <<"requestPath:"<<requestPath<<"\n" <<"requestType:"<<requestType<<"\n" <<"requestProtocol:"<<requestProtocol<<"\n" <<"referer:"<<referer<<"\n" <<"userAgent:"<<userAgent<<"\n" <<"statusCode:"<<statusCode<<"\n" <<"sizeBytes:"<<sizeBytes<<"\n" ;*/
+  /*std::cout <<"ll->hostname:"<<ll.hostname<<"\n" <<"userIP:"<<userIP<<"\n" <<"ll->userIP:"<<ll.userIP<<"\n" <<"ll->date:"<<ll.date<<"\n" <<"ll->timestamp:"<<ll.timestamp<<"\n" <<"ll->requestPath:"<<ll.requestPath<<"\n" <<"ll->requestType:"<<ll.requestType<<"\n" <<"ll->referer:"<<ll.referer<<"\n" <<"ll->agent:"<<ll.agent<<"\n" <<"ll->sizeBytes:"<<ll.sizeBytes<<"\n" <<"ll->statusCode:"<<ll.statusCode<<"\n" ;*/
   return 0;
 }
 template<typename T> void HttpAccessLogMetrics::incrementCount( std::map<T,int> *kvmap, T key ){

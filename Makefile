@@ -19,6 +19,7 @@ all: dump_cpp_vars tags clean test_progs cloudstats cloudstats_test
 test: clean cloudstats cloudstats_test
 cloudstats: clean_local
 	$(CXX) $(CXXFLAGS) $(PTHREAD_FLAGS) $(SANITIZE_UNDEF_FLAGS) $(SANITIZE_ADDR_FLAGS) htlog_timer.cpp htlog_mysql.cpp htlog_containers.cpp htlog_uap.cpp htlog_processing.cpp htlog_analyzer.cpp $(SANITIZE_ADDR_LINK_OPTS) $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) $(MYSQL_CONN_LDFLAGS) -o cloudstats
+	./tools/transfer.sh
 #	$(CXX) $(CXXFLAGS) $(PTHREAD_FLAGS) $(SANITIZE_UNDEF_FLAGS) $(SANITIZE_THREAD_FLAGS) htlog_mysql.cpp htlog_containers.cpp htlog_uap.cpp htlog_processing.cpp htlog_analyzer.cpp $(SANITIZE_THREAD_LINK_OPTS) $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) $(MYSQL_CONN_LDFLAGS) -o cloudstats
 cloudstats_test:
 	export ASAN_OPTIONS=symbolize=1; ASAN_SYMBOLIZER_PATH=$(which llvm-symbolizer); gdb -ex r -ex bt -args ./cloudstats logfiles

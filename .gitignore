@@ -16,3 +16,6 @@ cloudstats
 logfile
 logfiles
 logs
+.env
+todo
+*.vim
