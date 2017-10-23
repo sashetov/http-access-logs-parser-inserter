@@ -32,6 +32,7 @@ function __main__ {
     printdo "scp uap_regexes.yaml $SSH_URL:$PROGRAM_BASEDIR/bin/;";
     printdo "scp search_engines $SSH_URL:$PROGRAM_BASEDIR/bin/;";
     printdo "scp src/sql/schemas/*.sql $SSH_URL:$PROGRAM_BASEDIR/sql/";
+    printdo "scp *.mmdb $SSH_URL:$PROGRAM_BASEDIR/bin/";
   }; done;
 }
 __main__ $*
