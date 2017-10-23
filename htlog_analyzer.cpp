@@ -59,16 +59,30 @@ int main(int argc, char** argv) {
         std::cerr<<"invalid option '"<<c<<"' provided"<<std::endl;
     }
   }
-  if(logfile.size()){
-    std::cout<<"using "<<logfile<<" for output\n";
-  }
   if (optind < argc) {
     dirname = std::string(argv[optind++]);
     std::cout<<"Analyzing logfiles in directory: "<<dirname<<"\n";
   }
-  else {
+  int print_usage_and_exit=0;
+  if( mysql_hostname.size() ==0) {
+    std::cerr<<"Error: MYSQL_HOSTNAME (-h or --mysql_host ) option is required! "<<std::endl;
+    print_usage_and_exit++;
+  }
+  if( mysql_port.size()==0 ){
+    std::cerr<<"Error: MYSQL_PORT option ( -P or --mysql_port ) is required! "<<std::endl;
+    print_usage_and_exit++;
+  }
+  if( mysql_user.size() == 0 ){
+    std::cerr<<"Error: MYSQL_USER (-u or --mysql_user ) option is required! "<<std::endl;
+    print_usage_and_exit++;
+  }
+  if( mysql_password.size()==0 ){
+    std::cerr<<"Error: MYSQL_PASSWORD (-p or --mysql_password )option is required! "<<std::endl;
+    print_usage_and_exit++;
+  }
+  if ( print_usage_and_exit){ 
     std::cerr<<"Usage:\n"<< argv[0] <<" { -l ERROR.LOG | --logfile ERROR.LOG } -h MYSQL_HOSTNAME -u MYSQL_USER -P MYSQL_PORT -p MYSQL_PASSWORD LOGDIR_NAME/\n";
-    exit(-1);
+    exit(print_usage_and_exit);
   }
   loadSearchHostnames(search_hosts,"search_engines");
   filenames = getLogfileNamesFromDirectory(dirname);

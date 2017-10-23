@@ -13,7 +13,7 @@ function __main__ {
   fi;
   for HOSTNUM in 001 002 003; do {
     SSH_URL="${SSH_URL_PRE}${HOSTNUM}${SSH_URL_POST}";
-    printdo "ssh $SSH_URL 'mkdir -p $PROGRAM_BASEDIR/{lib,bin}'";
+    printdo "ssh $SSH_URL 'mkdir -p $PROGRAM_BASEDIR/{lib,bin,sql}'";
     printdo "ssh $SSH_URL 'yum -y install glibc-2.17 libmaxminddb-1.2.0-1.el7.x86_64 boost-regex-1.53.0-27.el7.x86_64 yaml-cpp-0.5.1-6.el7.x86_64 libicu-50.1.2-15.el7.x86_64'";
     ldd $BIN_FILE 2>&1  | \
     sed -r 's/^(.+=>)?[^\/]+(\/|linux-vdso.so.1)([^(=]+)(\(|=>).+/\2\3/g' |\
@@ -31,6 +31,7 @@ function __main__ {
     printdo "scp cloudstats $SSH_URL:$PROGRAM_BASEDIR/bin/;";
     printdo "scp uap_regexes.yaml $SSH_URL:$PROGRAM_BASEDIR/bin/;";
     printdo "scp search_engines $SSH_URL:$PROGRAM_BASEDIR/bin/;";
+    printdo "scp src/sql/schemas/*.sql $SSH_URL:$PROGRAM_BASEDIR/sql/";
   }; done;
 }
 __main__ $*
