@@ -17,10 +17,6 @@
 #include "htlog_containers.hpp"
 #include "htlog_mysql.hpp"
 #include "htlog_timer.hpp"
-#define MYSQL_HOSTNAME "185.52.26.79"
-#define MYSQL_PORT 3308
-#define MYSQL_USER "root"
-#define MYSQL_PASSWORD "qqq"
 std::string getHostnameFromLogfile(std::string);
 void loadSearchHostnames(std::vector<std::string> &, std::string);
 std::vector<std::string> getLogfileNamesFromDirectory( std::string );

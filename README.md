@@ -1,2 +1,2 @@
-# http-access-logs-parser-inserter
-http access logs parser inserter
+Usage:
+./cloudstats { -l ERROR.LOG | --logfile ERROR.LOG } -h MYSQL_HOSTNAME -u MYSQL_USER -P MYSQL_PORT -p MYSQL_PASSWORD LOGDIR_NAME/

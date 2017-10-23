@@ -4,7 +4,7 @@ int id;
 Timer * threads_timer = new Timer();
 int worker_threads_launched_total=0;
 int worker_threads_working=0;
-extern std::string dirname;
+extern std::string mysql_hostname, mysql_port, mysql_user, mysql_password, dirname, logfile;
 extern std::vector<std::string> search_hosts;
 extern std::vector<std::string> filenames;
 //MISC PRE-INIT
@@ -80,7 +80,7 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   return result;
 }
 //PUBLIC
-HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ) :lm(user_hosts[0],MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD){
+HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ) : lm(user_hosts[0],mysql_hostname,std::stoi(mysql_port),mysql_user,mysql_password){
   internal_hostnames=user_hosts;
   search_hostnames=search_hosts;
   lines_failed=0;

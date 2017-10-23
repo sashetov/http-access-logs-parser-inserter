@@ -1,14 +1,5 @@
 #!/bin/bash
-ENV_FILE=".env";
-function real_cwd {
- LINKPATH=$(readlink -f .);
- echo $LINKPATH;
- return $?;
-}
-function printdo { # short for print_and_do_cmd
-  echo "$*";
-  /usr/bin/bash -c "$*" 2>&1 > /dev/null;
-}
+. tools/common.inc.sh
 function __main__ {
   if ! [ -f $ENV_FILE ]; then 
     echo "environment file ($ENV_FILE) not present, please create it";

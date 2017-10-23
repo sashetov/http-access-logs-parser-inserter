@@ -1,29 +1,24 @@
 export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig'
-DEBUG_FLAGS=-g -ggdb
-WARNING_FLAGS=-Wall -Wextra -Werror -pedantic -v
-SANITIZE_THREAD_LINK_OPTS=-pie -lubsan  -ltsan -static-libtsan
-SANITIZE_THREAD_FLAGS=-fPIE -fsanitize=thread
-SANITIZE_ADDR_LINK_OPTS=-L/usr/local/lib64/ -Wl,-R/usr/local/lib64/ -lasan
-SANITIZE_ADDR_FLAGS=-fsanitize=address
-SANITIZE_UNDEF_FLAGS=-fsanitize=undefined -fsanitize=shift -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow
 LANGUAGE_FLAGS=-std=c++11 -fstrict-aliasing
-OPTIMIZE_FLAGS=-O3
 STACKTRACE_FLAGS=-fno-omit-frame-pointer -fno-optimize-sibling-calls
+WARNING_FLAGS=-Wall -Wextra -Werror -pedantic -v
+OPTIMIZE_FLAGS=-O3
+DEBUG_FLAGS=-g -ggdb3
 CXXFLAGS=$(LANGUAGE_FLAGS) $(STACKTRACE_FLAGS) $(WARNING_FLAGS) $(OPTIMIZE_FLAGS) $(DEBUG_FLAGS)
 PTHREAD_FLAGS=-pthread
-UAP_LDFLAGS=-lboost_regex -lyaml-cpp
+SANITIZE_UNDEF_FLAGS=-fsanitize=undefined -fsanitize=shift -fsanitize=integer-divide-by-zero -fsanitize=unreachable -fsanitize=vla-bound -fsanitize=null -fsanitize=return -fsanitize=signed-integer-overflow
+SANITIZE_ADDR_FLAGS=-fsanitize=address
+SANITIZE_ADDR_LDFLAGS=-L/usr/local/lib64/ -Wl,-R/usr/local/lib64/ -lasan
 GEOIP_LDFLAGS=-L/usr/local/lib/ -lgeolite2++ -lmaxminddb
+UAP_LDFLAGS=-lboost_regex -lyaml-cpp
 MYSQL_CONN_LDFLAGS=-lmysqlcppconn
-#MUDFLAP_FLAGS=-fmudflap -llibmudflap #export MUDFLAP_OPTIONS=-print-leaks;
 all: dump_cpp_vars tags clean test_progs cloudstats cloudstats_test
 test: clean cloudstats cloudstats_test
 cloudstats: clean_local
-	$(CXX) $(CXXFLAGS) $(PTHREAD_FLAGS) $(SANITIZE_UNDEF_FLAGS) $(SANITIZE_ADDR_FLAGS) htlog_timer.cpp htlog_mysql.cpp htlog_containers.cpp htlog_uap.cpp htlog_processing.cpp htlog_analyzer.cpp $(SANITIZE_ADDR_LINK_OPTS) $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) $(MYSQL_CONN_LDFLAGS) -o cloudstats
+	$(CXX) $(CXXFLAGS) $(PTHREAD_FLAGS) $(SANITIZE_UNDEF_FLAGS) $(SANITIZE_ADDR_FLAGS) htlog_timer.cpp htlog_mysql.cpp htlog_containers.cpp htlog_uap.cpp htlog_processing.cpp htlog_analyzer.cpp $(SANITIZE_ADDR_LDFLAGS) $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) $(MYSQL_CONN_LDFLAGS) -o cloudstats
 	./tools/transfer.sh
-#	$(CXX) $(CXXFLAGS) $(PTHREAD_FLAGS) $(SANITIZE_UNDEF_FLAGS) $(SANITIZE_THREAD_FLAGS) htlog_mysql.cpp htlog_containers.cpp htlog_uap.cpp htlog_processing.cpp htlog_analyzer.cpp $(SANITIZE_THREAD_LINK_OPTS) $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) $(MYSQL_CONN_LDFLAGS) -o cloudstats
 cloudstats_test:
-	export ASAN_OPTIONS=symbolize=1; ASAN_SYMBOLIZER_PATH=$(which llvm-symbolizer); gdb -ex r -ex bt -args ./cloudstats logfiles
-#	gdb -ex 'set disable-randomization off' -ex r -ex bt -args ./cloudstats logfiles
+	./tools/cloudstats-test.sh
 test_progs:
 	$(MAKE) -C tests/ all
 dump_cpp_vars:
