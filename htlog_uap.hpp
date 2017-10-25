@@ -56,7 +56,6 @@ struct UserAgent {
   bool isSpider() const { return device.family == "Spider"; }
 };
 void mark_placeholders(std::map<std::string::size_type, size_t>&, const std::string);
-void print_regexp_error( std::string,std::regex_error );
 AgentStore fill_agent_store( const YAML::Node, const std::string, const std::string, const std::string, const std::string);
 DeviceStore fill_device_store(const YAML::Node& device_parser);
 class UAStore {

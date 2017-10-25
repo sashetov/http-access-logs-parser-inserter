@@ -57,7 +57,6 @@ class HttpAccessLogMetrics {
     void processTrafficVectors( std::string, std::string );
     void processRequestUrl( std::string );
     std::string getCountryFromIP( std::string );
-    std::vector<KeyValueContainer> parseParamsString( std::string );
     std::vector<ParamsContainer> parseParamsString( std::string, int, std::string, std::string, std::string );
     void insertEntities( );
     std::map<unsigned long,int> getClientIps();
@@ -89,13 +88,9 @@ class HttpAccessLogMetrics {
     std::map<std::string, int> referer_hostnames_ids;       // referer_domain_id
     std::map<std::string,int> referer_paths;
     std::map<std::string,int> referer_paths_ids;            // page_id
-    std::map<ParamsContainer,int> referer_params;
-    std::map<ParamsContainer,int> referer_params_ids;       // url_param_id
     std::map<std::string,int> internal_domains;             // domain_id ( imported, not inserted )
     std::map<std::string,int> internal_paths;
     std::map<std::string,int> internal_paths_ids;           // page_id
-    std::map<ParamsContainer,int> internal_params;
-    std::map<ParamsContainer,int> internal_params_ids;      // url_param_id
     std::map<KeyValueContainer,int> search_queries;
     std::map<KeyValueContainer,int> search_queries_ids;     // search_terms_ids
     std::map<TVectorContainer,int> tvectors_inner;
@@ -105,6 +100,8 @@ class HttpAccessLogMetrics {
     std::map<HourlyHitsContainer,int> hits;
     std::map<HourlyVisitsContainer,int> visits;
     std::map<HourlyPageviewsContainer,int> pageviews;
+    std::map<HourlyReferersContainer,int> referers;
+    std::map<HourlySearchTermsContainer,int> search_terms;
     //methods
     int getLinesNumber();
     url_parts getUrlParts( std::string );

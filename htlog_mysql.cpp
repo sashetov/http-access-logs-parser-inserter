@@ -1,4 +1,5 @@
 #include "htlog_mysql.hpp"
+extern std::string log_path;
 template<typename T> T getNthNode( std::map<T,int> pcs, int n ) {
   int i =0;
   typename std::map<T,int>::iterator it;
@@ -10,6 +11,19 @@ template<typename T> T getNthNode( std::map<T,int> pcs, int n ) {
     i++;
   }
   return T();// return default version with empty strings..
+}
+std::string find_string_key_by_value( std::map<std::string, int> str_ids_map, int search_id ){
+  int id;
+  std::string str_val;
+  std::map<std::string,int>::iterator fpit;
+  for( fpit  = str_ids_map.begin(); fpit!=str_ids_map.end(); fpit++){
+    str_val = fpit->first;
+    id = fpit->second;
+    if(id == search_id){
+      break;
+    }
+  }
+  return str_val;
 }
 LogsMysql::LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password) : host(mysql_host), port(mysql_port), username(mysql_user), password(mysql_password), mysql_url("tcp://"+host+":"+std::to_string(port)), domain_name(domain) {
 }
@@ -25,18 +39,18 @@ void LogsMysql::endThread(){
 }
 sql::ResultSet * LogsMysql::runSelectQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {
   if(LOG_SQL_STMTS) {
-    std::string log_path = "logs/"+domain_name+".sql";
-    std::ofstream logfile(log_path, std::fstream::in | std::fstream::out | std::fstream::app );
+    std::string log_path_full = log_path+"/"+domain_name+".sql";
+    std::ofstream logfile(log_path_full, std::fstream::in | std::fstream::out | std::fstream::app );
     logfile<<sql<<std::endl;
     logfile.close();
   }
   sql::ResultSet * res(stmt->executeQuery(sql));
   return res;
 }
-void LogsMysql::runInsertQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {
+void LogsMysql::runQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {
   if(LOG_SQL_STMTS) {
-    std::string log_path = "logs/"+domain_name+".sql";
-    std::ofstream logfile(log_path, std::fstream::in | std::fstream::out | std::fstream::app );
+    std::string log_path_full = log_path+"/"+domain_name+".sql";
+    std::ofstream logfile(log_path_full, std::fstream::in | std::fstream::out | std::fstream::app );
     logfile<<sql<<std::endl;
     logfile.close();
   }
@@ -122,7 +136,7 @@ void LogsMysql::insertClientIps(std::map<unsigned long,int> &client_ips_ids, std
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if(client_ips.size() > 0){
       //std::cout<<"client ips insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
+      runQuery(stmt,insert_sql);
       //std::cout<<"client ips select_ids_sql: "<<select_ids_sql<<"\n";
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
       while (res->next()) {
@@ -156,7 +170,7 @@ void LogsMysql::insertStringEntities(std::string database, std::string table, st
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if(entities.size() > 0){
       //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
+      runQuery(stmt,insert_sql);
       //std::cout<<database<<"."<<table<<"select_ids_sql: "<<select_ids_sql<<"\n";
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
       while (res->next()) {
@@ -192,7 +206,7 @@ void LogsMysql::insertNameVersionEntities(std::string database, std::string tabl
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if(entities.size() > 0){
       //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
+      runQuery(stmt,insert_sql);
       //std::cout<<database<<"."<<table<<"select_ids_sql: "<<select_ids_sql<<"\n";
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
       while (res->next()) {
@@ -223,7 +237,6 @@ void LogsMysql::insertSearchTerms(std::map<KeyValueContainer,int> &entity_ids_ma
       std::string name = kvC.getKey();
       std::string search_hostname = kvC.getValue();
       int sid =  (referer_hostnames_ids.find(search_hostname))->second;
-      //std::cout<<"sid "<<std::to_string(sid)<<" search_host "<<search_hostname<<"\n";
       insert_sql += "('"+mysql_conn->escapeString(name)+"',"+mysql_conn->escapeString(std::to_string(sid))+"),";
       select_ids_sql+= "(name = '"+mysql_conn->escapeString(name)+"' AND search_engine_id= "+mysql_conn->escapeString(std::to_string(sid))+") OR ";
     }
@@ -233,18 +246,14 @@ void LogsMysql::insertSearchTerms(std::map<KeyValueContainer,int> &entity_ids_ma
     select_ids_sql +=";";
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if( entities.size() > 0 ) {
-      //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
-      //std::cout<<database<<"."<<table<<"select_ids_sql: "<<select_ids_sql<<"\n";
+      runQuery(stmt,insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
       int i =0;
-      //if(res->rowsCount() != entities.size()){
-      //throw std::runtime_error( "rows count != entities number "+std::to_string(res->rowsCount())+ "!="+std::to_string(entities.size())+ "\n" + "insert_sql: " + insert_sql + "\n" + "select_ids_sql: " + select_ids_sql + "\n" ); 
-      //}
       while (res->next()) {
-        KeyValueContainer nv= getNthNode(entities,i);
         int id = std::stoi( res->getString("id"));
-        //std::cout<<"entity_ids_map insert "<<nv.toString()<<","<<id<<"\n";
+        std::string search_term = res->getString("name");
+        std::string search_engine_id = res->getString("search_engine_id");
+        KeyValueContainer nv = KeyValueContainer(search_term, search_engine_id );
         entity_ids_map.insert({nv,id});
         i++;
       }
@@ -252,59 +261,6 @@ void LogsMysql::insertSearchTerms(std::map<KeyValueContainer,int> &entity_ids_ma
   } catch (sql::SQLException &e) {
     std::cerr<< "LogsMysql::insertSearchTerms caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
-  //} catch ( std::runtime_error &e) {
-  //std::cerr<< "# ERR: " << e.what() << "\n";
-  //}
-}
-void LogsMysql::insertParamsEntities(std::map<ParamsContainer,int> &entity_ids_map, std::map<ParamsContainer,int> entities, std::map<std::string,int> page_paths_ids, std::map<std::string,int> page_paths_full_ids) {
-  try {
-    std::string database = "httpstats_pages";
-    std::string table = "url_params";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
-    std::string insert_sql = "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(page_id,full_page_id,k,val) VALUES ";
-    std::string select_ids_sql = "SELECT id,k,val,full_page_id,page_id FROM "+mysql_conn->escapeString(table)+" WHERE ";
-    std::map<ParamsContainer,int>::iterator pc_it;
-    for( pc_it = entities.begin(); pc_it!=entities.end(); pc_it++){
-      ParamsContainer pC = pc_it->first;
-      std::string path = pC.getPage();
-      int path_id = page_paths_ids.find(path)->second;
-      std::string full_path = pC.getFullPagePath();
-      std::string key = pC.getKey();
-      std::string value = pC.getValue();
-      //std::cout<<pC.toString()<<"\n";
-      int full_path_id = page_paths_full_ids.find(full_path)->second;
-      insert_sql += "("+mysql_conn->escapeString(std::to_string(path_id))+","+mysql_conn->escapeString(std::to_string(full_path_id))+",'"+mysql_conn->escapeString(key)+"','"+mysql_conn->escapeString(value)+"'),";
-      select_ids_sql+= "(full_page_id = "+mysql_conn->escapeString(std::to_string(full_path_id))+" AND page_id = "+mysql_conn->escapeString(std::to_string(path_id))+" AND k = '"+mysql_conn->escapeString(key)+"' AND val = '"+mysql_conn->escapeString(value)+"' ) OR ";
-    }
-    insert_sql = insert_sql.substr(0, insert_sql.size()-1); // chop off ','
-    insert_sql +=";";
-    select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-3); // chop off last ','
-    select_ids_sql +=";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
-    if(entities.size() > 0 ){
-      //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
-      boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
-      //std::cout<<database<<"."<<table<<"select_ids_sql: "<<select_ids_sql<<"\n";
-      int i =0;
-      if(res->rowsCount() != entities.size()){
-        //throw std::runtime_error( "rows count != entities number "+std::to_string(res->rowsCount())+"!="+std::to_string(entities.size())+ "insert_sql: " + insert_sql + "\n" + "select_ids_sql: " + select_ids_sql + "\n" );
-      }
-      while (res->next()) {
-        int id = std::stoi( res->getString("id"));
-        ParamsContainer found_pc = getNthNode(entities,i);
-        entity_ids_map.insert({found_pc,id});
-        i++;
-      }
-    }
-  } catch (sql::SQLException &e) {
-    std::cerr<< "LogsMysql::insertParamsEntities caught exception: "<< e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
-  }/* catch ( std::runtime_error &e) {
-    std::cerr<< "# ERR: " << e.what() << "\n";
-  }*/
 }
 void LogsMysql::insertExternalDomains(std::map<std::string,int> &referer_hostnames_ids, std::map<std::string, int> referer_hostnames) {
   try {
@@ -322,14 +278,14 @@ void LogsMysql::insertExternalDomains(std::map<std::string,int> &referer_hostnam
         insert_sql += "('"+mysql_conn->escapeString(hostname)+"'),";
         select_ids_sql+= "'"+mysql_conn->escapeString(hostname)+"',";
     }
-    insert_sql = insert_sql.substr(0, insert_sql.size()-1); // chop off last ','
+    insert_sql = insert_sql.substr(0, insert_sql.size()-1);
     insert_sql +=";";
-    select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-1); // chop off last ','
+    select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-1);
     select_ids_sql +=");";
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if( referer_hostnames.size() > 0 ){
       //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
+      runQuery(stmt,insert_sql);
       //std::cout<<database<<"."<<table<<"select_ids_sql: "<<select_ids_sql<<"\n";
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
       while (res->next()) {
@@ -349,13 +305,19 @@ void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,int> 
     boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
     handler->con = conn.get();
     handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
-    std::string insert_sql = inner ? 
-      "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(a_id,b_id) VALUES ":
-      "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(referer_domain_id,referer_page_id,page_id) VALUES " ;
-    std::string select_ids_sql = inner ? 
-      "SELECT id,a_id,b_id FROM "+mysql_conn->escapeString(table)+" WHERE ":
-      "SELECT id,referer_domain_id,referer_page_id,page_id FROM "+mysql_conn->escapeString(table)+" WHERE ";
+    std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
+    long long timestamp = (long long) (std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch())).count();
+    std::string temp_table_name = "ttab_for_join_"+std::to_string(timestamp);
+    std::string columns_full =  inner ?  table+".a_id,"+table+".b_id" : table+".referer_domain_id,"+table+".referer_page_id,"+table+".page_id";
+    std::string columns=  inner ?  "a_id,b_id" : "referer_domain_id,referer_page_id,page_id";
+    std::string insert_sql ="INSERT IGNORE INTO "+table+"("+columns+") VALUES ";
+    std::string create_temp_table_sql = "CREATE TEMPORARY TABLE "+temp_table_name+" like httpstats_pages."+table+";";
+    std::string temp_table_insert_sql = "INSERT IGNORE INTO "+temp_table_name+"("+columns+") VALUES ";
+    std::string join_on_clause = inner ? 
+      "t.a_id="+table+".a_id AND t.b_id = "+table+".b_id " : 
+      "t.referer_domain_id = "+table+".referer_domain_id AND t.referer_page_id = "+table+".referer_page_id AND t.page_id = "+table+".page_id ";
+    std::string select_ids_sql = "SELECT "+table+".id,"+columns_full+" FROM "+table+" JOIN "+temp_table_name+" t ON "+join_on_clause+";";
+    std::string insert_values="";
     std::map<TVectorContainer,int>::iterator tvc_it;
     for( tvc_it = tvectors.begin(); tvc_it!=tvectors.end(); tvc_it++){
       TVectorContainer tvC = tvc_it->first;
@@ -364,42 +326,46 @@ void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,int> 
       int path_a_id = page_paths_full_ids.find(path_a)->second;
       int path_b_id = page_paths_full_ids.find(path_b)->second;
       if(inner){
-        insert_sql += "("+mysql_conn->escapeString(std::to_string(path_a_id))+","+mysql_conn->escapeString(std::to_string(path_b_id))+"),";
-        select_ids_sql+= "(a_id= "+mysql_conn->escapeString(std::to_string(path_a_id))+" AND b_id = "+mysql_conn->escapeString(std::to_string(path_b_id))+" ) OR ";
+        insert_values += "("+std::to_string(path_a_id)+","+std::to_string(path_b_id)+"),";
       }
       else {
         std::string external_domain = tvC.getExternalDomain();
         int referer_domain_id = referer_hostnames_ids.find(external_domain)->second;
-        insert_sql += "("+mysql_conn->escapeString(std::to_string(referer_domain_id))+","+mysql_conn->escapeString(std::to_string(path_a_id))+","+mysql_conn->escapeString(std::to_string(path_b_id))+"),";
-        select_ids_sql+= "(referer_domain_id="+mysql_conn->escapeString(std::to_string(referer_domain_id))+" AND referer_page_id = "+mysql_conn->escapeString(std::to_string(path_a_id))+" AND page_id = "+mysql_conn->escapeString(std::to_string(path_b_id))+" ) OR ";
+        insert_values += "("+std::to_string(referer_domain_id)+","+std::to_string(path_a_id)+","+std::to_string(path_b_id)+"),";
       }
     }
-    insert_sql = insert_sql.substr(0, insert_sql.size()-1); // chop off ','
-    insert_sql +=";";
-    select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-3); // chop off last ','
-    select_ids_sql +=";";
+    insert_values= insert_values.substr(0, insert_values.size()-1)+";";
+    insert_sql += insert_values;
+    temp_table_insert_sql += insert_values;
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > create_stmt(handler->con->createStatement());
     if( tvectors.size() ) {
-      //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
-      //std::cout<<database<<"."<<table<<"select_ids_sql: "<<select_ids_sql<<"\n";
+      runQuery(stmt,insert_sql);
+      runQuery(stmt,create_temp_table_sql);
+      runQuery(stmt,temp_table_insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
-      int i =0;
-      if(res->rowsCount() != tvectors.size()){
-        //throw std::runtime_error( "rows count != tvectors number "+std::to_string(res->rowsCount())+"!="+std::to_string(tvectors.size())+ "insert_sql: " + insert_sql + "\n" + "select_ids_sql: " + select_ids_sql + "\n" );
-      }
-      while (res->next()) {
-        int id = std::stoi( res->getString("id"));
-        TVectorContainer found = getNthNode(tvectors,i);
-        tvectors_ids.insert({found,id});
-        i++;
+      while ( res->next() ) {
+        int col_index = 1;
+        int id = std::stoi( res->getString(col_index));
+        int external_domain_id = 0;
+        if(!inner) {
+          col_index = 2;
+          external_domain_id = std::stoi(res->getString(col_index));
+        }
+        col_index = inner ? 2:3;
+        int a_id = std::stoi( res->getString(col_index));
+        col_index = inner ? 3:4;
+        int b_id = std::stoi( res->getString(col_index));
+        std::string page_path_a = find_string_key_by_value(page_paths_full_ids, a_id);
+        std::string page_path_b = find_string_key_by_value(page_paths_full_ids, b_id);
+        std::string external_domain = inner ? "" : find_string_key_by_value(referer_hostnames_ids, external_domain_id);
+        TVectorContainer searchTvector(inner, external_domain, page_path_a, page_path_b);
+        tvectors_ids.insert({searchTvector,id});
       }
     }
   } catch (sql::SQLException &e) {
     std::cerr<< "LogsMysql::insertTrafficVectors caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
-  }/* catch ( std::runtime_error &e) {
-    std::cerr<< "# ERR: " << e.what() << "\n";
-  }*/
+  }
 }
 void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, int real_did){
   try {
@@ -420,8 +386,7 @@ void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, int re
     insert_sql +=";";
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if( hits.size()>0 ){
-      //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
+      runQuery(stmt,insert_sql);
     }
   } catch (sql::SQLException &e) {
     std::cerr<< "LogsMysql::insertHitsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
@@ -448,14 +413,13 @@ void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits,
     insert_sql +=";";
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if( visits.size() > 0 ) {
-      //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
+      runQuery(stmt,insert_sql);
     }
   } catch (sql::SQLException &e) {
     std::cerr<< "LogsMysql::insertVisitsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
-void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> pageviews, int real_did, std::map<unsigned long, int> client_ips_ids, std::map<std::string,int> page_paths_full_ids ){
+void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> pageviews, int real_did, std::map<unsigned long, int> client_ips_ids, std::map<std::string,int> page_paths_full_ids){
   try {
     std::string database = "httpstats_pages";
     std::string table = "pageviews_hourly";
@@ -478,8 +442,74 @@ void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> p
     insert_sql +=";";
     boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
     if( pageviews.size()> 0){
-      //std::cout<<database<<"."<<table<<" insert_sql: "<<insert_sql<<"\n";
-      runInsertQuery(stmt,insert_sql);
+      runQuery(stmt,insert_sql);
+    }
+  } catch (sql::SQLException &e) {
+    std::cerr<< "LogsMysql::insertPageviewsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+  }
+}
+void LogsMysql::insertReferersPerHour( std::map<HourlyReferersContainer,int> referers, int real_did, std::map<std::string,int> page_paths_full_ids, std::map<std::string,int> referer_hostnames_ids ){
+  try {
+    std::string database = "httpstats_pages";
+    std::string table = "referers_hourly";
+    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
+    handler->con = conn.get();
+    handler->con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    std::string insert_sql = "INSERT IGNORE INTO "+table+"(date,domains_id,page_id,referer_domain_id,count) VALUES ";
+    std::map<HourlyReferersContainer,int>::iterator hrc_it;
+    for( hrc_it = referers.begin(); hrc_it!=referers.end(); hrc_it++){
+      HourlyReferersContainer hrC = hrc_it->first;
+      std::string page_path = hrC.getRefererPathFull();
+      std::string referer_domain = hrC.getRefererDomain();
+      int page_id =  (page_paths_full_ids.find(page_path))->second;
+      int referer_domain_id = (referer_hostnames_ids.find(referer_domain))->second;
+      int count = hrc_it->second;
+      insert_sql += "('"+ mysql_conn->escapeString(hrC.getTsMysql())+"',"+ mysql_conn->escapeString(std::to_string(real_did))+","+ mysql_conn->escapeString(std::to_string(page_id))+","+ mysql_conn->escapeString(std::to_string(referer_domain_id))+","+ mysql_conn->escapeString(std::to_string(count))+"),";
+    }
+    insert_sql = insert_sql.substr(0, insert_sql.size()-1);
+    insert_sql +=";";
+    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    if( referers.size()> 0){
+      runQuery(stmt,insert_sql);
+    }
+  } catch (sql::SQLException &e) {
+    std::cerr<< "LogsMysql::insertPageviewsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+  }
+}
+void LogsMysql::insertSearchTermsPerHour( std::map<HourlySearchTermsContainer,int> search_terms, int real_did, std::map<std::string,int> page_paths_full_ids, std::map<KeyValueContainer,int> search_terms_ids, std::map<std::string,int> referer_hostnames_ids ){
+  try {
+    std::string database = "httpstats_pages";
+    std::string table = "search_terms_hourly";
+    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
+    handler->con = conn.get();
+    handler->con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    std::string insert_sql = "INSERT IGNORE INTO "+table+"(date,domains_id,page_id,search_term_id,count) VALUES ";
+    std::map<HourlySearchTermsContainer,int>::iterator hsc_it;
+    std::map<KeyValueContainer,int>::iterator kvc_it;
+    for( hsc_it = search_terms.begin(); hsc_it!=search_terms.end(); hsc_it++){
+      HourlySearchTermsContainer hsC = hsc_it->first;
+      std::string page_path = hsC.getPagePathFull();
+      std::string search_term = hsC.getSearchTerm();
+      std::string search_engine_hostname = hsC.getSearchEngineDomain();
+      int sid =  (referer_hostnames_ids.find(search_engine_hostname))->second;
+      KeyValueContainer stc = KeyValueContainer(search_term, std::to_string(sid));
+      int page_id =  (page_paths_full_ids.find(page_path))->second;
+      int search_term_id = (search_terms_ids.find(stc))->second;
+      int count = hsc_it->second;
+      insert_sql += "('"+ 
+        mysql_conn->escapeString(hsC.getTsMysql())+"',"+ 
+        mysql_conn->escapeString(std::to_string(real_did))+","+ 
+        mysql_conn->escapeString(std::to_string(page_id))+","+ 
+        mysql_conn->escapeString(std::to_string(search_term_id))+","+ 
+        mysql_conn->escapeString(std::to_string(count))+"),";
+    }
+    insert_sql = insert_sql.substr(0, insert_sql.size()-1);
+    insert_sql +=";";
+    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    if( search_terms.size()> 0){
+      runQuery(stmt,insert_sql);
     }
   } catch (sql::SQLException &e) {
     std::cerr<< "LogsMysql::insertPageviewsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";

@@ -4,7 +4,7 @@ int id;
 Timer * threads_timer = new Timer();
 int worker_threads_launched_total=0;
 int worker_threads_working=0;
-extern std::string mysql_hostname, mysql_port, mysql_user, mysql_password, dirname, logfile;
+extern std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, logfile;
 extern std::vector<std::string> search_hosts;
 extern std::vector<std::string> filenames;
 //MISC PRE-INIT
@@ -80,7 +80,7 @@ std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){
   return result;
 }
 //PUBLIC
-HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ) : lm(user_hosts[0],mysql_hostname,std::stoi(mysql_port),mysql_user,mysql_password){
+HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ) : lm(user_hosts[0],mysql_hostname,std::stoi(mysql_port_num),mysql_user,mysql_password){
   internal_hostnames=user_hosts;
   search_hostnames=search_hosts;
   lines_failed=0;
@@ -113,9 +113,30 @@ int HttpAccessLogMetrics::logsScan( ){
         HourlyHitsContainer hhc = HourlyHitsContainer( real_did , ll.timestamp );
         HourlyVisitsContainer hvc = HourlyVisitsContainer( real_did, ll.timestamp, ll.userIP);
         HourlyPageviewsContainer hpc = HourlyPageviewsContainer( real_did, ll.timestamp, ll.userIP, ll.requestPath );
+        url_parts referer_parts = getUrlParts(ll.referer);
+        HourlyReferersContainer hrc = HourlyReferersContainer( real_did, referer_parts.hostname, referer_parts.full_path, ll.timestamp );
         incrementCount( &hits, hhc );
         incrementCount( &visits, hvc );
         incrementCount( &pageviews, hpc );
+        incrementCount( &referers, hrc );
+        std::string search_term;
+        int i,j;
+        for ( i =0; i< (int)search_hostnames.size(); i++) {
+          if( referer_parts.hostname == search_hostnames[i]) {
+            std::vector<ParamsContainer> params = parseParamsString( 
+                referer_parts.params, 3, referer_parts.hostname, referer_parts.path, ll.referer );
+            for(j=0; j<(int)params.size(); j++){
+              ParamsContainer param = params[j];
+              if(param.getKey() == "q"){
+                search_term = param.getValue();
+              }
+            }
+            if( search_term.size() ){
+              HourlySearchTermsContainer hsc = HourlySearchTermsContainer( real_did, referer_parts.hostname, search_term, referer_parts.full_path, ll.timestamp);
+              incrementCount( &search_terms, hsc );
+            }
+          }
+        }
         incrementCount( &client_ips, ll.userIP);
         incrementCount( &client_geo_locations, getCountryFromIP(ll.userIPStr));
         processUserAgent( ll.agent );
@@ -191,7 +212,7 @@ void HttpAccessLogMetrics::iterateAllMetrics( ){
     //std::cout<<"referer_paths: "<<key<<" count: "<<count<<"\n";
   }
   //std::cout<<"referer_params "<<referer_params.size()<<"\n";
-  std::map<ParamsContainer,int>::iterator pc_it;
+  /*std::map<ParamsContainer,int>::iterator pc_it;
   for( pc_it = referer_params.begin(); pc_it!=referer_params.end(); pc_it++){
     ParamsContainer key = pc_it->first;
     //int count = pc_it->second;
@@ -204,7 +225,7 @@ void HttpAccessLogMetrics::iterateAllMetrics( ){
     ParamsContainer key = pc_it->first;
     //int count = pc_it->second;
     //std::cout<<key.getPageType()<<" internal_hostname "<<key.getHost()<<" internal_page: "<<key.getPage()<<" internref param: "<<key.getKey()<<" param_value: "<<key.getValue()<<" count: "<<count<<"\n";
-  }
+  }*/
   //std::cout<<"search_queries "<<search_queries.size()<<"\n";
   for( kv_it = search_queries.begin(); kv_it!=search_queries.end(); kv_it++){
     KeyValueContainer key = kv_it->first;
@@ -394,51 +415,25 @@ void HttpAccessLogMetrics::processTrafficVectors( std::string requestPath, std::
   }
   if(hostname_type == 1 ) {
     if( url_parsed.hostname.length() > 0 ) {
-      //std::cout<<"internal_domain '"<<url_parsed.hostname<<"'\n";
       incrementCount(&internal_domains, url_parsed.hostname);
       TVectorContainer inner_tvc(true,"",url_parsed.full_path,requestPath);
       incrementCount(&tvectors_inner, inner_tvc);
     }
     if( url_parsed.path.length() > 0 ) {
-      //std::cout<<"internal_pathstring: '"<<url_parsed.path<<"'\n";
       incrementCount(&internal_paths, url_parsed.path );
-    }
-    if( url_parsed.params.length() > 0) {
-      if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-        params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, referer);
-      }
-      //std::cout<<"internal_paramstring: '"<<url_parsed.params<<"'\n";
-      for (  params_it = params.begin() ; params_it != params.end(); params_it++){
-        //std::cout<<"internal_param key '"<<(*params_it).getKey()<<"'\n";
-        //std::cout<<"internal_param value '"<<(*params_it).getValue()<<"'\n";
-        incrementCount(&internal_params, (*params_it));
-      }
     }
   }
   else if(hostname_type == 2 ) {
     if( url_parsed.hostname.length() > 0 ) {
-      //std::cout<<"referer_hostname '"<<url_parsed.hostname<<"'\n";
       incrementCount(&referer_hostnames, url_parsed.hostname);
       TVectorContainer inner_tvc(false,url_parsed.hostname,url_parsed.full_path,requestPath);
       incrementCount(&tvectors_incoming, inner_tvc);
     }
     if( url_parsed.path.length() > 0 ) {
-      //std::cout<<"referer_pathstring: '"<<url_parsed.path<<"'\n";
-      incrementCount(&referer_paths, url_parsed.path);
-    }
-    if( url_parsed.params.length() > 0) {
-      if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-        params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, referer);
-      }
-      //std::cout<<"referer_paramstring: '"<<url_parsed.params<<"'\n";
-      for( params_it = params.begin(); params_it!=params.end(); params_it++){
-        //std::cout<<"referer_param key '"<<(*params_it).getKey()<<"'\n";
-        //std::cout<<"referer_param value '"<<(*params_it).getValue()<<"'\n";
-        incrementCount(&referer_params, (*params_it));
-      }
+      incrementCount(&referer_paths, url_parsed.full_path);
     }
   }
-  else if(hostname_type == 3 ) {
+  if(hostname_type == 3 ) {
     if( url_parsed.params.length() > 0 && url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
       params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, referer);
       TVectorContainer inner_tvc(false,url_parsed.hostname,url_parsed.full_path,requestPath);
@@ -446,11 +441,9 @@ void HttpAccessLogMetrics::processTrafficVectors( std::string requestPath, std::
     }
     for( params_it = params.begin(); params_it!=params.end(); params_it++){
       if((*params_it).getKey() == "q"){
-        //std::cout<<"search_terms_param key '"<<(*params_it).getKey()<<"'\n";
-        //std::cout<<"search_terms_param value '"<<(*params_it).getValue()<<"'\n";
         KeyValueContainer searchContainer((*params_it).getValue(),(*params_it).getHost());
         incrementCount(&search_queries, searchContainer);
-        incrementCount(&referer_hostnames, (*params_it).getHost() ); // also add search hostnames to external domains table
+        incrementCount(&referer_hostnames, (*params_it).getHost() );
       }
     }
   }
@@ -459,47 +452,13 @@ void HttpAccessLogMetrics::processRequestUrl( std::string requestPath ){
   std::vector<ParamsContainer> params;
   std::vector<ParamsContainer>::iterator params_it;
   url_parts url_parsed = getUrlPartsFromReqPath( requestPath, "http", internal_hostnames[0] );
-  int hostname_type = 1;
   if( url_parsed.path.length()> 0){
     incrementCount(&page_paths_full, requestPath);
-    incrementCount(&internal_paths, url_parsed.path);
+    incrementCount(&internal_paths, url_parsed.full_path);
   }
   if( url_parsed.hostname.length()>0){
     incrementCount(&internal_domains, url_parsed.hostname);
   }
-  if(url_parsed.params.length() > 0 ) {
-    if( url_parsed.path.length() > 0 && url_parsed.hostname.length() > 0 ) {
-      params = parseParamsString( url_parsed.params, hostname_type, url_parsed.hostname, url_parsed.path, requestPath );
-    }
-    for( params_it = params.begin(); params_it!=params.end(); params_it++){
-      incrementCount(&internal_params, (*params_it));
-    }
-  }
-}
-std::vector<KeyValueContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str ){
-  std::vector<KeyValueContainer> results;
-  long long found;
-  if( params_str.length() > 0 ) { 
-    std::string workstring(params_str);
-    std::string param;
-    while( (found = (long long) workstring.find("&")) !=-1 ){
-      std::string query;
-      param = workstring.substr(0,found);
-      workstring = workstring.substr(found+1, workstring.length()-found-1);
-      if( (found=(long long)param.find("=")) != -1 ){
-        std::string key = param.substr(0,found);
-        std::string val = param.substr(found+1, param.length()-found-1);
-        results.push_back(KeyValueContainer(key,val));
-      }
-    }
-    param = workstring;
-    if( (found = (long long)param.find("=")) != -1 ){
-      std::string key = param.substr(0,found);
-      std::string val = param.substr(found+1, param.length()-found-1);
-      results.push_back(KeyValueContainer(key,val));
-    }
-  }
-  return results;
 }
 std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str, int type, std::string hostname, std::string page_path, std::string page_path_full ){
   std::vector<ParamsContainer> results;
@@ -527,25 +486,24 @@ std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::strin
   return results;
 }
 void HttpAccessLogMetrics::insertEntities(){
-  timer->start("initThread");              lm.initThread();                                                                                                       timer->stop("initThread");
-  timer->start("insertClientIps");         lm.insertClientIps( client_ips_ids, client_ips );                                                                      timer->stop("insertClientIps");
-  timer->start("insertLocations");         lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations );           timer->stop("insertLocations");
-  timer->start("insertDevices");           lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices);                     timer->stop("insertDevices");
-  timer->start("insertOses");              lm.insertNameVersionEntities( "httpstats_clients", "oses", client_oses_ids, client_oses);                              timer->stop("insertOses");
-  timer->start("insertBrowsers");          lm.insertNameVersionEntities( "httpstats_clients", "browsers", client_browsers_ids, client_browsers );                 timer->stop("insertBrowsers");
-  timer->start("insertPagePathsFull");     lm.insertStringEntities( "httpstats_pages", "pages_paths_full", page_paths_full_ids, page_paths_full );                timer->stop("insertPagePathsFull");
-  timer->start("insertExternalDomains");   lm.insertStringEntities( "httpstats_pages", "external_domains", referer_hostnames_ids, referer_hostnames );            timer->stop("insertExternalDomains");
-  timer->start("insertRefererPaths");      lm.insertStringEntities( "httpstats_pages", "pages_paths", referer_paths_ids, referer_paths );                         timer->stop("insertRefererPaths");
-  timer->start("insertInternalPaths");     lm.insertStringEntities( "httpstats_pages", "pages_paths", internal_paths_ids, internal_paths );                       timer->stop("insertInternalPaths");
-  //timer->start("insertRefererParams");   lm.insertParamsEntities( referer_params_ids, referer_params, referer_paths_ids, page_paths_full_ids);                  timer->stop("insertRefererParams");
-  //timer->start("insertInternalParams");  lm.insertParamsEntities( internal_params_ids, internal_params, internal_paths_ids, page_paths_full_ids);               timer->stop("insertInternalParams");
-  timer->start("insertSearchQueries");     lm.insertSearchTerms( search_queries_ids, search_queries, referer_hostnames_ids );                                     timer->stop("insertSearchQueries");
-  timer->start("insertTvectorsInner");     lm.insertTrafficVectors( true, tvectors_inner_ids, tvectors_inner, referer_hostnames_ids, page_paths_full_ids);        timer->stop("insertTvectorsInner");
-  timer->start("insertTvectorsIncoming");  lm.insertTrafficVectors( false, tvectors_incoming_ids, tvectors_incoming, referer_hostnames_ids, page_paths_full_ids); timer->stop("insertTvectorsIncoming");
-  timer->start("insertHitsHourly");        lm.insertHitsPerHour( hits, real_did );                                                                                timer->stop("insertHitsHourly");
-  timer->start("insertVisitsHourly");      lm.insertVisitsPerHour( visits, real_did, client_ips_ids );                                                            timer->stop("insertVisitsHourly");
-  timer->start("insertPageviewsHourly");   lm.insertPageviewsPerHour( pageviews, real_did, client_ips_ids, page_paths_full_ids );                                 timer->stop("insertPageviewsHourly");
-  timer->start("endThread");               lm.endThread();                                                                                                        timer->stop("endThread"); 
+  timer->start("initThread");                lm.initThread();                                                                                                       timer->stop("initThread");
+  timer->start("insertClientIps");           lm.insertClientIps( client_ips_ids, client_ips );                                                                      timer->stop("insertClientIps");
+  timer->start("insertLocations");           lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations );           timer->stop("insertLocations");
+  timer->start("insertDevices");             lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices);                     timer->stop("insertDevices");
+  timer->start("insertOses");                lm.insertNameVersionEntities( "httpstats_clients", "oses", client_oses_ids, client_oses);                              timer->stop("insertOses");
+  timer->start("insertBrowsers");            lm.insertNameVersionEntities( "httpstats_clients", "browsers", client_browsers_ids, client_browsers );                 timer->stop("insertBrowsers");
+  timer->start("insertPagePathsFull");       lm.insertStringEntities( "httpstats_pages", "pages_paths_full", page_paths_full_ids, page_paths_full );                timer->stop("insertPagePathsFull");
+  timer->start("insertExternalDomains");     lm.insertStringEntities( "httpstats_pages", "external_domains", referer_hostnames_ids, referer_hostnames );            timer->stop("insertExternalDomains");
+  timer->start("insertRefererPaths");        lm.insertStringEntities( "httpstats_pages", "pages_paths_full", referer_paths_ids, referer_paths );                    timer->stop("insertRefererPaths");
+  timer->start("insertSearchQueries");       lm.insertSearchTerms( search_queries_ids, search_queries, referer_hostnames_ids );                                     timer->stop("insertSearchQueries");
+  timer->start("insertTvectorsInner");       lm.insertTrafficVectors( true, tvectors_inner_ids, tvectors_inner, referer_hostnames_ids, page_paths_full_ids);        timer->stop("insertTvectorsInner");
+  timer->start("insertTvectorsIncoming");    lm.insertTrafficVectors( false, tvectors_incoming_ids, tvectors_incoming, referer_hostnames_ids, page_paths_full_ids); timer->stop("insertTvectorsIncoming");
+  timer->start("insertHitsHourly");          lm.insertHitsPerHour( hits, real_did );                                                                                timer->stop("insertHitsHourly");
+  timer->start("insertVisitsHourly");        lm.insertVisitsPerHour( visits, real_did, client_ips_ids );                                                            timer->stop("insertVisitsHourly");
+  timer->start("insertPageviewsHourly");     lm.insertPageviewsPerHour( pageviews, real_did, client_ips_ids, page_paths_full_ids );                                 timer->stop("insertPageviewsHourly");
+  timer->start("insertReferersPerHour");     lm.insertReferersPerHour( referers, real_did, page_paths_full_ids, referer_hostnames_ids );                            timer->stop("insertReferersPerHour");
+  timer->start("insertSearchTermsPerHour");  lm.insertSearchTermsPerHour( search_terms, real_did, page_paths_full_ids, search_queries_ids, referer_hostnames_ids);  timer->stop("insertSearchTermsPerHour");
+  timer->start("endThread");                 lm.endThread();                                                                                                        timer->stop("endThread"); 
 }
 std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){
   return client_ips;
@@ -602,7 +560,7 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
     int id = str_it->second;
     std::cout<<"internal_paths "<<path<<":"<<id<<"\n";
   }
-  for( pc_it = referer_params_ids.begin(); pc_it!=referer_params_ids.end(); pc_it++){
+  /*for( pc_it = referer_params_ids.begin(); pc_it!=referer_params_ids.end(); pc_it++){
     int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
     std::cout<<"referer_params "<<pc.toString()<<":"<<id<<"\n";
@@ -611,7 +569,7 @@ void HttpAccessLogMetrics::printAllIdsMaps(){
     int id = pc_it->second;
     ParamsContainer pc = pc_it->first;
     std::cout<<"internal_params "<<pc.toString()<<":"<<id<<"\n";
-  }
+  }*/
   for( kv_it = search_queries_ids.begin(); kv_it!=search_queries_ids.end(); kv_it++){
     KeyValueContainer kvC = kv_it->first;
     int id = kv_it->second;

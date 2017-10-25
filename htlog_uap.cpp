@@ -9,52 +9,6 @@ void mark_placeholders(std::map<std::string::size_type, size_t>& replacement_map
   }
   return;
 }
-void print_regexp_error( std::string re_str, std::regex_error e ){
-  std::cerr<<"REGEXP ERROR:"<<std::endl<<re_str<<std::endl;
-  if (e.code() == std::regex_constants::error_collate ){
-    std::cerr<<"The expression contained an invalid collating element name."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_ctype) {
-    std::cerr<<"The expression contained an invalid character class name."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_escape ){
-    std::cerr<<"The expression contained an invalid escaped character, or a trailing escape."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_backref  ){
-    std::cerr<<"The expression contained an invalid back reference."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_brack ){
-    std::cerr<<"The expression contained mismatched brackets ([ and ])."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_paren){
-    std::cerr<<"The expression contained mismatched parentheses (( and ))."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_brace ){
-    std::cerr<<"The expression contained mismatched braces ({ and })."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_badbrace){
-    std::cerr<<"The expression contained an invalid range between braces ({ and })."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_range ){
-    std::cerr<<"The expression contained an invalid character range."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_space ){
-    std::cerr<<"There was insufficient memory to convert the expression info a finite state machine."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_badrepeat ){
-    std::cerr<<"The expression contained a repeat specifier (one of *?+{) that was not preceded by a valid regular expression."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_complexity ){
-    std::cerr<<"The complexity of an attempted match against a regular expression exceeded a pre-set level."<<std::endl;
-  }
-  else if(e.code() == std::regex_constants::error_stack  ){
-    std::cerr<<"There was insufficient memory to determine whether the regular expression could match the specified character sequence."<<std::endl;
-  }
-  else {
-    std::cerr<<"some other regexp error occured"<<std::endl;
-  }
-
-}
 AgentStore fill_agent_store( const YAML::Node node, const std::string repl, const std::string major_repl, const std::string minor_repl, const std::string patch_repl) {
   AgentStore agent_store;
   assert(node.Type() == YAML::NodeType::Map);

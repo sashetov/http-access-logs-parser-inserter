@@ -101,5 +101,47 @@ class HourlyPageviewsContainer : public HourlyVisitsContainer {
   protected:
     std::string page_path;
 };
+class HourlyEntitiesContainer : public HourlyHitsContainer {
+  public:
+    HourlyEntitiesContainer();
+    HourlyEntitiesContainer( int, time_t );
+    int getEntityId() const;
+    int operator <( const HourlyEntitiesContainer &) const;
+    int operator >( const HourlyEntitiesContainer &) const;
+    int operator ==( const HourlyEntitiesContainer &) const;
+    ~HourlyEntitiesContainer();
+  protected:
+    int entity_id;
+};
+class HourlyReferersContainer : public HourlyHitsContainer {
+  public:
+    HourlyReferersContainer();
+    HourlyReferersContainer( int, std::string, std::string, time_t );
+    std::string getRefererPathFull() const;
+    std::string getRefererDomain() const;
+    int operator <( const HourlyReferersContainer &) const;
+    int operator >( const HourlyReferersContainer &) const;
+    int operator ==( const HourlyReferersContainer &) const;
+    ~HourlyReferersContainer();
+  protected:
+    std::string referer_domain;
+    std::string referer_path_full;
+};
+class HourlySearchTermsContainer  : public HourlyHitsContainer {
+  public:
+    HourlySearchTermsContainer();
+    HourlySearchTermsContainer( int, std::string, std::string, std::string, time_t);
+    std::string getSearchTerm();
+    std::string getSearchEngineDomain();
+    std::string getPagePathFull();
+    int operator <( const HourlySearchTermsContainer &) const;
+    int operator >( const HourlySearchTermsContainer &) const;
+    int operator ==( const HourlySearchTermsContainer &) const;
+    ~HourlySearchTermsContainer();
+  protected:
+    std::string search_engine_domain;
+    std::string search_term;
+    std::string page_path_full;
+};
 #define __HTLOG_CONTAINERS__
 #endif
