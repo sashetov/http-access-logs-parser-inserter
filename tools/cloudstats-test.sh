@@ -1,6 +1,6 @@
 #!/bin/bash
 . tools/common.inc.sh
-export ASAN_OPTIONS=symbolize=1;
+export ASAN_OPTIONS='symbolize=1';
 export ASAN_SYMBOLIZER_PATH=$(which llvm-symbolizer);
 function __main__ {
   if ! [ -f $ENV_FILE ]; then 
@@ -13,6 +13,6 @@ function __main__ {
     echo "binary $BIN_FILE not present, please run make";
     exit 1;
   fi;
-  printdo "gdb -ex r -ex bt -args ./${BIN_FILE} -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u ${MYSQL_USER} -p ${MYSQL_PASS} ${LOGFILES_DIR}"
+  printdo "gdb -ex r -ex bt -args ./${BIN_FILE} -s ${SQL_LOGS_DIR} -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u ${MYSQL_USER} -p ${MYSQL_PASS} ${LOGFILES_DIR}"
 }
 __main__ $*

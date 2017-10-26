@@ -1,6 +1,4 @@
-#ifndef __HTLOG_CONTAINERS__
 #include "htlog_containers.hpp"
-#endif
 // KVC
 KeyValueContainer::KeyValueContainer( ) {
   key = "";

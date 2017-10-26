@@ -1,6 +1,6 @@
-#ifndef __HTLOG_TIMER__
 #include "htlog_timer.hpp"
-Timer::Timer(){ }
+Timer::Timer(){ 
+}
 long long Timer::start( std::string timer_name ){
   start_times.insert({timer_name, std::chrono::steady_clock::now()});
   return (long long) std::chrono::duration_cast<std::chrono::milliseconds> ((start_times.find(timer_name)->second).time_since_epoch()).count();
@@ -44,5 +44,5 @@ void Timer::printAllDurationsSorted(){
 std::map<std::string, long long> Timer::getAllDurations(){
   return durations;
 }
-Timer::~Timer(){ }
-#endif
+Timer::~Timer(){
+}

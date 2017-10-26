@@ -8,11 +8,33 @@
 #include <boost/algorithm/string.hpp>
 #include <regex>
 #include <yaml-cpp/yaml.h>
+void trim(std::string& str);
+void mark_placeholders(std::map<std::string::size_type, size_t>&, const std::string);
+void replace_all_placeholders( std::string&, const boost::smatch&, std::map<std::string::size_type, size_t>);
+template <class A, class AS> void fill_agent( A& , const AS& , const boost::smatch& , const bool );
 struct RegexContainer {
   std::string re_str;
-  boost::regex  re;
-  //std::regex re;
+  boost::regex  re; //std::regex re;
 };
+struct GenericStore {
+  std::string replacement;
+  std::map<std::string::size_type, size_t> replacementMap;
+  RegexContainer regExpr;
+};
+struct AgentStore : GenericStore {
+  std::string majorVersionReplacement;
+  std::string minorVersionReplacement;
+  std::string patchVersionReplacement;
+  std::string patchMinorVersionReplacement;
+};
+AgentStore fill_agent_store( const YAML::Node, const std::string, const std::string, const std::string, const std::string);
+struct DeviceStore : GenericStore {
+  std::string brandReplacement;
+  std::string modelReplacement;
+  std::map<std::string::size_type, size_t> brandReplacementMap;
+  std::map<std::string::size_type, size_t> modelReplacementMap;
+};
+DeviceStore fill_device_store(const YAML::Node& device_parser);
 struct Generic {
   std::string family;
 };
@@ -31,23 +53,6 @@ struct Agent : Generic {
     return (major.empty() ? "0" : major) + "." + (minor.empty() ? "0" : minor) + "." + (patch.empty() ? "0" : patch);
   }
 };
-struct GenericStore {
-  std::string replacement;
-  std::map<std::string::size_type, size_t> replacementMap;
-  RegexContainer regExpr;
-};
-struct DeviceStore : GenericStore {
-  std::string brandReplacement;
-  std::string modelReplacement;
-  std::map<std::string::size_type, size_t> brandReplacementMap;
-  std::map<std::string::size_type, size_t> modelReplacementMap;
-};
-struct AgentStore : GenericStore {
-  std::string majorVersionReplacement;
-  std::string minorVersionReplacement;
-  std::string patchVersionReplacement;
-  std::string patchMinorVersionReplacement;
-};
 struct UserAgent {
   Device device;
   Agent os;
@@ -55,9 +60,6 @@ struct UserAgent {
   std::string toFullString() const { return browser.toString() + "/" + os.toString(); }
   bool isSpider() const { return device.family == "Spider"; }
 };
-void mark_placeholders(std::map<std::string::size_type, size_t>&, const std::string);
-AgentStore fill_agent_store( const YAML::Node, const std::string, const std::string, const std::string, const std::string);
-DeviceStore fill_device_store(const YAML::Node& device_parser);
 class UAStore {
   public:
   UAStore( std::string ) ;
@@ -66,12 +68,7 @@ class UAStore {
   std::vector<AgentStore> osStore;
   std::vector<AgentStore> browserStore;
 };
-void trim(std::string& str);
-//void replace_all_placeholders( std::string&, const std::smatch&, std::map<std::string::size_type, size_t>);
-void replace_all_placeholders( std::string&, const boost::smatch&, std::map<std::string::size_type, size_t>);
 Device parse_device_impl(const std::string&, const UAStore* );
-//template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const std::smatch& , const bool );
-template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& , const AGENT_STORE& , const boost::smatch& , const bool );
 Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store);
 Agent parse_os_impl(const std::string& ua, const UAStore* ua_store);
 class UserAgentParser {

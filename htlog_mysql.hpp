@@ -1,5 +1,4 @@
 #ifndef __HTLOG_MYSQL__
-#include "mysql.h"
 #include <string>
 #include <stdlib.h>
 #include <iostream>

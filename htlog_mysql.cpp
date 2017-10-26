@@ -1,5 +1,7 @@
 #include "htlog_mysql.hpp"
-extern std::string log_path;
+//EXTERN GLOBALS
+extern std::string sql_logs_path;
+//MISC UTILITY FUNCS
 template<typename T> T getNthNode( std::map<T,int> pcs, int n ) {
   int i =0;
   typename std::map<T,int>::iterator it;
@@ -25,6 +27,7 @@ std::string find_string_key_by_value( std::map<std::string, int> str_ids_map, in
   }
   return str_val;
 }
+//LogsMysql
 LogsMysql::LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password) : host(mysql_host), port(mysql_port), username(mysql_user), password(mysql_password), mysql_url("tcp://"+host+":"+std::to_string(port)), domain_name(domain) {
 }
 void LogsMysql::initThread(){
@@ -39,8 +42,8 @@ void LogsMysql::endThread(){
 }
 sql::ResultSet * LogsMysql::runSelectQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {
   if(LOG_SQL_STMTS) {
-    std::string log_path_full = log_path+"/"+domain_name+".sql";
-    std::ofstream logfile(log_path_full, std::fstream::in | std::fstream::out | std::fstream::app );
+    std::string sql_logs_path_full = sql_logs_path+"/"+domain_name+".sql";
+    std::ofstream logfile(sql_logs_path_full, std::fstream::in | std::fstream::out | std::fstream::app );
     logfile<<sql<<std::endl;
     logfile.close();
   }
@@ -49,8 +52,8 @@ sql::ResultSet * LogsMysql::runSelectQuery(boost::scoped_ptr< sql::Statement > &
 }
 void LogsMysql::runQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {
   if(LOG_SQL_STMTS) {
-    std::string log_path_full = log_path+"/"+domain_name+".sql";
-    std::ofstream logfile(log_path_full, std::fstream::in | std::fstream::out | std::fstream::app );
+    std::string sql_logs_path_full = sql_logs_path+"/"+domain_name+".sql";
+    std::ofstream logfile(sql_logs_path_full, std::fstream::in | std::fstream::out | std::fstream::app );
     logfile<<sql<<std::endl;
     logfile.close();
   }

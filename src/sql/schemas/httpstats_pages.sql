@@ -6,7 +6,6 @@ SET GLOBAL innodb_file_format=Barracuda;
 SET GLOBAL innodb_compression_level=9;
 SET GLOBAL tx_isolation = 'READ-COMMITTED';
 
-CREATE TABLE pages_paths          ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL UNIQUE                           )                                                                 ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=16;
 CREATE TABLE pages_paths_full     ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL UNIQUE                           )                                                                 ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=16;
 CREATE TABLE tvectors_inn         ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, a_id INT NOT NULL, b_id INT NOT NULL,                                 UNIQUE KEY `tvector_inn` (`a_id`, `b_id`))   ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=16;
 CREATE TABLE external_domains     ( id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL,                                           UNIQUE KEY `name` (`name`) ) ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=16;

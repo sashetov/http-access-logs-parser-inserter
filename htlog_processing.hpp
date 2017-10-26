@@ -8,20 +8,15 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <GeoLite2PP.hpp>
-#include <dirent.h>
-#include <sys/stat.h>
 #include <errno.h>
 #include <condition_variable>
 #include <chrono>
 #include "htlog_uap.hpp"
+#include "htlog_analyzer.hpp"
 #include "htlog_containers.hpp"
 #include "htlog_mysql.hpp"
 #include "htlog_timer.hpp"
 std::string getHostnameFromLogfile(std::string);
-void loadSearchHostnames(std::vector<std::string> &, std::string);
-std::vector<std::string> getLogfileNamesFromDirectory( std::string );
-int getdir(std::string dir, std::vector<std::string> &files);
-size_t getFilesize( std::string );
 typedef struct logline {
   std::string  hostname;
   unsigned long  userIP;
@@ -44,10 +39,9 @@ typedef struct url_parts {
 } url_parts;
 class HttpAccessLogMetrics {
   public:
-    HttpAccessLogMetrics( std::vector<std::string>, std::vector<std::string>,std::string);
+    HttpAccessLogMetrics( std::vector<std::string>, std::vector<SearchEngineContainer>, std::string);
     ~HttpAccessLogMetrics();
     int logsScan( );
-    void iterateAllMetrics( );
     int parseLine(std::string,parsed_logline &);
     unsigned long getNumericIp( std::string );
     std::string getStringIP(unsigned long);
@@ -70,7 +64,7 @@ class HttpAccessLogMetrics {
     int lines_processed;
     std::string filename;
     std::vector<std::string> internal_hostnames;
-    std::vector<std::string> search_hostnames;
+    std::vector<SearchEngineContainer> search_engines;
     std::string* error;
     std::map<unsigned long, int> client_ips;
     std::map<unsigned long, int> client_ips_ids;            // ip_id
@@ -111,4 +105,5 @@ void set_id_safely( int );
 void notify( int );
 void spawn_when_ready( int, int, int, int& );
 void start_thread_pool( int );
+#define __HTLOG_PROCESSING__
 #endif
