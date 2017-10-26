@@ -8,16 +8,18 @@ std::vector<std::string> filenames;
 int main(int argc, char** argv) {
   int optchar, exit_status=0;
   std::string program_name = std::string(argv[0],strlen(argv[0]));
+  int sql_logs_option_used=0;
   while (1) {
     int option_index = 0;
     static struct option long_options[] = {
-      {"sql_logs_path", 1, 0,  0 },
-      {"mysql_host", 1, 0,  0 },
-      {"mysql_port", 1, 0,  0 },
-      {"mysql_user", 1, 0,  0 },
+      {"sql_logs_path",  1, 0,  0 },
+      {"mysql_host",     1, 0,  0 },
+      {"mysql_port",     1, 0,  0 },
+      {"mysql_user",     1, 0,  0 },
       {"mysql_password", 1, 0,  0 },
+      {"usage",          0, 0,  0 },
     };
-    optchar = getopt_long(argc, argv, "s:h:u:P:p:g", long_options, &option_index);
+    optchar = getopt_long(argc, argv, "gs:h:u:P:p:", long_options, &option_index);
     if (optchar == -1) {
       break;
     }
@@ -26,6 +28,7 @@ int main(int argc, char** argv) {
       case 0:
         if(std::string(long_options[option_index].name) == "sql_logs_path" && optarg ){
           sql_logs_path = std::string(optarg);
+          sql_logs_option_used=1;
         }
         else if(std::string(long_options[option_index].name) == "mysql_host" && optarg ){
           mysql_hostname = std::string(optarg);
@@ -44,6 +47,7 @@ int main(int argc, char** argv) {
         }
         break;
       case 's':
+        sql_logs_option_used=1;
         sql_logs_path = std::string(optarg);
         break;
       case 'h':
@@ -69,6 +73,10 @@ int main(int argc, char** argv) {
   if (optind < argc) {
     dirname = std::string(argv[optind++]);
     std::cout<<"Analyzing logfiles in directory: "<<dirname<<"\n";
+  }
+  if( sql_logs_option_used && sql_logs_path.size() ==0 ) {
+    std::cerr<<"Error: SQL_LOGS_DIR not provided for optional option { -s|--sql_logs_path SQL_LOGS_DIR }"<<std::endl;
+    exit_status++;
   }
   if( mysql_hostname.size() ==0) {
     std::cerr<<"Error: MYSQL_HOSTNAME (-h | --mysql_host ) option is required! "<<std::endl;

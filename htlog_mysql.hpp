@@ -25,8 +25,8 @@ class LogsMysql {
     void endThread();
     sql::ResultSet * runSelectQuery(boost::scoped_ptr< sql::Statement > &, std::string );
     void runQuery(boost::scoped_ptr< sql::Statement > &, std::string);
-    std::vector<std::vector<std::string>> * runMultiQuery( std::string, std::string );
     int getDomainsId( std::string );
+    std::vector<std::string> getUserHostnames( int );
     int getUserId(int );
     void insertClientIps( std::map<unsigned long,int> &, std::map<unsigned long, int> );
     void insertDomains();

@@ -22,8 +22,6 @@ class ParamsContainer : public KeyValueContainer {
   public:
     ParamsContainer( );
     ParamsContainer(int, std::string, std::string, std::string, std::string, std::string);
-    //using KeyValueContainer::getKey;
-    //using KeyValueContainer::getValue;
     std::string getHost() const;
     std::string getPage() const;
     std::string getFullPagePath() const;
@@ -101,29 +99,19 @@ class HourlyPageviewsContainer : public HourlyVisitsContainer {
   protected:
     std::string page_path;
 };
-class HourlyEntitiesContainer : public HourlyHitsContainer {
-  public:
-    HourlyEntitiesContainer();
-    HourlyEntitiesContainer( int, time_t );
-    int getEntityId() const;
-    int operator <( const HourlyEntitiesContainer &) const;
-    int operator >( const HourlyEntitiesContainer &) const;
-    int operator ==( const HourlyEntitiesContainer &) const;
-    ~HourlyEntitiesContainer();
-  protected:
-    int entity_id;
-};
 class HourlyReferersContainer : public HourlyHitsContainer {
   public:
     HourlyReferersContainer();
-    HourlyReferersContainer( int, std::string, std::string, time_t );
+    HourlyReferersContainer( int, std::string, std::string, time_t, bool );
     std::string getRefererPathFull() const;
     std::string getRefererDomain() const;
+    bool isInnerReferer() const;
     int operator <( const HourlyReferersContainer &) const;
     int operator >( const HourlyReferersContainer &) const;
     int operator ==( const HourlyReferersContainer &) const;
     ~HourlyReferersContainer();
   protected:
+    bool inner;
     std::string referer_domain;
     std::string referer_path_full;
 };
@@ -131,9 +119,9 @@ class HourlySearchTermsContainer  : public HourlyHitsContainer {
   public:
     HourlySearchTermsContainer();
     HourlySearchTermsContainer( int, std::string, std::string, std::string, time_t);
-    std::string getSearchTerm();
-    std::string getSearchEngineDomain();
-    std::string getPagePathFull();
+    std::string getSearchTerm() const;
+    std::string getSearchEngineDomain() const;
+    std::string getPagePathFull() const;
     int operator <( const HourlySearchTermsContainer &) const;
     int operator >( const HourlySearchTermsContainer &) const;
     int operator ==( const HourlySearchTermsContainer &) const;

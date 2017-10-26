@@ -108,7 +108,6 @@ TVectorContainer::TVectorContainer(){
   referer_domain = "";
   page_path_a = "";
   page_path_b = "";
-
 }
 TVectorContainer::TVectorContainer(bool inner_vector, std::string external_hostname, std::string full_path_a, std::string full_path_b ){
   isInnerVector = inner_vector;
@@ -151,7 +150,10 @@ int TVectorContainer::operator >( const TVectorContainer & rhs ) const {
   return 0;
 }
 int TVectorContainer::operator ==( const TVectorContainer & rhs ) const {
-  return isInnerVector == rhs.vectorIsInner() && referer_domain == rhs.getExternalDomain() && page_path_a == rhs.getPagePathA() && page_path_b == rhs.getPagePathB();
+  return isInnerVector == rhs.vectorIsInner() &&
+         referer_domain == rhs.getExternalDomain() &&
+         page_path_a == rhs.getPagePathA() &&
+         page_path_b == rhs.getPagePathB();
 }
 std::string TVectorContainer::toString() const{
   if(isInnerVector){
@@ -291,47 +293,17 @@ int HourlyPageviewsContainer::operator ==(const HourlyPageviewsContainer & rhs) 
 }
 HourlyPageviewsContainer::~HourlyPageviewsContainer(){
 }
-//HE
-HourlyEntitiesContainer::HourlyEntitiesContainer(){
-  hour_ts = 0;
-  domain_id = 0;
-}
-HourlyEntitiesContainer::HourlyEntitiesContainer( int did, time_t ts_full ){
-  hour_ts = roundTsToHour(&ts_full);
-  domain_id = did;
-}
-int HourlyEntitiesContainer::getEntityId() const{
-  return entity_id;
-}
-int HourlyEntitiesContainer::operator <( const HourlyEntitiesContainer & rhs ) const {
-  if( domain_id != rhs.getDomainId() )
-    return domain_id < rhs.getDomainId();
-  if( hour_ts != rhs.getHourlyTs() )
-    return hour_ts < rhs.getHourlyTs();
-  return 0;
-}
-int HourlyEntitiesContainer::operator >( const HourlyEntitiesContainer & rhs ) const {
-  if( domain_id != rhs.getDomainId() )
-    return domain_id > rhs.getDomainId();
-  if( hour_ts != rhs.getHourlyTs() )
-    return hour_ts > rhs.getHourlyTs();
-  return 0;
-}
-int HourlyEntitiesContainer::operator ==( const HourlyEntitiesContainer & rhs ) const {
-  return domain_id == rhs.getDomainId() && hour_ts == rhs.getHourlyTs();
-}
-HourlyEntitiesContainer::~HourlyEntitiesContainer(){
-}
 //HR
 HourlyReferersContainer::HourlyReferersContainer(){
   hour_ts = 0;
   domain_id = 0;
 }
-HourlyReferersContainer::HourlyReferersContainer( int did, std::string referer_hostname, std::string referer_path, time_t ts_full ){
+HourlyReferersContainer::HourlyReferersContainer( int did, std::string referer_hostname, std::string referer_path, time_t ts_full, bool is_inner_hostname ){
+  domain_id = did;
   hour_ts = roundTsToHour(&ts_full);
   referer_domain = referer_hostname;
   referer_path_full = referer_path;
-  domain_id = did;
+  inner= is_inner_hostname;
 }
 std::string HourlyReferersContainer::getRefererPathFull() const {
   return referer_path_full;
@@ -339,22 +311,37 @@ std::string HourlyReferersContainer::getRefererPathFull() const {
 std::string HourlyReferersContainer::getRefererDomain() const {
   return referer_domain;
 }
+bool HourlyReferersContainer::isInnerReferer() const {
+  return inner;
+}
 int HourlyReferersContainer::operator <( const HourlyReferersContainer & rhs ) const {
+  if(referer_path_full != rhs.getRefererPathFull())
+    return referer_path_full < rhs.getRefererPathFull();
   if( domain_id != rhs.getDomainId() )
     return domain_id < rhs.getDomainId();
   if( hour_ts != rhs.getHourlyTs() )
     return hour_ts < rhs.getHourlyTs();
+  if( referer_domain != rhs.getRefererDomain() )
+    return referer_domain < rhs.getRefererDomain();
+  if( inner !=rhs.isInnerReferer() )
+    return inner < rhs.isInnerReferer();
   return 0;
 }
 int HourlyReferersContainer::operator >( const HourlyReferersContainer & rhs ) const {
+  if(referer_path_full != rhs.getRefererPathFull())
+    return referer_path_full > rhs.getRefererPathFull();
   if( domain_id != rhs.getDomainId() )
     return domain_id > rhs.getDomainId();
   if( hour_ts != rhs.getHourlyTs() )
     return hour_ts > rhs.getHourlyTs();
+  if( referer_domain != rhs.getRefererDomain() )
+    return referer_domain > rhs.getRefererDomain();
+  if( inner !=rhs.isInnerReferer() )
+    return inner > rhs.isInnerReferer();
   return 0;
 }
 int HourlyReferersContainer::operator ==( const HourlyReferersContainer & rhs ) const {
-  return domain_id == rhs.getDomainId() && hour_ts == rhs.getHourlyTs();
+  return referer_path_full == rhs.getRefererPathFull() && domain_id == rhs.getDomainId() && hour_ts == rhs.getHourlyTs() && referer_domain == rhs.getRefererDomain()&& inner == rhs.isInnerReferer() ;
 }
 HourlyReferersContainer::~HourlyReferersContainer(){
 }
@@ -364,37 +351,49 @@ HourlySearchTermsContainer::HourlySearchTermsContainer(){
   domain_id = 0;
 }
 HourlySearchTermsContainer::HourlySearchTermsContainer( int did, std::string search_engine_hostname, std::string search_terms, std::string page_path, time_t ts_full ){
-  hour_ts = roundTsToHour(&ts_full);
   domain_id = did;
+  hour_ts = roundTsToHour(&ts_full);
   search_term = search_terms;
   search_engine_domain = search_engine_hostname;
   page_path_full = page_path;
 }
-std::string HourlySearchTermsContainer::getPagePathFull(){
+std::string HourlySearchTermsContainer::getPagePathFull() const{
   return page_path_full;
 }
-std::string HourlySearchTermsContainer::getSearchEngineDomain(){
+std::string HourlySearchTermsContainer::getSearchEngineDomain() const{
   return search_engine_domain;
 }
-std::string HourlySearchTermsContainer::getSearchTerm(){
+std::string HourlySearchTermsContainer::getSearchTerm() const{
   return search_term;
 }
 int HourlySearchTermsContainer::operator <( const HourlySearchTermsContainer & rhs ) const {
   if( domain_id != rhs.getDomainId() )
     return domain_id < rhs.getDomainId();
+  if( search_engine_domain!= rhs.getSearchEngineDomain() )
+    return search_engine_domain< rhs.getSearchEngineDomain();
   if( hour_ts != rhs.getHourlyTs() )
     return hour_ts < rhs.getHourlyTs();
+  if( search_term!= rhs.getSearchTerm() )
+    return search_term < rhs.getSearchTerm();
+  if( page_path_full!= rhs.getPagePathFull() )
+    return page_path_full < rhs.getPagePathFull();
   return 0;
 }
 int HourlySearchTermsContainer::operator >( const HourlySearchTermsContainer & rhs ) const {
   if( domain_id != rhs.getDomainId() )
     return domain_id > rhs.getDomainId();
+  if( search_engine_domain!= rhs.getSearchEngineDomain() )
+    return search_engine_domain> rhs.getSearchEngineDomain();
   if( hour_ts != rhs.getHourlyTs() )
     return hour_ts > rhs.getHourlyTs();
+  if( search_term!= rhs.getSearchTerm() )
+    return search_term > rhs.getSearchTerm();
+  if( page_path_full!= rhs.getPagePathFull() )
+    return page_path_full > rhs.getPagePathFull();
   return 0;
 }
 int HourlySearchTermsContainer::operator ==( const HourlySearchTermsContainer & rhs ) const {
-  return domain_id == rhs.getDomainId() && hour_ts == rhs.getHourlyTs();
+    return domain_id > rhs.getDomainId() && search_engine_domain> rhs.getSearchEngineDomain() && hour_ts > rhs.getHourlyTs() && search_term > rhs.getSearchTerm() && page_path_full > rhs.getPagePathFull();
 }
 HourlySearchTermsContainer::~HourlySearchTermsContainer(){
 }

@@ -39,8 +39,9 @@ typedef struct url_parts {
 } url_parts;
 class HttpAccessLogMetrics {
   public:
-    HttpAccessLogMetrics( std::vector<std::string>, std::vector<SearchEngineContainer>, std::string);
+    HttpAccessLogMetrics( std::string, std::vector<SearchEngineContainer>, std::string );
     ~HttpAccessLogMetrics();
+    int getDomainId();
     int logsScan( );
     int parseLine(std::string,parsed_logline &);
     unsigned long getNumericIp( std::string );
@@ -50,11 +51,12 @@ class HttpAccessLogMetrics {
     void processUserAgent( std::string );
     void processTrafficVectors( std::string, std::string );
     void processRequestUrl( std::string );
-    std::string getCountryFromIP( std::string );
     std::vector<ParamsContainer> parseParamsString( std::string, int, std::string, std::string, std::string );
+    void processSearchTerms( std::string, time_t );
+    void processReferers( std::string, time_t );
+    std::string getCountryFromIP( std::string );
     void insertEntities( );
     std::map<unsigned long,int> getClientIps();
-    void printAllIdsMaps();
     Timer * timer;
   private:
     LogsMysql lm;
@@ -79,7 +81,7 @@ class HttpAccessLogMetrics {
     std::map<std::string,int> page_paths_full;
     std::map<std::string,int> page_paths_full_ids;          // full_page_id
     std::map<std::string,int> referer_hostnames;
-    std::map<std::string, int> referer_hostnames_ids;       // referer_domain_id
+    std::map<std::string,int> referer_hostnames_ids;        // referer_domain_id
     std::map<std::string,int> referer_paths;
     std::map<std::string,int> referer_paths_ids;            // page_id
     std::map<std::string,int> internal_domains;             // domain_id ( imported, not inserted )

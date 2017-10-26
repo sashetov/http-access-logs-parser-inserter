@@ -1,8 +1,7 @@
 #include "htlog_analyzer.hpp"
 void print_usage_and_exit(std::ostream & stream, const int exit_status, std::string program_name ) {
  stream<<"Usage:\n"<<program_name<<" {OPTIONAL_OPTS} [REQUIRED_OPTS] OBJECT"<<std::endl
-    <<" OPTIONAL_OPS:= { -s|--sql_logs_path SQL_LOGS_DIR "<<std::endl
-    <<"               }"<<std::endl
+    <<" OPTIONAL_OPS:= { -s|--sql_logs_path SQL_LOGS_DIR "<<std::endl<<" }"<<std::endl
     <<"REQUIRED_OPTS:= [ -h|--mysql_host MYSQL_HOSTNAME "<<std::endl
     <<"                  -u|--mysql_user MYSQL_USER "<<std::endl
     <<"                  -P|--mysql_port MYSQL_PORT "<<std::endl
@@ -18,21 +17,34 @@ void loadSearchEngines( std::vector<SearchEngineContainer> &search_engines, std:
   std::string line;
   std::string se,qps,qp;
   int found;
+  std::ifstream search_engines_file;
+  //std::cerr<<"loading search engines data from "<<filename<<std::endl;
+  search_engines_file.exceptions( std::ifstream::badbit | std::ifstream::failbit);
   try {
-    std::ifstream statsFile;
-    statsFile.exceptions( std::ifstream::badbit | std::ifstream::failbit);
-    statsFile.open(filename);
-    while( !statsFile.eof() ){
-      std::getline(statsFile, line);
+    search_engines_file.open(filename);
+  }
+  catch( const std::exception& e ){
+    if(!search_engines_file.eof()){
+      search_engines_file.close();
+      std::cerr<<"loadSearchHostnames caught exception:\n"<<e.what()<<"\n";
+      exit(1);
+    }
+  }
+  try {
+    while( !search_engines_file.eof() ){
+      std::getline(search_engines_file, line);
+      //std::cerr<<"line: "<<line<<std::endl;
       SearchEngineContainer sec;
       if ((found =(int) line.find_first_of(" ")) == -1){
         throw std::runtime_error("badly formatted search engine line:\n"+line);
       }
       se = line.substr(0,found);
+      std::cerr<<"search engine hostname: "<<se<<std::endl;
       qps = line.substr( found+1, line.length()-found-1 );
       while ((found =(int) qps.find_first_of(" ")) != -1){
         qp = qps.substr( 0, found );
         sec.query_params.push_back( qp );
+        std::cerr<<"query params string for "<<se<<": "<<qp<<std::endl;
         if( found+1 < (int)qps.length() ){
           qps = qps.substr( found + 1, line.length()-found-1 );
         }
@@ -40,11 +52,14 @@ void loadSearchEngines( std::vector<SearchEngineContainer> &search_engines, std:
       sec.hostname= se;
       search_engines.push_back( sec );
     }
-    statsFile.close();
+    search_engines_file.close();
   }
   catch( const std::exception& e ){
-    std::cerr<<"loadSearchHostnames caught runtime_error:\n"<<e.what()<<"\n";
-    exit(1);
+    if(!search_engines_file.eof()){
+      search_engines_file.close();
+      std::cerr<<"loadSearchHostnames caught exception:\n"<<e.what()<<"\n";
+      exit(1);
+    }
   }
 }
 std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){

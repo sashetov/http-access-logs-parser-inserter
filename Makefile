@@ -21,7 +21,7 @@ MYSQL_CPP_CONN_LDFLAGS=-lmysqlcppconn
 LDFLAGS=$(SANITIZE_ADDR_LDFLAGS) $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) $(MYSQL_CPP_CONN_LDFLAGS)
 all: dump_cpp_vars tags clean test_progs test
 readme:
-	./cloudstats -g > README.md
+	{ echo '```'; ./cloudstats -g; echo '```'; }> README.md
 clean_local:
 	rm -rf *.d *.o *.so *.a cloudstats logs/* core.*
 tags:
