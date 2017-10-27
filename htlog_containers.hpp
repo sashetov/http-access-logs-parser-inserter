@@ -52,7 +52,7 @@ class TVectorContainer {
     int operator ==( const TVectorContainer & ) const;
     std::string toString() const;
     ~TVectorContainer();
-  private:
+  protected:
     bool isInnerVector; // internal referer to page : true, external referer to page : false
     std::string referer_domain;
     std::string page_path_a;
@@ -61,11 +61,11 @@ class TVectorContainer {
 class HourlyHitsContainer {
   public:
     HourlyHitsContainer();
-    HourlyHitsContainer( int, time_t );
+    HourlyHitsContainer( unsigned long, time_t );
     time_t getHourlyTs() const;
     std::string getTsHour( );
     std::string getTsMysql( );
-    int getDomainId() const;
+    unsigned long getDomainId() const;
     int operator <( const HourlyHitsContainer &) const;
     int operator >( const HourlyHitsContainer &) const;
     int operator ==( const HourlyHitsContainer &) const;
@@ -73,12 +73,12 @@ class HourlyHitsContainer {
   protected:
     time_t roundTsToHour(time_t *);
     time_t hour_ts;
-    int domain_id;
+    unsigned long domain_id;
 };
 class HourlyVisitsContainer : public HourlyHitsContainer {
   public:
     HourlyVisitsContainer();
-    HourlyVisitsContainer( int, time_t, unsigned long);
+    HourlyVisitsContainer( unsigned long, time_t, unsigned long);
     unsigned long getIp() const;
     int operator <( const HourlyVisitsContainer &) const;
     int operator >( const HourlyVisitsContainer &) const;
@@ -90,7 +90,7 @@ class HourlyVisitsContainer : public HourlyHitsContainer {
 class HourlyPageviewsContainer : public HourlyVisitsContainer {
   public:
     HourlyPageviewsContainer();
-    HourlyPageviewsContainer( int, time_t, unsigned long, std::string );
+    HourlyPageviewsContainer( unsigned long, time_t, unsigned long, std::string );
     std::string getPagePath() const;
     int operator <( const HourlyPageviewsContainer&) const;
     int operator >( const HourlyPageviewsContainer&) const;
@@ -102,7 +102,7 @@ class HourlyPageviewsContainer : public HourlyVisitsContainer {
 class HourlyReferersContainer : public HourlyHitsContainer {
   public:
     HourlyReferersContainer();
-    HourlyReferersContainer( int, std::string, std::string, time_t, bool );
+    HourlyReferersContainer( unsigned long, std::string, std::string, time_t, bool );
     std::string getRefererPathFull() const;
     std::string getRefererDomain() const;
     bool isInnerReferer() const;
@@ -118,7 +118,7 @@ class HourlyReferersContainer : public HourlyHitsContainer {
 class HourlySearchTermsContainer  : public HourlyHitsContainer {
   public:
     HourlySearchTermsContainer();
-    HourlySearchTermsContainer( int, std::string, std::string, std::string, time_t);
+    HourlySearchTermsContainer( unsigned long, std::string, std::string, std::string, time_t);
     std::string getSearchTerm() const;
     std::string getSearchEngineDomain() const;
     std::string getPagePathFull() const;
@@ -130,6 +130,56 @@ class HourlySearchTermsContainer  : public HourlyHitsContainer {
     std::string search_engine_domain;
     std::string search_term;
     std::string page_path_full;
+};
+class HourlyUserAgentEntityContainer: public HourlyHitsContainer {
+  public:
+    HourlyUserAgentEntityContainer();
+    HourlyUserAgentEntityContainer( unsigned long, std::string, std::string, time_t );
+    std::string getUserAgentEntityName() const;
+    std::string getUserAgentEntityType() const;
+    int operator <(  const HourlyUserAgentEntityContainer&) const;
+    int operator >(  const HourlyUserAgentEntityContainer&) const;
+    int operator ==( const HourlyUserAgentEntityContainer&) const;
+    ~HourlyUserAgentEntityContainer();
+  protected:
+    std::string name;
+    std::string type;
+};
+class HourlyBandwidthContainer : public HourlyHitsContainer {
+  public:
+    HourlyBandwidthContainer();
+    HourlyBandwidthContainer( unsigned long, time_t, unsigned long, std::string );
+    unsigned long getSizeInKb() const;
+    std::string getPagePath() const;
+    int operator < ( const HourlyBandwidthContainer & ) const;
+    int operator >( const HourlyBandwidthContainer &) const;
+    int operator ==( const HourlyBandwidthContainer &) const;
+    ~HourlyBandwidthContainer();
+  protected:
+    unsigned long size_kb;
+    std::string page_path;
+};
+class HourlyTVContainer : public HourlyHitsContainer, public TVectorContainer {
+  public:
+    HourlyTVContainer();
+    HourlyTVContainer( bool, std::string, std::string, std::string, unsigned long, time_t );
+    int operator <( const HourlyTVContainer&) const;
+    int operator >( const HourlyTVContainer&) const;
+    int operator ==( const HourlyTVContainer&) const;
+    ~HourlyTVContainer();
+  protected:
+};
+class HourlyLocationsContainer : public HourlyHitsContainer {
+  public:
+    HourlyLocationsContainer();
+    HourlyLocationsContainer( unsigned long, std::string, time_t );
+    std::string getCountryCode() const;
+    int operator <( const HourlyLocationsContainer&) const;
+    int operator >( const HourlyLocationsContainer&) const;
+    int operator ==( const HourlyLocationsContainer&) const;
+    ~HourlyLocationsContainer();
+  protected:
+    std::string country_code;
 };
 #define __HTLOG_CONTAINERS__
 #endif

@@ -8,9 +8,11 @@
 #include <boost/algorithm/string.hpp>
 #include <regex>
 #include <yaml-cpp/yaml.h>
+//MISC UTILITY FUNCTIONS
 void trim(std::string& str);
 void mark_placeholders(std::map<std::string::size_type, size_t>&, const std::string);
 void replace_all_placeholders( std::string&, const boost::smatch&, std::map<std::string::size_type, size_t>);
+//FILL FUNCTIONS
 template <class A, class AS> void fill_agent( A& , const AS& , const boost::smatch& , const bool );
 struct RegexContainer {
   std::string re_str;
@@ -60,6 +62,7 @@ struct UserAgent {
   std::string toFullString() const { return browser.toString() + "/" + os.toString(); }
   bool isSpider() const { return device.family == "Spider"; }
 };
+//UASTORE
 class UAStore {
   public:
   UAStore( std::string ) ;
@@ -68,9 +71,11 @@ class UAStore {
   std::vector<AgentStore> osStore;
   std::vector<AgentStore> browserStore;
 };
+//UASTORE PARSER FUNCTIONS
 Device parse_device_impl(const std::string&, const UAStore* );
 Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store);
 Agent parse_os_impl(const std::string& ua, const UAStore* ua_store);
+//UAP
 class UserAgentParser {
  public:
   UserAgentParser(std::string );

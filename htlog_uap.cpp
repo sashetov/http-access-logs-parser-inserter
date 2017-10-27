@@ -1,5 +1,4 @@
 #include "htlog_uap.hpp"
-//MISC UTILITY FUNCTIONS
 void trim(std::string& str) {
   size_t first = str.find_first_not_of(' ');
   if (std::string::npos == first) {
@@ -25,7 +24,6 @@ void replace_all_placeholders( std::string& ua_property, const boost::smatch& re
   trim(ua_property);
   return;
 }
-//FILL FUNCTIONS
 template <class A, class AS> void fill_agent( A& agent, const AS& store, const boost::smatch& m, const bool os ) {
   if (m.size() > 1) {
     agent.family = !store.replacement.empty() ?  std::regex_replace( store.replacement, std::regex("\\$1"), m[1].str()) : m[1];
@@ -134,7 +132,6 @@ DeviceStore fill_device_store(const YAML::Node& device_parser) {
   }
   return device;
 }
-//UASTORE
 UAStore::UAStore( std::string regexes_file_path ){
   const YAML::Node regexes = YAML::LoadFile( regexes_file_path );
   const YAML::Node user_agent_parsers = regexes["user_agent_parsers"];
@@ -154,7 +151,6 @@ UAStore::UAStore( std::string regexes_file_path ){
 }
 UAStore::~UAStore(){
 }
-//UASTORE PARSER FUNCTIONS
 Device parse_device_impl(const std::string& ua, const UAStore* ua_store) {
   Device device;
   for (const auto& d : ua_store->deviceStore) {
@@ -226,7 +222,6 @@ Agent parse_os_impl(const std::string& ua, const UAStore* ua_store) {
   }
   return os;
 }
-//UAP
 UserAgentParser::UserAgentParser(std::string regexes_file_path) : regexes_file_path_(regexes_file_path) {
   ua_store_ = new UAStore(regexes_file_path);
 }
