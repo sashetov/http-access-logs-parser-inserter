@@ -1,5 +1,5 @@
-DROP DATABASE IF EXISTS httpstats_pages;
-CREATE DATABASE httpstats_pages;
+DROP DATABASE IF EXISTS httpstats_pages 
+CREATE DATABASE httpstats_pages ;
 USE httpstats_pages;
 SET GLOBAL innodb_file_per_table=1;
 SET GLOBAL innodb_file_format=Barracuda;

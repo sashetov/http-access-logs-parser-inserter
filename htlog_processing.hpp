@@ -16,61 +16,59 @@
 #include "htlog_containers.hpp"
 #include "htlog_mysql.hpp"
 #include "htlog_timer.hpp"
-void set_id_safely( int );
-void spawn_when_ready( int, int, int, int& );
-void start_thread_pool( int );
-std::string getHostnameFromLogfile(std::string);
-typedef struct logline {
-  std::string  hostname;
-  unsigned long  userIP;
-  std::string userIPStr;
-  std::string  date;
-  time_t timestamp;
-  std::string  requestPath;
-  std::string  requestType;
-  std::string  referer;
-  std::string  agent;
-  long sizeBytes;
-  int statusCode;
+void set_id_safely( int val );
+void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted );
+void start_thread_pool( int tpool_size );
+std::string getHostnameFromLogfile( std::string filename );
+typedef struct  logline {
+  std::string   hostname;
+  unsigned long userIP;
+  std::string   userIPStr;
+  std::string   date;
+  time_t        timestamp;
+  std::string   requestPath;
+  std::string   requestType;
+  std::string   referer;
+  std::string   agent;
+  long          sizeBytes;
+  int           statusCode;
 } parsed_logline;
 typedef struct url_parts {
-  std::string request_type;
-  std::string protocol;
-  std::string full_path;
-  std::string hostname;
-  std::string params;
+  std::string   protocol;
+  std::string   full_path;
+  std::string   hostname;
+  std::string   params;
 } url_parts;
 void print_url_parts( url_parts up );
 class HttpAccessLogMetrics {
   public:
-    HttpAccessLogMetrics( std::string, std::vector<SearchEngineContainer>, std::string );
+    HttpAccessLogMetrics( std::string user_host, std::vector<SearchEngineContainer> search_hosts, std::string file );
     ~HttpAccessLogMetrics();
     //HELPER METHODS
     unsigned long getDomainId();
-    unsigned long getNumericIp( std::string );
+    unsigned long getNumericIp( std::string addr );
     //DATA TANSORMATION FUNCTIONS
-    std::string getStringIP(unsigned long);
-    time_t getTimestamp( std::string );
-    std::string getCountryFromIP( std::string );
+    std::string getStringIP( unsigned long ip );
+    time_t getTimestamp( std::string dateTime );
+    std::string getCountryFromIP( std::string client_ip);
     //PARSING FUNCTIONS
-    std::vector<ParamsContainer> parseParamsString( std::string, int, std::string, std::string, std::string );
-    int parseLine(std::string,parsed_logline &);
+    std::vector<ParamsContainer> parseParamsString( std::string params_str, int type, std::string hostname, std::string page_path_full );
+    int parseLine( std::string line, parsed_logline &ll );
     //GENERIC MAPPING INCREMENTOR
-    template<typename T> void incrementCount( std::map<T,unsigned long>*, T );
-    template<typename T> void incrementCount( std::map<T,int>*, T );
+    template<typename T> void incrementCount( std::map<T,unsigned long> *kvmap, T key );
+    template<typename T> void incrementCount( std::map<T,int> *kvmap, T key );
     //MAPPING FUNCTIONS
     int logsScan( );
-    void processUserAgent( const UserAgent );
-    void processTrafficVectors( std::string, std::string, time_t timestamp );
-    void processRequestUrlAndBandwidth( time_t timestamp, std::string, unsigned long );
-    void processPagePathAndHourlyBandwidth( std::string, int );
-    void processHitsHourly(int, time_t);
-    void processVisitsHourly(int, unsigned long, time_t);
-    void processPageviewsHourly(int, unsigned long, std::string, time_t);
-    void processSearchTermsHourly( std::string, time_t );
-    void processReferersHourly( std::string, time_t );
-    void processUserAgentEntitiesHourly( const UserAgent, time_t );
-    void processLocationsHourly( std::string, time_t );
+    void processUserAgent( const UserAgent ua );
+    void processTrafficVectors( std::string request, std::string referer, time_t timestamp );
+    void processRequestUrlAndBandwidth( time_t timestamp, std::string request, unsigned long size_kb );
+    void processHitsHourly( int real_did, time_t timestamp );
+    void processVisitsHourly( int real_did, unsigned long user_ip, time_t timestamp );
+    void processPageviewsHourly( int real_did, unsigned long user_ip, std::string request_str, time_t timestamp );
+    void processSearchTermsHourly( std::string referer_str, time_t timestamp  );
+    void processReferersHourly( std::string referer_str, time_t timestamp );
+    void processUserAgentEntitiesHourly( const UserAgent ua, time_t timestamp );
+    void processLocationsHourly( std::string location, time_t timestamp );
     //INSERTER FUNCTION
     void insertEntities( );
     Timer * timer;
@@ -118,14 +116,13 @@ class HttpAccessLogMetrics {
     std::map<KeyValueContainer,unsigned long> client_browsers_ids;    // browser_id
     std::map<std::string,unsigned long> page_paths_full_ids;          // full_page_id
     std::map<std::string,unsigned long> referer_hostnames_ids;        // referer_domain_id
-    std::map<std::string,unsigned long> internal_paths_ids;           // page_id
     std::map<KeyValueContainer,unsigned long> search_queries_ids;     // search_terms_ids
     std::map<TVectorContainer,unsigned long> tvectors_inner_ids;      // tvin_id
     std::map<TVectorContainer,unsigned long> tvectors_incoming_ids;   // tvinc_id
     //INTERFACE TO MYSQL STORAGE ROUTINES
     LogsMysql lm;
     //HELPERS FOR PARSING REQUEST AND REFERER URLS
-    url_parts getUrlParts( std::string, bool );
+    url_parts getUrlParts( std::string url_string, bool is_referer );
 };
 #define __HTLOG_PROCESSING__
 #endif

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+
 class KeyValueContainer{
   public:
     KeyValueContainer( );
@@ -21,9 +22,8 @@ std::ostream &operator<<(std::ostream &, KeyValueContainer const &);
 class ParamsContainer : public KeyValueContainer {
   public:
     ParamsContainer( );
-    ParamsContainer(int, std::string, std::string, std::string, std::string, std::string);
+    ParamsContainer(int, std::string, std::string, std::string, std::string);
     std::string getHost() const;
-    std::string getPage() const;
     std::string getFullPagePath() const;
     int getPageType() const;
     int operator <( const ParamsContainer & ) const;
