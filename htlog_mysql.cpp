@@ -358,6 +358,9 @@ void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,unsig
       runQuery(stmt,create_temp_table_sql);
       runQuery(stmt,temp_table_insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
+      if( res->rowsCount() < tvectors.size() ) {
+        //throw std::runtime_error("rows count < needed for " + table);
+      }
       while ( res->next() ) {
         int col_index = 1;
         unsigned long id = (unsigned long) res->getUInt(col_index);
@@ -457,6 +460,7 @@ void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> p
       unsigned long ip_id = it == client_ips_ids.end()? 0 : it->second;
       if( ip_id == 0 ) { 
         throw std::runtime_error( "couldn't find ip " + std::to_string(ip) +" for domain name " + domain_name);
+        continue;
       }
       std::map<std::string,unsigned long>::iterator pit = page_paths_full_ids.find(page_path);
       unsigned long page_id = pit  == page_paths_full_ids.end() ? 0: pit->second;
@@ -686,7 +690,8 @@ void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string en
       std::map<KeyValueContainer,unsigned long>::iterator it = user_agent_entity_ids.find(user_agent_entity);
       unsigned long device_id = it == user_agent_entity_ids.end() ? 0 : it->second;
       if(device_id==0){
-        throw std::runtime_error("couldn't find id when inserting in table "+aeph_table+" for "+name+","+type+" for domain "+domain_name);
+        std::map<KeyValueContainer, unsigned long>::iterator uea_it;
+        throw std::runtime_error("couldn't find id when inserting in table "+aeph_table+" for '"+name+"','"+type+"' for domain "+domain_name+"");
       }
       insert_sql += "('"+ mysql_conn->escapeString(huec.getTsMysql())+"',"+ mysql_conn->escapeString(std::to_string(real_did))+","+ mysql_conn->escapeString(std::to_string(device_id))+","+ mysql_conn->escapeString(std::to_string(count))+"),";
     }
