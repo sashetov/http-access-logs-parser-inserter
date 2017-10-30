@@ -16,6 +16,15 @@ std::string find_string_key_by_value( std::map<std::string, unsigned long> str_i
 }
 LogsMysql::LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password) : host(mysql_host), port(mysql_port), username(mysql_user), password(mysql_password), mysql_url("tcp://"+host+":"+std::to_string(port)), domain_name(domain) {
 }
+std::string LogsMysql::getTsMysql( time_t ts ){
+  struct tm * tm_info;
+  char buffer[26];
+  tm_info = localtime(&ts);
+  tm_info->tm_sec = 0;
+  tm_info->tm_min = 0;
+  strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+  return std::string(buffer);
+}
 void LogsMysql::initThread(){
   driver = sql::mysql::get_driver_instance();
   handler = new st_worker_thread_param;
@@ -52,7 +61,7 @@ unsigned long LogsMysql::getDomainsId(  std::string domain ){
     std::cerr<< "LogsMysql::getDomainsId caught sql exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
   catch (std::exception &e) {
-    std::cerr<< "LogsMysql::getDomainsId caught exception: " << e.what() << " \n";
+    std::cerr<< "LogsmYSQL::GEtDomainsId caught exception: " << e.what() << " \n";
   }
   return real_did;
 }
@@ -404,7 +413,8 @@ void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, unsign
     if( hits.size()>0 ){
       runQuery(stmt,insert_sql);
     }
-  } catch (sql::SQLException &e) {
+  }
+  catch (sql::SQLException &e) {
     std::cerr<< "LogsMysql::insertHitsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
@@ -672,6 +682,58 @@ void LogsMysql::insertSearchTermsPerHour( std::map<HourlySearchTermsContainer,in
     std::cerr<< "LogsMysql::insertPageviewsPerHour caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
+void LogsMysql::insertAllPerDay( unsigned long real_did, time_t ts ){
+  try {
+    int i;
+    std::vector<std::string> databases;
+    std::vector<std::string> tables_basenames;
+    std::vector<std::string> columns_insert;
+    std::vector<std::string> columns_select;
+    std::vector<std::string> group_by_colums;
+    std::vector<std::string> insert_sqls;
+    databases.push_back("httpstats_domains"); tables_basenames.push_back("hits");       columns_insert.push_back("date,domains_id,count");                            columns_select.push_back("date,domains_id,sum(count) as count");                            group_by_colums.push_back("date");
+    databases.push_back("httpstats_clients"); tables_basenames.push_back("visits");     columns_insert.push_back("date,domains_id,ip_id,count");                      columns_select.push_back("date,domains_id,ip_id,sum(count) as count");                      group_by_colums.push_back("ip_id");
+    databases.push_back("httpstats_pages"); tables_basenames.push_back("pageviews");    columns_insert.push_back("date,domains_id,page_id,ip_id,count");              columns_select.push_back("date,domains_id,page_id,ip_id,sum(count) as count");              group_by_colums.push_back("page_id,ip_id");
+    databases.push_back("httpstats_pages"); tables_basenames.push_back("referers");     columns_insert.push_back("date,domains_id,page_id,referer_domain_id,count");  columns_select.push_back("date,domains_id,page_id,referer_domain_id,sum(count) as count");  group_by_colums.push_back("page_id,referer_domain_id");
+    databases.push_back("httpstats_clients"); tables_basenames.push_back("browsers");   columns_insert.push_back("date,domains_id,browser_id,count");                 columns_select.push_back("date,domains_id,browser_id,sum(count) as count");                 group_by_colums.push_back("browser_id");
+    databases.push_back("httpstats_clients"); tables_basenames.push_back("devices");    columns_insert.push_back("date,domains_id,device_id,count");                  columns_select.push_back("date,domains_id,device_id,sum(count) as count");                  group_by_colums.push_back("device_id");
+    databases.push_back("httpstats_clients"); tables_basenames.push_back("oses");       columns_insert.push_back("date,domains_id,os_id,count");                      columns_select.push_back("date,domains_id,os_id,sum(count) as count");                      group_by_colums.push_back("os_id");
+    databases.push_back("httpstats_pages"); tables_basenames.push_back("bandwidth");    columns_insert.push_back("date,domains_id,page_id,size_kb");                  columns_select.push_back("date,domains_id,page_id,sum(size_kb) as size_kb");                group_by_colums.push_back("page_id");
+    databases.push_back("httpstats_pages"); tables_basenames.push_back("tvinn");        columns_insert.push_back("date,domains_id,tvinn_id,count");                   columns_select.push_back("date,domains_id,tvinn_id,sum(count) as count");                   group_by_colums.push_back("tvinn_id");
+    databases.push_back("httpstats_pages"); tables_basenames.push_back("tvinc");        columns_insert.push_back("date,domains_id,tvinc_id,count");                   columns_select.push_back("date,domains_id,tvinc_id,sum(count) as count");                   group_by_colums.push_back("tvinc_id");
+    databases.push_back("httpstats_clients"); tables_basenames.push_back("locations");  columns_insert.push_back("date,domains_id,country_id,count");                 columns_select.push_back("date,domains_id,country_id,sum(count) as count");                 group_by_colums.push_back("country_id");
+    databases.push_back("httpstats_pages"); tables_basenames.push_back("search_terms"); columns_insert.push_back("date,domains_id,search_term_id,count");             columns_select.push_back("date,domains_id,search_term_id,sum(count) as count");             group_by_colums.push_back("search_term_id");
+    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
+    handler->con = conn.get();
+    time_t first = roundTsToDay(ts);
+    time_t next = getTomorrowMidnight(ts);
+    std::string first_day = getTsMysql(first);
+    std::string next_day = getTsMysql(next);
+    for(i=0; i< (int) columns_insert.size(); i++ ) {
+      handler->con->setSchema(databases[i]);
+      std::string hourly_table = tables_basenames[i]+"_hourly";
+      std::string daily_table = tables_basenames[i]+"_daily";
+      std::string insert_sql = "INSERT IGNORE INTO "+databases[i]+"."+daily_table+"("+columns_insert[i]+")"+
+        " SELECT DISTINCT DATE_FORMAT('"+ first_day +"','%Y-%m-%d 00:00:00') AS " + columns_select[i] +
+        " FROM "+ databases[i]+"."+hourly_table+" WHERE domains_id = "+ std::to_string(real_did)+
+        " AND date >= '"+ first_day +"' AND date < '"+ next_day +"' GROUP BY "+group_by_colums[i]+";";
+      insert_sqls.push_back(insert_sql);
+    }
+    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    for(i=0; i< (int) insert_sqls.size(); i++ ){
+      runQuery(stmt,insert_sqls[i]);
+    }
+  }
+  catch (sql::SQLException &e) {
+    std::cerr<< "LogsMysql::insertAllPerDay caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+  }
+}
+void LogsMysql::endThread(){
+  handler->driver->threadEnd();
+  delete(handler);
+}
+LogsMysql::~LogsMysql(){
+}
 void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string entity_id_name, std::map<HourlyUserAgentEntityContainer,int> uae_ph, unsigned long real_did, std::map<KeyValueContainer, unsigned long> user_agent_entity_ids ){
   try {
     std::string database = "httpstats_clients";
@@ -705,9 +767,20 @@ void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string en
     std::cerr<< "LogsMysql::buildAndRunUAEQuery caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
-void LogsMysql::endThread(){
-  handler->driver->threadEnd();
-  delete(handler);
+time_t LogsMysql::roundTsToDay( time_t ts_full) {
+  struct tm * timeinfo=localtime(&ts_full);
+  timeinfo->tm_sec = 0;
+  timeinfo->tm_min = 0;
+  timeinfo->tm_hour= 0;
+  time_t new_ts = mktime(timeinfo);
+  return new_ts;
 }
-LogsMysql::~LogsMysql(){
+time_t LogsMysql::getTomorrowMidnight( time_t ts_full) {
+  struct tm * timeinfo = localtime(&ts_full);
+  timeinfo->tm_sec = 0;
+  timeinfo->tm_min = 0;
+  timeinfo->tm_hour= 0;
+  timeinfo->tm_mday++;
+  time_t new_ts = mktime(timeinfo);
+  return new_ts;
 }

@@ -116,10 +116,15 @@ int HttpAccessLogMetrics::logsScan( ){
     if (filename == "-") {
       return 1;
     }
+    bool set_log_ts = false;
     while ( !statsFile.eof() ){
       parsed_logline ll;
       std::getline(statsFile, line);
       if ( parseLine(line,ll) == 0) {
+        if( ! set_log_ts ) {
+          log_ts = ll.timestamp;
+          set_log_ts = true;
+        }
         const UserAgent ua = g_ua_parser.parse( ll.agent );
         std::string country_code = getCountryFromIP( ll.userIPStr );
         // entities counts
@@ -222,12 +227,20 @@ int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ) {
   return 0;
 }
 template<typename T> void HttpAccessLogMetrics::incrementCount( std::map<T,unsigned long> *kvmap, T key ) {
-  int count=kvmap->count(key);
-  kvmap->insert({key,count});
+  unsigned long count = 1;
+  typename std::map<T, unsigned long>::iterator it = kvmap->find(key);
+  if (it == kvmap->end()){
+    kvmap->insert({key,count});
+  }
+  else it->second += count;
 }
 template<typename T> void HttpAccessLogMetrics::incrementCount( std::map<T,int> *kvmap, T key ) {
-  int count=kvmap->count(key);
-  kvmap->insert({key,count});
+  int count = 1;
+  typename std::map<T, int>::iterator it = kvmap->find(key);
+  if (it == kvmap->end()){
+    kvmap->insert({key,count});
+  }
+  else it->second += count;
 }
 std::string HttpAccessLogMetrics::getCountryFromIP( std::string client_ip){
   GeoLite2PP::DB db( "GeoLite2-City.mmdb" );
@@ -407,73 +420,29 @@ void HttpAccessLogMetrics::processLocationsHourly( std::string location, time_t 
   incrementCount( &locations_per_hour, hlc );
 }
 void HttpAccessLogMetrics::insertEntities(){
-  timer->start("initThread");
-  lm.initThread();
-  timer->stop("initThread");
-  timer->start("insertClientIps");
-  lm.insertClientIps( client_ips_ids, client_ips );
-  timer->stop("insertClientIps");
-  timer->start("insertLocations");
-  lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations );
-  timer->stop("insertLocations");
-  timer->start("insertDevices");
-  lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices);
-  timer->stop("insertDevices");
-  timer->start("insertOses");
-  lm.insertNameVersionEntities( "httpstats_clients", "oses", client_oses_ids, client_oses);
-  timer->stop("insertOses");
-  timer->start("insertBrowsers");
-  lm.insertNameVersionEntities( "httpstats_clients", "browsers", client_browsers_ids, client_browsers );
-  timer->stop("insertBrowsers");
-  timer->start("insertExternalDomains");
-  lm.insertStringEntities( "httpstats_pages", "external_domains", referer_hostnames_ids, referer_hostnames );
-  timer->stop("insertExternalDomains");
-  timer->start("insertPagePathsFull");
-  lm.insertStringEntities( "httpstats_pages", "pages_paths_full", page_paths_full_ids, page_paths_full );
-  timer->stop("insertPagePathsFull");
-  timer->start("insertSearchQueries");
-  lm.insertSearchTerms( search_queries_ids, search_queries, referer_hostnames_ids );
-  timer->stop("insertSearchQueries");
-  timer->start("insertTvectorsInner");
-  lm.insertTrafficVectors( true, tvectors_inner_ids, tvectors_inner, referer_hostnames_ids, page_paths_full_ids, internal_hostnames[0]);
-  timer->stop("insertTvectorsInner");
-  timer->start("insertTvectorsIncoming");
-  lm.insertTrafficVectors( false, tvectors_incoming_ids, tvectors_incoming, referer_hostnames_ids, page_paths_full_ids, internal_hostnames[0]);
-  timer->stop("insertTvectorsIncoming");
-  timer->start("insertHitsHourly");
-  lm.insertHitsPerHour( hits_per_hour, real_did );
-  timer->stop("insertHitsHourly");
-  timer->start("insertVisitsHourly");
-  lm.insertVisitsPerHour( visits_per_hour, real_did, client_ips_ids );
-  timer->stop("insertVisitsHourly");
-  timer->start("insertPageviewsHourly");
-  lm.insertPageviewsPerHour( pageviews_per_hour, real_did, client_ips_ids, page_paths_full_ids );
-  timer->stop("insertPageviewsHourly");
-  timer->start("insertLocationsPerHour");
-  lm.insertLocationsPerHour( locations_per_hour, real_did, client_geo_locations_ids );
-  timer->stop("insertLocationsPerHour");
-  timer->start("insertUserAgentEntitiesPerHour");
-  lm.insertUserAgentEntitiesPerHour( devices_per_hour, oses_per_hour, browsers_per_hour, real_did, client_devices_ids, client_oses_ids, client_browsers_ids );
-  timer->stop("insertUserAgentEntitiesPerHour");
-  timer->start("insertBandwidthPerHour");
-  lm.insertBandwidthPerHour( bandwidth_per_hour, real_did, page_paths_full_ids );
-  timer->stop("insertBandwidthPerHour");
-  timer->start("insertTVIncPerHour");
-  lm.insertTVCPerHour( false, tvectors_incoming_per_hour, real_did, tvectors_incoming_ids);
-  timer->stop("insertTVIncPerHour");
-  timer->start("insertTVInnPerHour");
-  lm.insertTVCPerHour( true, tvectors_inner_per_hour, real_did, tvectors_inner_ids);
-  timer->stop("insertTVInnPerHour");
-  timer->start("insertReferersPerHour");
-  lm.insertReferersPerHour( referers_per_hour, real_did, page_paths_full_ids, referer_hostnames_ids );
-  timer->stop("insertReferersPerHour");
-  timer->start("insertSearchTermsPerHour");
-  lm.insertSearchTermsPerHour( search_terms_per_hour, real_did, page_paths_full_ids, search_queries_ids, referer_hostnames_ids);
-  timer->stop("insertSearchTermsPerHour");
-  timer->start("endThread");
-  lm.endThread();
-  timer->stop("endThread");
-
+  timer->start("initThread"); lm.initThread(); timer->stop("initThread");
+  timer->start("insertClientIps"); lm.insertClientIps( client_ips_ids, client_ips ); timer->stop("insertClientIps");
+  timer->start("insertLocations"); lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations ); timer->stop("insertLocations");
+  timer->start("insertDevices"); lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices); timer->stop("insertDevices");
+  timer->start("insertOses"); lm.insertNameVersionEntities( "httpstats_clients", "oses", client_oses_ids, client_oses); timer->stop("insertOses");
+  timer->start("insertBrowsers"); lm.insertNameVersionEntities( "httpstats_clients", "browsers", client_browsers_ids, client_browsers ); timer->stop("insertBrowsers");
+  timer->start("insertExternalDomains"); lm.insertStringEntities( "httpstats_pages", "external_domains", referer_hostnames_ids, referer_hostnames ); timer->stop("insertExternalDomains");
+  timer->start("insertPagePathsFull"); lm.insertStringEntities( "httpstats_pages", "pages_paths_full", page_paths_full_ids, page_paths_full ); timer->stop("insertPagePathsFull");
+  timer->start("insertSearchQueries"); lm.insertSearchTerms( search_queries_ids, search_queries, referer_hostnames_ids ); timer->stop("insertSearchQueries");
+  timer->start("insertTvectorsInner"); lm.insertTrafficVectors( true, tvectors_inner_ids, tvectors_inner, referer_hostnames_ids, page_paths_full_ids, internal_hostnames[0]); timer->stop("insertTvectorsInner");
+  timer->start("insertTvectorsIncoming"); lm.insertTrafficVectors( false, tvectors_incoming_ids, tvectors_incoming, referer_hostnames_ids, page_paths_full_ids, internal_hostnames[0]); timer->stop("insertTvectorsIncoming");
+  timer->start("insertHitsHourly"); lm.insertHitsPerHour( hits_per_hour, real_did ); timer->stop("insertHitsHourly");
+  timer->start("insertVisitsHourly"); lm.insertVisitsPerHour( visits_per_hour, real_did, client_ips_ids ); timer->stop("insertVisitsHourly");
+  timer->start("insertPageviewsHourly"); lm.insertPageviewsPerHour( pageviews_per_hour, real_did, client_ips_ids, page_paths_full_ids ); timer->stop("insertPageviewsHourly");
+  timer->start("insertLocationsPerHour"); lm.insertLocationsPerHour( locations_per_hour, real_did, client_geo_locations_ids ); timer->stop("insertLocationsPerHour");
+  timer->start("insertUserAgentEntitiesPerHour"); lm.insertUserAgentEntitiesPerHour( devices_per_hour, oses_per_hour, browsers_per_hour, real_did, client_devices_ids, client_oses_ids, client_browsers_ids ); timer->stop("insertUserAgentEntitiesPerHour");
+  timer->start("insertBandwidthPerHour"); lm.insertBandwidthPerHour( bandwidth_per_hour, real_did, page_paths_full_ids ); timer->stop("insertBandwidthPerHour");
+  timer->start("insertTVIncPerHour"); lm.insertTVCPerHour( false, tvectors_incoming_per_hour, real_did, tvectors_incoming_ids); timer->stop("insertTVIncPerHour");
+  timer->start("insertTVInnPerHour"); lm.insertTVCPerHour( true, tvectors_inner_per_hour, real_did, tvectors_inner_ids); timer->stop("insertTVInnPerHour");
+  timer->start("insertReferersPerHour"); lm.insertReferersPerHour( referers_per_hour, real_did, page_paths_full_ids, referer_hostnames_ids ); timer->stop("insertReferersPerHour");
+  timer->start("insertSearchTermsPerHour"); lm.insertSearchTermsPerHour( search_terms_per_hour, real_did, page_paths_full_ids, search_queries_ids, referer_hostnames_ids); timer->stop("insertSearchTermsPerHour");
+  timer->start("insertAllPerDay"); lm.insertAllPerDay( real_did,  log_ts ); timer->stop("insertAllPerDay");
+  timer->start("endThread"); lm.endThread(); timer->stop("endThread");
 }
 url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string, bool is_referer ){
   std::string proto,path_noproto,hostname,page_path,params_str;

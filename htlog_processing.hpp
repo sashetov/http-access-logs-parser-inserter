@@ -123,6 +123,7 @@ class HttpAccessLogMetrics {
     LogsMysql lm;
     //HELPERS FOR PARSING REQUEST AND REFERER URLS
     url_parts getUrlParts( std::string url_string, bool is_referer );
+    time_t log_ts;
 };
 #define __HTLOG_PROCESSING__
 #endif
