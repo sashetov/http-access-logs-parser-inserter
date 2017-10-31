@@ -19,7 +19,7 @@ LogsMysql::LogsMysql(std::string domain, std::string mysql_host, int mysql_port,
 std::string LogsMysql::getTsMysql( time_t ts ){
   struct tm * tm_info;
   char buffer[26];
-  tm_info = localtime(&ts);
+  tm_info = gmtime(&ts);
   tm_info->tm_sec = 0;
   tm_info->tm_min = 0;
   strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
@@ -46,7 +46,7 @@ unsigned long LogsMysql::getDomainsId(  std::string domain ){
       possible_did = (unsigned long)res->getUInt("did");
     }
     else {
-      throw std::runtime_error("could not find a possible did for hostname: "+domain);
+      throw std::runtime_error("could not find a possible did for hostname: '"+domain+"'");
     }
     sql = "SELECT d1.did as real_did FROM domains d1 JOIN domains d2 on d1.did=d2.alias_of WHERE d1.alias_of=0 AND d1.did="+std::to_string(possible_did)+" OR d2.did="+std::to_string(possible_did)+" LIMIT 1;";
     res.reset(runSelectQuery(stmt,sql));
@@ -54,14 +54,11 @@ unsigned long LogsMysql::getDomainsId(  std::string domain ){
       real_did =  (unsigned long)res->getUInt("real_did");
     }
     else {
-      throw std::runtime_error("could not find a real did for hostname: "+domain); 
+      throw std::runtime_error("could not find a real did for hostname: '"+domain+"'"); 
     }
   }
-  catch (sql::SQLException &e) {
-    std::cerr<< "LogsMysql::getDomainsId caught sql exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
-  }
   catch (std::exception &e) {
-    std::cerr<< "LogsmYSQL::GEtDomainsId caught exception: " << e.what() << " \n";
+    std::cerr<< "LogsMysql::GetDomainsId caught exception: " << e.what() << " \n";
   }
   return real_did;
 }
@@ -172,8 +169,8 @@ void LogsMysql::insertStringEntities(std::string database, std::string table, st
     std::map<std::string,int>::iterator str_it;
     for( str_it = entities.begin(); str_it!=entities.end(); str_it++){
       std::string name = str_it->first;
-      insert_sql += "('"+mysql_conn->escapeString(name).substr(0,250)+"'),";
-      select_ids_sql+= "'"+mysql_conn->escapeString(name).substr(0,250)+"',";
+      insert_sql += "('"+mysql_conn->escapeString(name)+"'),";
+      select_ids_sql+= "'"+mysql_conn->escapeString(name)+"',";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+";";
     select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-1)+");";
@@ -516,7 +513,7 @@ void LogsMysql::insertBandwidthPerHour( std::map<HourlyBandwidthContainer,int> b
       unsigned long total_size_kb = count * size_kb;
       std::string page_path_full = hbC.getPagePath();
       std::map<std::string,unsigned long>::iterator pit = page_paths_full_ids.find(page_path_full);
-      unsigned long page_id = pit  == page_paths_full_ids.end() ? 0: pit->second;
+      unsigned long page_id = pit  == page_paths_full_ids.end() ? 1: pit->second;
       if( page_id == 0 ) { 
         throw std::runtime_error( "couldn't find page_path" + page_path_full +" for domain name " + domain_name);
       }
@@ -768,7 +765,7 @@ void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string en
   }
 }
 time_t LogsMysql::roundTsToDay( time_t ts_full) {
-  struct tm * timeinfo=localtime(&ts_full);
+  struct tm * timeinfo=gmtime(&ts_full);
   timeinfo->tm_sec = 0;
   timeinfo->tm_min = 0;
   timeinfo->tm_hour= 0;
@@ -776,7 +773,7 @@ time_t LogsMysql::roundTsToDay( time_t ts_full) {
   return new_ts;
 }
 time_t LogsMysql::getTomorrowMidnight( time_t ts_full) {
-  struct tm * timeinfo = localtime(&ts_full);
+  struct tm * timeinfo = gmtime(&ts_full);
   timeinfo->tm_sec = 0;
   timeinfo->tm_min = 0;
   timeinfo->tm_hour= 0;

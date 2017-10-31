@@ -140,7 +140,7 @@ HourlyHitsContainer::HourlyHitsContainer( unsigned long did, time_t ts_full ){
 }
 time_t HourlyHitsContainer::roundTsToHour( time_t * ts_full ) {
   struct tm * timeinfo;
-  timeinfo = localtime(ts_full);
+  timeinfo = gmtime(ts_full);
   timeinfo->tm_sec = 0;
   timeinfo->tm_min = 0;
   time_t ts_hourly = mktime(timeinfo);
@@ -152,7 +152,7 @@ time_t HourlyHitsContainer::getHourlyTs() const{
 std::string HourlyHitsContainer::getTsHour( ){
   struct tm * tm_info;
   char buffer[26];
-  tm_info = localtime(&hour_ts);
+  tm_info = gmtime(&hour_ts);
   tm_info->tm_sec = 0;
   tm_info->tm_min = 0;
   strftime(buffer, 26, "%d-%h-%Y %H:%M:%S %Z", tm_info);
@@ -161,7 +161,7 @@ std::string HourlyHitsContainer::getTsHour( ){
 std::string HourlyHitsContainer::getTsMysql( ){
   struct tm * tm_info;
   char buffer[26];
-  tm_info = localtime(&hour_ts);
+  tm_info = gmtime(&hour_ts);
   tm_info->tm_sec = 0;
   tm_info->tm_min = 0;
   strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);

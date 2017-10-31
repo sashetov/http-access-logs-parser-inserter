@@ -483,7 +483,11 @@ url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string, bool is_ref
   result.protocol = proto;
   result.hostname = hostname;
   result.params = params_str;
-  result.full_path = page_path.substr(0,250);
+  result.full_path =page_path.substr(0,150);
+  trim(result.protocol);
+  trim(result.hostname);
+  trim(result.params);
+  trim(result.full_path);
   //print_url_parts( result );
   return result;
 }
