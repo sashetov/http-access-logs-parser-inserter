@@ -14,10 +14,10 @@ void set_id_safely( int val ){
   id=val;
 }
 void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
-  std::string filename; 
+  std::string filename="";
   if( (long long) filenames.size() > tid){
     filename = dirname+"/"+filenames[tid];
-    threads_timer->start(filenames[tid]);
+    threads_timer->start(filename);
   }
   std::string user_hostname = getHostnameFromLogfile(filename);
   std::cerr<<"thread "<<tid<<":"<<std::this_thread::get_id()<<" processing "<<filename<<std::endl;
@@ -29,18 +29,16 @@ void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
     hMetrics.logsScan( ); 
     hMetrics.timer->stop("logsScan");
     hMetrics.insertEntities( );
+    threads_timer->stop(filename);
     hMetrics.timer->printAllDurationsSorted();
   }
   ncompleted++;
   worker_threads_working--;
   std::thread(set_id_safely,id+1).join();
   std::string is_greater = (id < tmax) ? "<" : ">";
-  std::cerr<<"ncompleted: "<<ncompleted<<"/"<<tmax <<" id: "<<id<<is_greater<<tmax <<" worker_threads_working: "<<worker_threads_working <<" worker_threads_launched_total: "<<worker_threads_launched_total<<std::endl; //" worker_threads_waiting: "<<worker_threads_waiting <<
+  std::cerr<<"ncompleted: "<<ncompleted<<"/"<<tmax <<" id: "<<id<<is_greater<<tmax <<" worker_threads_working: "<<worker_threads_working <<" worker_threads_launched_total: "<<worker_threads_launched_total<<std::endl;
   if( id < tmax  ) {
     std::thread( spawn_when_ready, id , tpool_size, tmax, std::ref(ncompleted)).detach();
-  }
-  if( (long long) filenames.size() > tid){
-    threads_timer->stop(filenames[tid]);
   }
 }
 void start_thread_pool( int tpool_size ){
