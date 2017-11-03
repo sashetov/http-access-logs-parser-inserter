@@ -4,52 +4,50 @@ extern std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, d
 extern std::vector<SearchEngineContainer> search_hosts;
 extern std::vector<std::string> filenames;
 //PTHREADS
-std::mutex m;
-int id;
+std::mutex m_tid, m_nc;
 Timer * threads_timer = new Timer();
-int worker_threads_launched_total=0;
-int worker_threads_working=0;
-void set_id_safely( int val ){
-  std::lock_guard<std::mutex> lk(m);
-  id=val;
+void inc_tid( int & tid ) {
+  std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
+  tid++;
 }
-void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
-  std::string filename="";
-  if( (long long) filenames.size() > tid){
-    filename = dirname+"/"+filenames[tid];
-    threads_timer->start(filename);
-  }
-  std::string user_hostname = getHostnameFromLogfile(filename);
-  std::cerr<<"thread "<<tid<<":"<<std::this_thread::get_id()<<" processing "<<filename<<std::endl;
-  worker_threads_launched_total++;
-  worker_threads_working++;
-  HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostname, search_hosts, filename );
-  if( hMetrics.getDomainId() != 0 ) {
-    hMetrics.timer->start("logsScan");
-    hMetrics.logsScan( ); 
-    hMetrics.timer->stop("logsScan");
-    hMetrics.insertEntities( );
-    threads_timer->stop(filename);
-    hMetrics.timer->printAllDurationsSorted();
-  }
+void inc_nc( int & ncompleted ) {
+  std::lock_guard<std::mutex> lk_n(m_nc,  std::adopt_lock);
   ncompleted++;
-  worker_threads_working--;
-  std::thread(set_id_safely,id+1).join();
-  std::string is_greater = (id < tmax) ? "<" : ">";
-  std::cerr<<"ncompleted: "<<ncompleted<<"/"<<tmax <<" id: "<<id<<is_greater<<tmax <<" worker_threads_working: "<<worker_threads_working <<" worker_threads_launched_total: "<<worker_threads_launched_total<<std::endl;
-  if( id < tmax  ) {
-    std::thread( spawn_when_ready, id , tpool_size, tmax, std::ref(ncompleted)).detach();
+}
+void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {
+  std::lock(m_tid, m_nc);
+  std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
+  std::lock_guard<std::mutex> lk_n(m_nc, std::adopt_lock);
+  if(tid < ttotal){
+    std::thread( inc_tid, std::ref(tid) ).join();
+    std::string filename = dirname+"/"+filenames[tid];
+    threads_timer->start(filename);
+    std::string user_hostname = getHostnameFromLogfile(filename);
+    std::cerr<<"thread "<<tid<<":"<<" processing "<<filename<<std::endl;
+    HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostname, search_hosts, filename );
+    if( hMetrics.getDomainId() != 0 ) {
+      hMetrics.timer->start("logsScan");
+      hMetrics.logsScan( ); 
+      hMetrics.timer->stop("logsScan");
+      hMetrics.insertEntities( );
+      hMetrics.timer->printAllDurationsSorted();
+    }
+    std::string tid_ineq = (tid == ttotal) ? "==" : (tid < ttotal) ?"<":">";
+    std::string nc_ineq = (ncompleted == ttotal) ? "==" : (ncompleted < ttotal) ?"<":">";
+    std::cerr<<"ncompleted: "<<ncompleted<<nc_ineq<<ttotal<<" tid: "<<tid<<tid_ineq<<ttotal<<std::endl;
+    threads_timer->stop(filename);
+    std::thread( inc_nc, std::ref(ncompleted) ).join();
+    std::lock_guard<std::mutex> lk_n(m_nc, std::adopt_lock);
+    if(ncompleted < ttotal) {
+      std::thread( spawn_if_ready, ttotal, std::ref(tid), std::ref(ncompleted) ).join();
+    }
   }
 }
-void start_thread_pool( int tpool_size ){
-  std::thread( set_id_safely, 0 ).join();
-  int ncompleted=0;
-  int nt_total= filenames.size();
+void start_thread_pool( int tpool_size, int ttotal, int &tid, int& ncompleted ){
   for( int i = 0; i < tpool_size; i++){
-    std::thread( spawn_when_ready, id, tpool_size, nt_total, std::ref(ncompleted) ).detach();
-    std::thread( set_id_safely, id+1 ).join();
+    std::thread( spawn_if_ready, ttotal, std::ref(tid), std::ref(ncompleted) ).detach();
   }
-  while( ncompleted < nt_total ) { // wait out in this thread till completion
+  while( ncompleted < ttotal ) { // wait out in this thread till completion
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
   threads_timer->printAllDurationsSorted();

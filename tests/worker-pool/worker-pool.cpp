@@ -1,47 +1,46 @@
 #include <stdio.h>
 #include <thread>
+#include <mutex>
+#include <functional>
 #include <iostream>
 #include <vector>
 #include <condition_variable>
 #include <chrono>
-std::vector<int> lock_signal_vars;
-std::condition_variable cv;
-std::mutex m;
-void notify( int tid ) {
-  std::lock_guard<std::mutex> lk(m);
-  //std::cerr << "notifying "<<tid<<"\n";
-  lock_signal_vars[tid] = tid;
-  cv.notify_all();
+std::mutex m_id, m_n;
+void inc_id( int &id ){
+  std::lock_guard<std::mutex> lk_id(m_id, std::adopt_lock);
+  id++;
 }
-void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));//FAKE WORK...
-  ncompleted++;
-  std::cout<<"thread id: "<<std::this_thread::get_id()<<" ncompleted/nt_total: "<<ncompleted<<"/"<<tmax<<std::endl;
-  int new_tid = tid + tpool_size;
-  if( new_tid < tmax ){
-    std::unique_lock<std::mutex> lk(m);
-    cv.wait( lk, [=] { // c++11 for lambda [](){}
-        //std::cerr << "waiting on lsv["<<tid<<"]=="<<tid<<"\n";
-        return lock_signal_vars[tid] == tid;
-        });
-    //std::cerr <<"condition reached lsv["<<tid<<"]=="<< tid <<" ncompleted: "<<ncompleted<<"\n";
-    std::thread( spawn_when_ready, new_tid, tpool_size, tmax, std::ref(ncompleted)).detach();
-    std::thread( notify, new_tid ).detach();
+void inc_n( int &n ){
+  std::lock_guard<std::mutex> lk_n(m_n,  std::adopt_lock);
+  n++;
+}
+void spawn_if_ready( int ttotal, int &id, int &n ) {
+  std::lock(m_id, m_n);
+  std::lock_guard<std::mutex> lk_id(m_id, std::adopt_lock);
+  std::lock_guard<std::mutex> lk_n(m_n, std::adopt_lock);
+  if(id < ttotal){
+    std::thread( inc_id, std::ref(id) ).join();
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    std::thread( inc_n, std::ref(n) ).join();
+    std::lock_guard<std::mutex> lk_n(m_n, std::adopt_lock);
+    if(n < ttotal) {
+      std::thread( spawn_if_ready, ttotal, std::ref(id), std::ref(n) ).join();
+    }
   }
 }
-void start_thread_pool( int tpool_size, int nt_total ){
-  int i, completed=0;
-  lock_signal_vars.resize(nt_total);
+void start_thread_pool( int tpool_size, int ttotal, int &id, int& n ){
+  int i;
   for(i=0; i< tpool_size; i++){
-    lock_signal_vars[i] = -1;
-    std::thread( spawn_when_ready, i, tpool_size, nt_total, std::ref(completed)).detach();
-    std::thread( notify, i ).detach();
+    std::thread( spawn_if_ready, ttotal, std::ref(id), std::ref(n) ).detach();
   }
-  while(completed< nt_total ){
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  while( n < ttotal ){
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
+  std::cout<<id<<" "<<n<<std::endl;
 }
 int main(int argc, char** argv) {
+  int id=0, n=0;
   int minargc =2;
   if( argc < minargc ) {
     std::cout<<"Usage:\n"<< argv[0] <<" THREAD_POOL_SIZE TOTAL_THREADS_TO_LAUNCH\n";
@@ -49,7 +48,7 @@ int main(int argc, char** argv) {
     exit(-1);
   }
   int thread_pool_size = std::stoi(std::string(argv[1]));
-  int total_threads = std::stoi(std::string(argv[2]));
-  std::cerr<<"thread_pool_size "<<thread_pool_size<<" total_threads "<<total_threads<<"\n";
-  start_thread_pool( thread_pool_size, total_threads );
+  int ttotal = std::stoi(std::string(argv[2]));
+  std::cerr<<"thread_pool_size "<<thread_pool_size<<" total_threads "<<ttotal<<std::endl;
+  start_thread_pool( thread_pool_size, ttotal, std::ref(id), std::ref(n) );
 }

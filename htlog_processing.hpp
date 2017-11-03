@@ -16,9 +16,10 @@
 #include "htlog_containers.hpp"
 #include "htlog_mysql.hpp"
 #include "htlog_timer.hpp"
-void set_id_safely( int val );
-void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted );
-void start_thread_pool( int tpool_size );
+void inc_tid( int & tid );
+void inc_nc( int & ncompleted );
+void spawn_if_ready( int ttotal, int &tid, int &ncompleted);
+void start_thread_pool( int tpool_size, int ttotal, int &tid, int& ncompleted );
 std::string getHostnameFromLogfile( std::string filename );
 typedef struct  logline {
   std::string   hostname;
