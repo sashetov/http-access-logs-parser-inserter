@@ -21,8 +21,10 @@ struct st_worker_thread_param {
 class LogsMysql {
   public:
     LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password);
-    std::string getTsMysql( time_t ts );
+    ~LogsMysql();
     void initThread();
+    void endThread();
+    std::string getTsMysql( time_t ts );
     unsigned long getDomainsId(  std::string domain );
     unsigned long getUserId( unsigned long real_did );
     sql::ResultSet * runSelectQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) ;
@@ -44,8 +46,6 @@ class LogsMysql {
     void insertLocationsPerHour( std::map<HourlyLocationsContainer,int> locations, unsigned long real_did, std::map<std::string,unsigned long> locations_ids );
     void insertSearchTermsPerHour( std::map<HourlySearchTermsContainer,int> search_terms, unsigned long real_did, std::map<std::string,unsigned long> page_paths_full_ids, std::map<KeyValueContainer,unsigned long> search_terms_ids, std::map<std::string,unsigned long> referer_hostnames_ids );
     void insertAllPerDay( unsigned long real_did, time_t ts  );
-    void endThread();
-    ~LogsMysql();
   private:
     std::string host;
     int port;
@@ -54,7 +54,7 @@ class LogsMysql {
     std::string mysql_url;
     std::string domain_name;
     sql::Driver * driver;
-    struct st_worker_thread_param * handler;
+    struct st_worker_thread_param handler;
     void buildAndRunHourlyUAEQuery(std::string aeph_table, std::string entity_id_name, std::map<HourlyUserAgentEntityContainer,int> uae_ph, unsigned long real_did, std::map<KeyValueContainer, unsigned long> user_agent_entity_ids );
     time_t roundTsToDay( time_t ts_full );
     time_t getTomorrowMidnight( time_t ts_full);

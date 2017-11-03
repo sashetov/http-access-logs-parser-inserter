@@ -20,8 +20,8 @@ void inc_n( int &n ){
   n++;
 }
 void spawn_if_ready( int ttotal, int &id, int &n ) {
-  std::lock_guard<std::mutex> lk_id(m_id, std::adopt_lock);
   std::thread( inc_id, std::ref(id) ).join();
+  std::lock_guard<std::mutex> lk_id(m_id, std::adopt_lock);
   if( id < ttotal ){
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }

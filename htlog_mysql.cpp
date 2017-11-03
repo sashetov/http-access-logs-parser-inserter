@@ -15,6 +15,16 @@ std::string find_string_key_by_value( std::map<std::string, unsigned long> str_i
   return str_val;
 }
 LogsMysql::LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password) : host(mysql_host), port(mysql_port), username(mysql_user), password(mysql_password), mysql_url("tcp://"+host+":"+std::to_string(port)), domain_name(domain) {
+  driver = sql::mysql::get_driver_instance();
+  handler.driver = driver;
+}
+LogsMysql::~LogsMysql(){
+}
+void LogsMysql::initThread(){
+  handler.driver->threadInit();
+}
+void LogsMysql::endThread(){
+  handler.driver->threadEnd();
 }
 std::string LogsMysql::getTsMysql( time_t ts ){
   struct tm * tm_info;
@@ -25,21 +35,15 @@ std::string LogsMysql::getTsMysql( time_t ts ){
   strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
   return std::string(buffer);
 }
-void LogsMysql::initThread(){
-  driver = sql::mysql::get_driver_instance();
-  handler = new st_worker_thread_param;
-  handler->driver = driver;
-  handler->driver->threadInit();
-}
 unsigned long LogsMysql::getDomainsId(  std::string domain ){
   unsigned long possible_did=0, real_did=0;
   std::string database = "cluster";
   try {
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string sql= "SELECT did FROM domains where domain_name ='"+ mysql_conn->escapeString(domain) + "' LIMIT 1;";
     boost::scoped_ptr< sql::ResultSet > res( runSelectQuery( stmt, sql ) );
     if (res->next()) {
@@ -66,11 +70,11 @@ unsigned long LogsMysql::getUserId( unsigned long real_did ){
   unsigned long uid=0;
   std::string database = "cluster";
   try {
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string sql= "SELECT uid FROM domains where did ="+ mysql_conn->escapeString(std::to_string(real_did))+ ";";
     boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,sql));
     while (res->next()) {
@@ -109,10 +113,10 @@ std::vector<std::string> LogsMysql::getUserHostnames( unsigned long real_did ){
   std::string database = "cluster";
   std::vector<std::string> internal_hostnames;
   try {
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     std::string all_domains_real_first_sql = "SELECT domain_name FROM domains WHERE alias_of="+ std::to_string(real_did)+ " OR did="+ std::to_string(real_did)+ " ORDER BY alias_of ASC;";
     boost::scoped_ptr< sql::ResultSet > res( runSelectQuery( stmt, all_domains_real_first_sql) );
     while (res->next()) {
@@ -127,13 +131,13 @@ std::vector<std::string> LogsMysql::getUserHostnames( unsigned long real_did ){
 void LogsMysql::insertClientIps(std::map<unsigned long,unsigned long> &client_ips_ids, std::map<unsigned long, int> client_ips) {
   try {
     std::string database = "httpstats_clients";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
     std::string insert_sql = "INSERT IGNORE INTO ips(ipv4) VALUES ";
     std::string select_ids_sql = "SELECT ipv4,id FROM ips WHERE ipv4 IN (";
     std::map<unsigned long,int>::iterator ul_it;
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     for( ul_it = client_ips.begin(); ul_it!=client_ips.end(); ul_it++){
       unsigned long ip= ul_it->first;
       insert_sql += "("+mysql_conn->escapeString(std::to_string(ip))+"),";
@@ -143,7 +147,7 @@ void LogsMysql::insertClientIps(std::map<unsigned long,unsigned long> &client_ip
     insert_sql +=";";
     select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-1); // chop off last ','
     select_ids_sql +=");";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if(client_ips.size() > 0){
       runQuery(stmt,insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
@@ -160,10 +164,10 @@ void LogsMysql::insertClientIps(std::map<unsigned long,unsigned long> &client_ip
 }
 void LogsMysql::insertStringEntities(std::string database, std::string table, std::map<std::string,unsigned long> &entity_ids_map, std::map<std::string, int> entities ) {
   try {
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+table+"(name) VALUES ";
     std::string select_ids_sql = "SELECT id,name FROM "+table+" WHERE name IN (";
     std::map<std::string,int>::iterator str_it;
@@ -174,7 +178,7 @@ void LogsMysql::insertStringEntities(std::string database, std::string table, st
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+";";
     select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-1)+");";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( entities.size() > 0){
       runQuery(stmt,insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
@@ -193,10 +197,10 @@ void LogsMysql::insertExternalDomains(std::map<std::string,unsigned long> &refer
   try {
     std::string database = "httpstats_pages";
     std::string table = "external_domains";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(name) VALUES ";
     std::string select_ids_sql = "SELECT name,id FROM "+mysql_conn->escapeString(table)+"WHERE name IN (";
     std::map<std::string,int>::iterator ul_it;
@@ -207,7 +211,7 @@ void LogsMysql::insertExternalDomains(std::map<std::string,unsigned long> &refer
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+";";
     select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-1)+");";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( referer_hostnames.size() > 0 ){
       runQuery(stmt,insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
@@ -223,10 +227,10 @@ void LogsMysql::insertExternalDomains(std::map<std::string,unsigned long> &refer
 }
 void LogsMysql::insertNameVersionEntities(std::string database, std::string table, std::map<KeyValueContainer,unsigned long> &entity_ids_map, std::map<KeyValueContainer, int> entities) {
   try {
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+table+"(name,version) VALUES ";
     std::string select_ids_sql = "SELECT name,version,id FROM "+table+" WHERE ";
     std::map<KeyValueContainer,int>::iterator kv_it;
@@ -239,7 +243,7 @@ void LogsMysql::insertNameVersionEntities(std::string database, std::string tabl
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1) +";";
     select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-3) +";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if(entities.size() > 0){
       runQuery(stmt,insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
@@ -259,10 +263,10 @@ void LogsMysql::insertSearchTerms( std::map<KeyValueContainer,unsigned long> &se
   try {
     std::string database = "httpstats_pages";
     std::string table = "search_terms";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(name,search_engine_id) VALUES ";
     std::string select_ids_sql = "SELECT name,search_engine_id,id FROM "+mysql_conn->escapeString(table)+" WHERE ";
     std::map<KeyValueContainer,int>::iterator kv_it;
@@ -285,7 +289,7 @@ void LogsMysql::insertSearchTerms( std::map<KeyValueContainer,unsigned long> &se
     insert_sql +=";";
     select_ids_sql = select_ids_sql.substr(0, select_ids_sql.size()-3); // chop off last ','
     select_ids_sql +=";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( search_terms.size() > 0 && i>0) {
       runQuery(stmt,insert_sql);
       boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,select_ids_sql));
@@ -308,9 +312,9 @@ void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,unsig
   try {
     std::string database = "httpstats_pages";
     std::string table = inner ? "tvectors_inn" : "tvectors_inc";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
     std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
     long long timestamp = (long long) (std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch())).count();
     std::string temp_table_name = "ttab_for_join_"+std::to_string(timestamp);
@@ -357,8 +361,8 @@ void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,unsig
     insert_values= insert_values.substr(0, insert_values.size()-1)+";";
     insert_sql += insert_values;
     temp_table_insert_sql += insert_values;
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
-    boost::scoped_ptr< sql::Statement > create_stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
+    boost::scoped_ptr< sql::Statement > create_stmt(handler.con->createStatement());
     if( tvectors.size() > 0 && i>0) {
       runQuery(stmt,insert_sql);
       runQuery(stmt,create_temp_table_sql);
@@ -394,10 +398,10 @@ void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, unsign
   try {
     std::string database = "httpstats_domains";
     std::string table = "hits_hourly";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(date,domains_id,count) VALUES ";
     std::map<HourlyHitsContainer,int>::iterator hhc_it;
     for( hhc_it = hits.begin(); hhc_it!=hits.end(); hhc_it++){
@@ -406,7 +410,7 @@ void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, unsign
       insert_sql += "('"+mysql_conn->escapeString(hhC.getTsMysql())+"',"+mysql_conn->escapeString(std::to_string(real_did))+","+mysql_conn->escapeString(std::to_string(count))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( hits.size()>0 ){
       runQuery(stmt,insert_sql);
     }
@@ -420,10 +424,10 @@ void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits,
     int i =0;
     std::string database = "httpstats_clients";
     std::string table = "visits_hourly";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(date,domains_id,ip_id,count) VALUES ";
     std::map<HourlyVisitsContainer,int>::iterator hvc_it;
     for( hvc_it = visits.begin(); hvc_it!=visits.end(); hvc_it++) {
@@ -439,7 +443,7 @@ void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits,
       i++;
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1) +";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( visits.size() > 0  && i > 0 ) {
       runQuery(stmt,insert_sql);
     }
@@ -452,10 +456,10 @@ void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> p
   try {
     std::string database = "httpstats_pages";
     std::string table = "pageviews_hourly";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+mysql_conn->escapeString(table)+"(date,domains_id,ip_id,page_id,count) VALUES ";
     std::map<HourlyPageviewsContainer,int>::iterator hpc_it;
     for( hpc_it = pageviews.begin(); hpc_it!=pageviews.end(); hpc_it++){
@@ -477,7 +481,7 @@ void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> p
       insert_sql += "('"+mysql_conn->escapeString(hpC.getTsMysql())+"',"+mysql_conn->escapeString(std::to_string(real_did))+","+mysql_conn->escapeString(std::to_string(ip_id))+","+mysql_conn->escapeString(std::to_string(page_id))+","+mysql_conn->escapeString(std::to_string(count))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+ ";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( pageviews.size()> 0){
       runQuery(stmt,insert_sql);
     }
@@ -500,10 +504,10 @@ void LogsMysql::insertBandwidthPerHour( std::map<HourlyBandwidthContainer,int> b
   try {
     std::string database = "httpstats_pages";
     std::string table = "bandwidth_hourly";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+ mysql_conn->escapeString(table)+"(date,domains_id,page_id,size_kb) VALUES ";
     std::map<HourlyBandwidthContainer,int>::iterator hbc_it;
     for( hbc_it = bandwidth.begin(); hbc_it!=bandwidth.end(); hbc_it++){
@@ -520,7 +524,7 @@ void LogsMysql::insertBandwidthPerHour( std::map<HourlyBandwidthContainer,int> b
       insert_sql += "('"+ mysql_conn->escapeString(hbC.getTsMysql())+"',"+ mysql_conn->escapeString(std::to_string(real_did))+","+ mysql_conn->escapeString(std::to_string(page_id))+","+ mysql_conn->escapeString(std::to_string(total_size_kb ))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+ ";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( bandwidth.size()> 0){
       runQuery(stmt,insert_sql);
     }
@@ -533,10 +537,10 @@ void LogsMysql::insertTVCPerHour( bool is_inner, std::map<HourlyTVContainer,int>
     std::string database = "httpstats_pages";
     std::string table = is_inner ?"tvinn_hourly":"tvinc_hourly";
     std::string tv_column = is_inner ?"tvinn_id":"tvinc_id";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+ table+"(date,domains_id,"+tv_column+",count) VALUES ";
     std::map<HourlyTVContainer,int>::iterator htvc_it;
     for( htvc_it = tvectors.begin(); htvc_it!=tvectors.end(); htvc_it++){
@@ -551,7 +555,7 @@ void LogsMysql::insertTVCPerHour( bool is_inner, std::map<HourlyTVContainer,int>
       insert_sql += "('"+ mysql_conn->escapeString(htvc.getTsMysql())+"',"+ mysql_conn->escapeString(std::to_string(real_did))+","+ mysql_conn->escapeString(std::to_string(htvc_id))+","+ mysql_conn->escapeString(std::to_string(count))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+ ";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( tvectors.size()> 0){
       runQuery(stmt,insert_sql);
     }
@@ -564,10 +568,10 @@ void LogsMysql::insertLocationsPerHour( std::map<HourlyLocationsContainer,int> l
   try {
     std::string database = "httpstats_clients";
     std::string table = "locations_hourly";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+ mysql_conn->escapeString(table)+"(date,domains_id,country_id,count) VALUES ";
     std::map<HourlyLocationsContainer,int>::iterator hlc_it;
     for( hlc_it = locations.begin(); hlc_it!=locations.end(); hlc_it++){
@@ -583,7 +587,7 @@ void LogsMysql::insertLocationsPerHour( std::map<HourlyLocationsContainer,int> l
       insert_sql += "('"+ mysql_conn->escapeString(hlC.getTsMysql())+"',"+ mysql_conn->escapeString(std::to_string(real_did))+","+ mysql_conn->escapeString(std::to_string(location_id))+","+ mysql_conn->escapeString(std::to_string(count))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+ ";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( locations.size()> 0){
       runQuery(stmt,insert_sql);
     }
@@ -595,10 +599,10 @@ void LogsMysql::insertReferersPerHour( std::map<HourlyReferersContainer,int> ref
   std::string database = "httpstats_pages";
   std::string table = "referers_hourly";
   try {
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+table+"(date,domains_id,page_id,referer_domain_id,count) VALUES ";
     std::map<HourlyReferersContainer,int>::iterator hrc_it;
     for( hrc_it = referers.begin(); hrc_it!=referers.end(); hrc_it++){
@@ -628,7 +632,7 @@ void LogsMysql::insertReferersPerHour( std::map<HourlyReferersContainer,int> ref
         mysql_conn->escapeString(std::to_string(count))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( referers.size()> 0){
       runQuery(stmt,insert_sql);
     }
@@ -641,10 +645,10 @@ void LogsMysql::insertSearchTermsPerHour( std::map<HourlySearchTermsContainer,in
   try {
     std::string database = "httpstats_pages";
     std::string table = "search_terms_hourly";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+table+"(date,domains_id,page_id,search_term_id,count) VALUES ";
     std::map<HourlySearchTermsContainer,int>::iterator hsc_it;
     std::map<KeyValueContainer,int>::iterator kvc_it;
@@ -670,7 +674,7 @@ void LogsMysql::insertSearchTermsPerHour( std::map<HourlySearchTermsContainer,in
       insert_sql += "('"+ mysql_conn->escapeString(hsC.getTsMysql())+"',"+ mysql_conn->escapeString(std::to_string(real_did))+","+ mysql_conn->escapeString(std::to_string(page_id))+","+ mysql_conn->escapeString(std::to_string(search_term_id))+","+ mysql_conn->escapeString(std::to_string(count))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( search_terms.size()> 0){
       runQuery(stmt,insert_sql);
     }
@@ -700,14 +704,14 @@ void LogsMysql::insertAllPerDay( unsigned long real_did, time_t ts ){
     databases.push_back("httpstats_pages"); tables_basenames.push_back("tvinc");        columns_insert.push_back("date,domains_id,tvinc_id,count");                   columns_select.push_back("date,domains_id,tvinc_id,sum(count) as count");                   group_by_colums.push_back("tvinc_id");
     databases.push_back("httpstats_clients"); tables_basenames.push_back("locations");  columns_insert.push_back("date,domains_id,country_id,count");                 columns_select.push_back("date,domains_id,country_id,sum(count) as count");                 group_by_colums.push_back("country_id");
     databases.push_back("httpstats_pages"); tables_basenames.push_back("search_terms"); columns_insert.push_back("date,domains_id,search_term_id,count");             columns_select.push_back("date,domains_id,search_term_id,sum(count) as count");             group_by_colums.push_back("search_term_id");
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
     time_t first = roundTsToDay(ts);
     time_t next = getTomorrowMidnight(ts);
     std::string first_day = getTsMysql(first);
     std::string next_day = getTsMysql(next);
     for(i=0; i< (int) columns_insert.size(); i++ ) {
-      handler->con->setSchema(databases[i]);
+      handler.con->setSchema(databases[i]);
       std::string hourly_table = tables_basenames[i]+"_hourly";
       std::string daily_table = tables_basenames[i]+"_daily";
       std::string insert_sql = "INSERT IGNORE INTO "+databases[i]+"."+daily_table+"("+columns_insert[i]+")"+
@@ -716,7 +720,7 @@ void LogsMysql::insertAllPerDay( unsigned long real_did, time_t ts ){
         " AND date >= '"+ first_day +"' AND date < '"+ next_day +"' GROUP BY "+group_by_colums[i]+";";
       insert_sqls.push_back(insert_sql);
     }
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     for(i=0; i< (int) insert_sqls.size(); i++ ){
       runQuery(stmt,insert_sqls[i]);
     }
@@ -725,19 +729,13 @@ void LogsMysql::insertAllPerDay( unsigned long real_did, time_t ts ){
     std::cerr<< "LogsMysql::insertAllPerDay caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
-void LogsMysql::endThread(){
-  handler->driver->threadEnd();
-  delete(handler);
-}
-LogsMysql::~LogsMysql(){
-}
 void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string entity_id_name, std::map<HourlyUserAgentEntityContainer,int> uae_ph, unsigned long real_did, std::map<KeyValueContainer, unsigned long> user_agent_entity_ids ){
   try {
     std::string database = "httpstats_clients";
-    boost::scoped_ptr< sql::Connection > conn(handler->driver->connect(mysql_url, username, password));
-    handler->con = conn.get();
-    handler->con->setSchema(database);
-    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler->con);
+    boost::scoped_ptr< sql::Connection > conn(handler.driver->connect(mysql_url, username, password));
+    handler.con = conn.get();
+    handler.con->setSchema(database);
+    sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(handler.con);
     std::string insert_sql = "INSERT IGNORE INTO "+aeph_table+ "(date,domains_id,"+entity_id_name+",count) VALUES ";
     std::map<HourlyUserAgentEntityContainer,int>::iterator huec_it;
     for( huec_it= uae_ph.begin(); huec_it!=uae_ph.end(); huec_it++){
@@ -755,7 +753,7 @@ void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string en
       insert_sql += "('"+ mysql_conn->escapeString(huec.getTsMysql())+"',"+ mysql_conn->escapeString(std::to_string(real_did))+","+ mysql_conn->escapeString(std::to_string(device_id))+","+ mysql_conn->escapeString(std::to_string(count))+"),";
     }
     insert_sql = insert_sql.substr(0, insert_sql.size()-1)+ ";";
-    boost::scoped_ptr< sql::Statement > stmt(handler->con->createStatement());
+    boost::scoped_ptr< sql::Statement > stmt(handler.con->createStatement());
     if( uae_ph.size()> 0){
       runQuery(stmt,insert_sql);
     }

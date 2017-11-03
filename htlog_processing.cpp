@@ -19,13 +19,12 @@ void inc_nc( int & ncompleted ) {
   ncompleted++;
 }
 void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {
-  std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
   std::thread( inc_tid, std::ref( tid) ).join();
+  std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
   if(tid < ttotal){
     std::string filename = dirname+"/"+filenames[tid];
     threads_timer->start(filename);
     std::string user_hostname = getHostnameFromLogfile(filename);
-    std::cerr<<"thread "<<tid<<":"<<" processing "<<filename<<std::endl;
     HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostname, search_hosts, filename );
     if( hMetrics.getDomainId() != 0 ) {
       hMetrics.timer->start("logsScan");
@@ -87,6 +86,7 @@ void print_url_parts( url_parts up ){
     <<std::endl;
 }
 HttpAccessLogMetrics::HttpAccessLogMetrics( std::string user_host, std::vector<SearchEngineContainer> search_hosts, std::string file ) : lm(user_host,mysql_hostname,std::stoi(mysql_port_num),mysql_user,mysql_password){
+  std::cerr<<"thread "<<std::this_thread::get_id()<<":"<<" processing "<<filename<<std::endl;
   search_engines = search_hosts;
   lines_failed=0;
   lines_processed=0;
@@ -98,6 +98,7 @@ HttpAccessLogMetrics::HttpAccessLogMetrics( std::string user_host, std::vector<S
   timer = new Timer();
 }
 HttpAccessLogMetrics::~HttpAccessLogMetrics(){
+  lm.endThread();
   delete timer;
 }
 unsigned long HttpAccessLogMetrics::getDomainId(){
@@ -417,7 +418,6 @@ void HttpAccessLogMetrics::processLocationsHourly( std::string location, time_t 
   incrementCount( &locations_per_hour, hlc );
 }
 void HttpAccessLogMetrics::insertEntities(){
-  //timer->start("initThread"); lm.initThread(); timer->stop("initThread");
   timer->start("insertClientIps"); lm.insertClientIps( client_ips_ids, client_ips ); timer->stop("insertClientIps");
   timer->start("insertLocations"); lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations ); timer->stop("insertLocations");
   timer->start("insertDevices"); lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices); timer->stop("insertDevices");
@@ -439,7 +439,6 @@ void HttpAccessLogMetrics::insertEntities(){
   timer->start("insertReferersPerHour"); lm.insertReferersPerHour( referers_per_hour, real_did, page_paths_full_ids, referer_hostnames_ids ); timer->stop("insertReferersPerHour");
   timer->start("insertSearchTermsPerHour"); lm.insertSearchTermsPerHour( search_terms_per_hour, real_did, page_paths_full_ids, search_queries_ids, referer_hostnames_ids); timer->stop("insertSearchTermsPerHour");
   timer->start("insertAllPerDay"); lm.insertAllPerDay( real_did,  log_ts ); timer->stop("insertAllPerDay");
-  //timer->start("endThread"); lm.endThread(); timer->stop("endThread");
 }
 url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string, bool is_referer ){
   std::string proto,path_noproto,hostname,page_path,params_str;
