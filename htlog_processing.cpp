@@ -94,7 +94,6 @@ HttpAccessLogMetrics::HttpAccessLogMetrics( std::string user_host, std::vector<S
   real_did = lm.getDomainsId(user_host);
   internal_hostnames = lm.getUserHostnames( real_did );
   uid = lm.getUserId( real_did );
-  lm.endThread();
   filename = file;
   timer = new Timer();
 }
@@ -418,7 +417,7 @@ void HttpAccessLogMetrics::processLocationsHourly( std::string location, time_t 
   incrementCount( &locations_per_hour, hlc );
 }
 void HttpAccessLogMetrics::insertEntities(){
-  timer->start("initThread"); lm.initThread(); timer->stop("initThread");
+  //timer->start("initThread"); lm.initThread(); timer->stop("initThread");
   timer->start("insertClientIps"); lm.insertClientIps( client_ips_ids, client_ips ); timer->stop("insertClientIps");
   timer->start("insertLocations"); lm.insertStringEntities( "httpstats_clients", "locations", client_geo_locations_ids, client_geo_locations ); timer->stop("insertLocations");
   timer->start("insertDevices"); lm.insertNameVersionEntities( "httpstats_clients", "devices", client_devices_ids, client_devices); timer->stop("insertDevices");
@@ -440,7 +439,7 @@ void HttpAccessLogMetrics::insertEntities(){
   timer->start("insertReferersPerHour"); lm.insertReferersPerHour( referers_per_hour, real_did, page_paths_full_ids, referer_hostnames_ids ); timer->stop("insertReferersPerHour");
   timer->start("insertSearchTermsPerHour"); lm.insertSearchTermsPerHour( search_terms_per_hour, real_did, page_paths_full_ids, search_queries_ids, referer_hostnames_ids); timer->stop("insertSearchTermsPerHour");
   timer->start("insertAllPerDay"); lm.insertAllPerDay( real_did,  log_ts ); timer->stop("insertAllPerDay");
-  timer->start("endThread"); lm.endThread(); timer->stop("endThread");
+  //timer->start("endThread"); lm.endThread(); timer->stop("endThread");
 }
 url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string, bool is_referer ){
   std::string proto,path_noproto,hostname,page_path,params_str;
