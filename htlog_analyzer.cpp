@@ -1,13 +1,12 @@
 #include "htlog_analyzer.hpp"
 void print_usage_and_exit(std::ostream & stream, const int exit_status, std::string program_name ) {
  stream<<"Usage:\n"<<program_name<<" {OPTIONAL_OPTS} [REQUIRED_OPTS] OBJECT"<<std::endl
-    <<" OPTIONAL_OPS:= { -s|--sql_logs_path SQL_LOGS_DIR "<<std::endl<<" }"<<std::endl
+    <<"OPTIONAL_OPTS:= { -s|--sql_logs_path SQL_LOGS_DIR  }"<<std::endl
     <<"REQUIRED_OPTS:= [ -h|--mysql_host MYSQL_HOSTNAME "<<std::endl
     <<"                  -u|--mysql_user MYSQL_USER "<<std::endl
     <<"                  -P|--mysql_port MYSQL_PORT "<<std::endl
-    <<"                  -p|--mysql_password MYSQL_PASSWORD "<<std::endl
-    <<"                ]"<<std::endl
-    <<"        OBJECT= LOGDIR_PATH"<<std::endl
+    <<"                  -p|--mysql_password MYSQL_PASSWORD ]"<<std::endl
+    <<"  OBJECT= LOGDIR_PATH"<<std::endl
     <<"NOTES:"<<std::endl
     <<"LOGDIR_PATH  - relative or full path to directory containing logfiles named DOMAIN.NAME.log and containing httpd access logs in apache combined format"<<std::endl
     <<"SQL_LOGS_DIR - relative or full path to directory where to dump logs of sql statements run for each domain name, each in its own log file"<<std::endl;

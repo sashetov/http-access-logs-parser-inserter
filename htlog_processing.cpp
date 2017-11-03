@@ -7,19 +7,21 @@ extern std::vector<std::string> filenames;
 std::mutex m_tid, m_nc;
 Timer * threads_timer = new Timer();
 void inc_tid( int & tid ) {
+  std::lock(m_tid, m_nc);
   std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
+  std::lock_guard<std::mutex> lk_n(m_nc,  std::adopt_lock);
   tid++;
 }
 void inc_nc( int & ncompleted ) {
+  std::lock(m_tid, m_nc);
+  std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
   std::lock_guard<std::mutex> lk_n(m_nc,  std::adopt_lock);
   ncompleted++;
 }
 void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {
-  std::lock(m_tid, m_nc);
   std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
-  std::lock_guard<std::mutex> lk_n(m_nc, std::adopt_lock);
+  std::thread( inc_tid, std::ref( tid) ).join();
   if(tid < ttotal){
-    std::thread( inc_tid, std::ref(tid) ).join();
     std::string filename = dirname+"/"+filenames[tid];
     threads_timer->start(filename);
     std::string user_hostname = getHostnameFromLogfile(filename);
@@ -32,15 +34,12 @@ void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {
       hMetrics.insertEntities( );
       hMetrics.timer->printAllDurationsSorted();
     }
-    std::string tid_ineq = (tid == ttotal) ? "==" : (tid < ttotal) ?"<":">";
-    std::string nc_ineq = (ncompleted == ttotal) ? "==" : (ncompleted < ttotal) ?"<":">";
-    std::cerr<<"ncompleted: "<<ncompleted<<nc_ineq<<ttotal<<" tid: "<<tid<<tid_ineq<<ttotal<<std::endl;
     threads_timer->stop(filename);
-    std::thread( inc_nc, std::ref(ncompleted) ).join();
-    std::lock_guard<std::mutex> lk_n(m_nc, std::adopt_lock);
-    if(ncompleted < ttotal) {
-      std::thread( spawn_if_ready, ttotal, std::ref(tid), std::ref(ncompleted) ).join();
-    }
+  }
+  std::thread( inc_nc, std::ref(ncompleted) ).join();
+  std::lock_guard<std::mutex> lk_n(m_nc, std::adopt_lock);
+  if(ncompleted < ttotal) {
+    std::thread( spawn_if_ready, ttotal, std::ref(tid), std::ref(ncompleted) ).detach();
   }
 }
 void start_thread_pool( int tpool_size, int ttotal, int &tid, int& ncompleted ){
@@ -49,6 +48,9 @@ void start_thread_pool( int tpool_size, int ttotal, int &tid, int& ncompleted ){
   }
   while( ncompleted < ttotal ) { // wait out in this thread till completion
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::string tid_ineq = (tid == ttotal) ? "==" : (tid < ttotal) ?"<":">";
+    std::string nc_ineq = (ncompleted == ttotal) ? "==" : (ncompleted < ttotal) ?"<":">";
+    std::cerr<<"ncompleted: "<<ncompleted<<nc_ineq<<ttotal<<" tid: "<<tid<<tid_ineq<<ttotal<<std::endl;
   }
   threads_timer->printAllDurationsSorted();
 }
