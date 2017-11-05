@@ -9,126 +9,156 @@ AgentStore	htlog_uap.hpp	/^struct AgentStore : GenericStore {$/;"	s
 DB	GeoLite2PP.cpp	/^GeoLite2PP::DB::DB( const std::string &database_filename )$/;"	f	class:GeoLite2PP::DB
 Device	htlog_uap.hpp	/^struct Device : Generic {$/;"	s
 DeviceStore	htlog_uap.hpp	/^struct DeviceStore : GenericStore {$/;"	s
-ERROR_MAX	ht_nodes.h	4;"	d
 ErrorCategory	GeoLite2PP_error_category.hpp	/^	class ErrorCategory : public std::error_category$/;"	c	class:GeoLite2PP::MMDBStatus
 GEOLITE2PP_VERSION	GeoLite2PP_version.hpp	16;"	d
 Generic	htlog_uap.hpp	/^struct Generic {$/;"	s
 GenericStore	htlog_uap.hpp	/^struct GenericStore {$/;"	s
 GeoLite2PP	GeoLite2PP.hpp	/^namespace GeoLite2PP$/;"	n
 GeoLite2PP	GeoLite2PP_error_category.hpp	/^namespace GeoLite2PP$/;"	n
-HT_ALLOC_SIZE_DEFAULT	ht_nodes.h	6;"	d
-HT_ALLOC_SIZE_MAX	ht_nodes.h	5;"	d
-HourlyHitsContainer	htlog_containers.cpp	/^HourlyHitsContainer::HourlyHitsContainer( int did, time_t ts_full ){$/;"	f	class:HourlyHitsContainer
+HourlyBandwidthContainer	htlog_containers.cpp	/^HourlyBandwidthContainer::HourlyBandwidthContainer( unsigned long real_did, time_t timestamp, unsigned long sizeInKb, std::string path ){$/;"	f	class:HourlyBandwidthContainer
+HourlyBandwidthContainer	htlog_containers.cpp	/^HourlyBandwidthContainer::HourlyBandwidthContainer(){$/;"	f	class:HourlyBandwidthContainer
+HourlyBandwidthContainer	htlog_containers.hpp	/^class HourlyBandwidthContainer : public HourlyHitsContainer {$/;"	c
+HourlyHitsContainer	htlog_containers.cpp	/^HourlyHitsContainer::HourlyHitsContainer( unsigned long did, time_t ts_full ){$/;"	f	class:HourlyHitsContainer
 HourlyHitsContainer	htlog_containers.cpp	/^HourlyHitsContainer::HourlyHitsContainer(){$/;"	f	class:HourlyHitsContainer
 HourlyHitsContainer	htlog_containers.hpp	/^class HourlyHitsContainer {$/;"	c
+HourlyLocationsContainer	htlog_containers.cpp	/^HourlyLocationsContainer::HourlyLocationsContainer( unsigned long real_did, std::string country, time_t timestamp ){$/;"	f	class:HourlyLocationsContainer
+HourlyLocationsContainer	htlog_containers.hpp	/^class HourlyLocationsContainer : public HourlyHitsContainer {$/;"	c
 HourlyPageviewsContainer	htlog_containers.cpp	/^HourlyPageviewsContainer::HourlyPageviewsContainer() : HourlyVisitsContainer() {$/;"	f	class:HourlyPageviewsContainer
-HourlyPageviewsContainer	htlog_containers.cpp	/^HourlyPageviewsContainer::HourlyPageviewsContainer(int did, time_t ts_full, unsigned long ip, std::string full_path) : HourlyVisitsContainer( did, ts_full, ip ) {$/;"	f	class:HourlyPageviewsContainer
+HourlyPageviewsContainer	htlog_containers.cpp	/^HourlyPageviewsContainer::HourlyPageviewsContainer(unsigned long did, time_t ts_full, unsigned long ip, std::string full_path) : HourlyVisitsContainer( did, ts_full, ip ) {$/;"	f	class:HourlyPageviewsContainer
 HourlyPageviewsContainer	htlog_containers.hpp	/^class HourlyPageviewsContainer : public HourlyVisitsContainer {$/;"	c
+HourlyReferersContainer	htlog_containers.cpp	/^HourlyReferersContainer::HourlyReferersContainer( unsigned long did, std::string referer_hostname, std::string referer_path, time_t ts_full, bool is_inner_hostname ){$/;"	f	class:HourlyReferersContainer
+HourlyReferersContainer	htlog_containers.cpp	/^HourlyReferersContainer::HourlyReferersContainer(){$/;"	f	class:HourlyReferersContainer
+HourlyReferersContainer	htlog_containers.hpp	/^class HourlyReferersContainer : public HourlyHitsContainer {$/;"	c
+HourlySearchTermsContainer	htlog_containers.cpp	/^HourlySearchTermsContainer::HourlySearchTermsContainer( unsigned long did, std::string search_engine_hostname, std::string search_terms, std::string page_path, time_t ts_full ){$/;"	f	class:HourlySearchTermsContainer
+HourlySearchTermsContainer	htlog_containers.cpp	/^HourlySearchTermsContainer::HourlySearchTermsContainer(){$/;"	f	class:HourlySearchTermsContainer
+HourlySearchTermsContainer	htlog_containers.hpp	/^class HourlySearchTermsContainer  : public HourlyHitsContainer {$/;"	c
+HourlyTVContainer	htlog_containers.cpp	/^HourlyTVContainer::HourlyTVContainer( bool is_inner_vector, std::string external_hostname, std::string full_path_a, std::string full_path_b, unsigned long real_did, time_t timestamp ) : HourlyHitsContainer(real_did, timestamp), TVectorContainer(is_inner_vector,external_hostname, full_path_a, full_path_b  ) {$/;"	f	class:HourlyTVContainer
+HourlyTVContainer	htlog_containers.cpp	/^HourlyTVContainer::HourlyTVContainer(){$/;"	f	class:HourlyTVContainer
+HourlyTVContainer	htlog_containers.hpp	/^class HourlyTVContainer : public HourlyHitsContainer, public TVectorContainer {$/;"	c
+HourlyUserAgentEntityContainer	htlog_containers.cpp	/^HourlyUserAgentEntityContainer::HourlyUserAgentEntityContainer( unsigned long real_did, std::string uae_name, std::string uae_type, time_t ts_full){$/;"	f	class:HourlyUserAgentEntityContainer
+HourlyUserAgentEntityContainer	htlog_containers.cpp	/^HourlyUserAgentEntityContainer::HourlyUserAgentEntityContainer(){$/;"	f	class:HourlyUserAgentEntityContainer
+HourlyUserAgentEntityContainer	htlog_containers.hpp	/^class HourlyUserAgentEntityContainer: public HourlyHitsContainer {$/;"	c
 HourlyVisitsContainer	htlog_containers.cpp	/^HourlyVisitsContainer::HourlyVisitsContainer() : HourlyHitsContainer() {$/;"	f	class:HourlyVisitsContainer
-HourlyVisitsContainer	htlog_containers.cpp	/^HourlyVisitsContainer::HourlyVisitsContainer(int did, time_t ts_full, unsigned long ip) : HourlyHitsContainer( did, ts_full ) {$/;"	f	class:HourlyVisitsContainer
+HourlyVisitsContainer	htlog_containers.cpp	/^HourlyVisitsContainer::HourlyVisitsContainer(unsigned long did, time_t ts_full, unsigned long ip) : HourlyHitsContainer( did, ts_full ) {$/;"	f	class:HourlyVisitsContainer
 HourlyVisitsContainer	htlog_containers.hpp	/^class HourlyVisitsContainer : public HourlyHitsContainer {$/;"	c
-HttpAccessLogMetrics	htlog_processing.cpp	/^HttpAccessLogMetrics::HttpAccessLogMetrics( std::vector<std::string> user_hosts, std::vector<std::string> search_hosts, std::string file ) : internal_hostnames(user_hosts), search_hostnames(search_hosts), lm(user_hosts[0],MYSQL_HOSTNAME,MYSQL_PORT,MYSQL_USER,MYSQL_PASSWORD) {$/;"	f	class:HttpAccessLogMetrics
+HttpAccessLogMetrics	htlog_processing.cpp	/^HttpAccessLogMetrics::HttpAccessLogMetrics( std::string user_host, std::vector<SearchEngineContainer> search_hosts, std::string file ) : lm(user_host,mysql_hostname,std::stoi(mysql_port_num),mysql_user,mysql_password){$/;"	f	class:HttpAccessLogMetrics
 HttpAccessLogMetrics	htlog_processing.hpp	/^class HttpAccessLogMetrics {$/;"	c
 KeyValueContainer	htlog_containers.cpp	/^KeyValueContainer::KeyValueContainer( ) {$/;"	f	class:KeyValueContainer
 KeyValueContainer	htlog_containers.cpp	/^KeyValueContainer::KeyValueContainer( std::string k, std::string v) {$/;"	f	class:KeyValueContainer
 KeyValueContainer	htlog_containers.hpp	/^class KeyValueContainer{$/;"	c
-LOG_SQL_STMTS	htlog_mysql.hpp	12;"	d
+LOG_SQL_STMTS	htlog_mysql.hpp	15;"	d
 LogsMysql	htlog_mysql.cpp	/^LogsMysql::LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password) : host(mysql_host), port(mysql_port), username(mysql_user), password(mysql_password), mysql_url("tcp:\/\/"+host+":"+std::to_string(port)), domain_name(domain) {$/;"	f	class:LogsMysql
 LogsMysql	htlog_mysql.hpp	/^class LogsMysql {$/;"	c
 MMDBStatus	GeoLite2PP_error_category.hpp	/^	enum class MMDBStatus$/;"	c	namespace:GeoLite2PP
 MStr	GeoLite2PP.hpp	/^  typedef std::map<std::string, std::string> MStr;$/;"	t	namespace:GeoLite2PP
-MYSQL_HOSTNAME	htlog_processing.hpp	19;"	d
-MYSQL_PASSWORD	htlog_processing.hpp	22;"	d
-MYSQL_PORT	htlog_processing.hpp	20;"	d
-MYSQL_USER	htlog_processing.hpp	21;"	d
 ParamsContainer	htlog_containers.cpp	/^ParamsContainer::ParamsContainer( ) : KeyValueContainer(){$/;"	f	class:ParamsContainer
-ParamsContainer	htlog_containers.cpp	/^ParamsContainer::ParamsContainer( int pageType, std::string host, std::string pagePath, std::string pagePathFull, std::string k, std::string v) : KeyValueContainer(k,v){$/;"	f	class:ParamsContainer
+ParamsContainer	htlog_containers.cpp	/^ParamsContainer::ParamsContainer( int pageType, std::string host, std::string pagePathFull, std::string k, std::string v) : KeyValueContainer(k,v){$/;"	f	class:ParamsContainer
 ParamsContainer	htlog_containers.hpp	/^class ParamsContainer : public KeyValueContainer {$/;"	c
 RegexContainer	htlog_uap.hpp	/^struct RegexContainer {$/;"	s
+SearchEngineContainer	htlog_analyzer.hpp	/^struct SearchEngineContainer{$/;"	s
 TVectorContainer	htlog_containers.cpp	/^TVectorContainer::TVectorContainer(){$/;"	f	class:TVectorContainer
 TVectorContainer	htlog_containers.cpp	/^TVectorContainer::TVectorContainer(bool inner_vector, std::string external_hostname, std::string full_path_a, std::string full_path_b ){$/;"	f	class:TVectorContainer
 TVectorContainer	htlog_containers.hpp	/^class TVectorContainer {$/;"	c
+Timer	htlog_timer.cpp	/^Timer::Timer(){ $/;"	f	class:Timer
+Timer	htlog_timer.hpp	/^class Timer {$/;"	c
 UAStore	htlog_uap.cpp	/^UAStore::UAStore( std::string regexes_file_path ){$/;"	f	class:UAStore
 UAStore	htlog_uap.hpp	/^class UAStore {$/;"	c
 UserAgent	htlog_uap.hpp	/^struct UserAgent {$/;"	s
 UserAgentParser	htlog_uap.cpp	/^UserAgentParser::UserAgentParser(std::string regexes_file_path) : regexes_file_path_(regexes_file_path) {$/;"	f	class:UserAgentParser
 UserAgentParser	htlog_uap.hpp	/^class UserAgentParser {$/;"	c
 VCStr	GeoLite2PP.hpp	/^  typedef std::vector<const char *> VCStr;$/;"	t	namespace:GeoLite2PP
-__HTLOG_CONTAINERS__	htlog_containers.hpp	104;"	d
-__HTLOG_MYSQL__	htlog_mysql.hpp	49;"	d
-__HTLOG_UAP__	htlog_uap.hpp	88;"	d
-__HT_NODE__	ht_nodes.h	19;"	d
+__HTLOG_ANALYZER__	htlog_analyzer.hpp	17;"	d
+__HTLOG_CONTAINERS__	htlog_containers.hpp	183;"	d
+__HTLOG_MYSQL__	htlog_mysql.hpp	62;"	d
+__HTLOG_PROCESSING__	htlog_processing.hpp	129;"	d
+__HTLOG_TIMER__	htlog_timer.hpp	25;"	d
+__HTLOG_UAP__	htlog_uap.hpp	89;"	d
 add_to_map	GeoLite2PP.cpp	/^void GeoLite2PP::DB::add_to_map( GeoLite2PP::MStr &m, MMDB_lookup_result_s *node, const std::string &name, const std::string &language, const VCStr &v )$/;"	f	class:GeoLite2PP::DB
-agent	htlog_processing.hpp	/^  std::string  agent;$/;"	m	struct:logline
+agent	htlog_processing.hpp	/^  std::string   agent;$/;"	m	struct:logline
+bandwidth_per_hour	htlog_processing.hpp	/^    std::map<HourlyBandwidthContainer,int> bandwidth_per_hour;$/;"	m	class:HttpAccessLogMetrics
 brand	htlog_uap.hpp	/^  std::string brand;$/;"	m	struct:Device
 brandReplacement	htlog_uap.hpp	/^  std::string brandReplacement;$/;"	m	struct:DeviceStore
 brandReplacementMap	htlog_uap.hpp	/^  std::map<std::string::size_type, size_t> brandReplacementMap;$/;"	m	struct:DeviceStore
 browser	htlog_uap.hpp	/^  Agent browser;$/;"	m	struct:UserAgent
 browserStore	htlog_uap.hpp	/^  std::vector<AgentStore> browserStore;$/;"	m	class:UAStore
+browsers_per_hour	htlog_processing.hpp	/^    std::map<HourlyUserAgentEntityContainer,int> browsers_per_hour;$/;"	m	class:HttpAccessLogMetrics
+buildAndRunHourlyUAEQuery	htlog_mysql.cpp	/^void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string entity_id_name, std::map<HourlyUserAgentEntityContainer,int> uae_ph, unsigned long real_did, std::map<KeyValueContainer, unsigned long> user_agent_entity_ids ){$/;"	f	class:LogsMysql
 client_browsers	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> client_browsers;$/;"	m	class:HttpAccessLogMetrics
-client_browsers_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> client_browsers_ids;    \/\/ browser_id$/;"	m	class:HttpAccessLogMetrics
+client_browsers_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,unsigned long> client_browsers_ids;    \/\/ browser_id$/;"	m	class:HttpAccessLogMetrics
 client_devices	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> client_devices;$/;"	m	class:HttpAccessLogMetrics
-client_devices_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> client_devices_ids;     \/\/ with client_devices vers device_id $/;"	m	class:HttpAccessLogMetrics
+client_devices_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,unsigned long> client_devices_ids;     \/\/ device_id$/;"	m	class:HttpAccessLogMetrics
 client_geo_locations	htlog_processing.hpp	/^    std::map<std::string,int> client_geo_locations;$/;"	m	class:HttpAccessLogMetrics
-client_geo_locations_ids	htlog_processing.hpp	/^    std::map<std::string,int> client_geo_locations_ids;     \/\/ country_id$/;"	m	class:HttpAccessLogMetrics
+client_geo_locations_ids	htlog_processing.hpp	/^    std::map<std::string,unsigned long> client_geo_locations_ids;     \/\/ country_id$/;"	m	class:HttpAccessLogMetrics
 client_ip	htlog_containers.hpp	/^    unsigned long client_ip;$/;"	m	class:HourlyVisitsContainer
 client_ips	htlog_processing.hpp	/^    std::map<unsigned long, int> client_ips;$/;"	m	class:HttpAccessLogMetrics
-client_ips_ids	htlog_processing.hpp	/^    std::map<unsigned long, int> client_ips_ids;            \/\/ ip_id$/;"	m	class:HttpAccessLogMetrics
+client_ips_ids	htlog_processing.hpp	/^    std::map<unsigned long, unsigned long> client_ips_ids;            \/\/ ip_id$/;"	m	class:HttpAccessLogMetrics
 client_oses	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> client_oses;$/;"	m	class:HttpAccessLogMetrics
-client_oses_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> client_oses_ids;        \/\/ os_id$/;"	m	class:HttpAccessLogMetrics
+client_oses_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,unsigned long> client_oses_ids;        \/\/ os_id$/;"	m	class:HttpAccessLogMetrics
 con	htlog_mysql.hpp	/^  sql::Connection *con;$/;"	m	struct:st_worker_thread_param
 corrupt_search_tree	GeoLite2PP_error_category.hpp	/^		corrupt_search_tree			= MMDB_CORRUPT_SEARCH_TREE_ERROR			,	\/\/\/<= 2$/;"	m	class:GeoLite2PP::MMDBStatus
+country_code	htlog_containers.hpp	/^    std::string country_code;$/;"	m	class:HourlyLocationsContainer
 create_json_from_entry	GeoLite2PP.cpp	/^void GeoLite2PP::DB::create_json_from_entry( std::stringstream &ss, size_t depth, uint32_t data_size, MMDB_entry_data_list_s * &node, const bool in_array )$/;"	f	class:GeoLite2PP::DB
-cv	htlog_processing.cpp	/^std::condition_variable cv;$/;"	v
-cv_m	htlog_processing.cpp	/^std::mutex cv_m;$/;"	v
-date	htlog_processing.hpp	/^  std::string  date;$/;"	m	struct:logline
+date	htlog_processing.hpp	/^  std::string   date;$/;"	m	struct:logline
 device	htlog_uap.hpp	/^  Device device;$/;"	m	struct:UserAgent
 deviceStore	htlog_uap.hpp	/^  std::vector<DeviceStore> deviceStore;$/;"	m	class:UAStore
-dirname	htlog_analyzer.cpp	/^std::string dirname;$/;"	v
-domain_id	htlog_containers.hpp	/^    int domain_id;$/;"	m	class:HourlyHitsContainer
+devices_per_hour	htlog_processing.hpp	/^    std::map<HourlyUserAgentEntityContainer,int> devices_per_hour;$/;"	m	class:HttpAccessLogMetrics
+dirname	main.cpp	/^std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, sql_logs_path;$/;"	v
+domain_id	htlog_containers.hpp	/^    unsigned long domain_id;$/;"	m	class:HourlyHitsContainer
 domain_name	htlog_mysql.hpp	/^    std::string domain_name;$/;"	m	class:LogsMysql
 driver	htlog_mysql.hpp	/^    sql::Driver * driver;$/;"	m	class:LogsMysql
 driver	htlog_mysql.hpp	/^  sql::Driver *driver;$/;"	m	struct:st_worker_thread_param
+durations	htlog_timer.hpp	/^    std::map<std::string, long long> durations;$/;"	m	class:Timer
 endThread	htlog_mysql.cpp	/^void LogsMysql::endThread(){$/;"	f	class:LogsMysql
-error	htlog_processing.hpp	/^    std::string* error;$/;"	m	class:HttpAccessLogMetrics
-et	htlog_processing.hpp	/^    int et; \/\/ end timestamp$/;"	m	class:HttpAccessLogMetrics
+end_times	htlog_timer.hpp	/^    std::map<std::string,std::chrono::steady_clock::time_point> end_times;$/;"	m	class:Timer
 family	htlog_uap.hpp	/^  std::string family;$/;"	m	struct:Generic
 file_open	GeoLite2PP_error_category.hpp	/^		file_open					= MMDB_FILE_OPEN_ERROR						,	\/\/\/<= 1$/;"	m	class:GeoLite2PP::MMDBStatus
 filename	htlog_processing.hpp	/^    std::string filename;$/;"	m	class:HttpAccessLogMetrics
-filenames	htlog_analyzer.cpp	/^std::vector<std::string> filenames;$/;"	v
-fill_agent	htlog_uap.cpp	/^template <class AGENT, class AGENT_STORE> void fill_agent( AGENT& agent, const AGENT_STORE& store, const boost::smatch& m, const bool os ) {$/;"	f
+filenames	main.cpp	/^std::vector<std::string> filenames;$/;"	v
+fill_agent	htlog_uap.cpp	/^template <class A, class AS> void fill_agent( A& agent, const AS& store, const boost::smatch& m, const bool os ) {$/;"	f
 fill_agent_store	htlog_uap.cpp	/^AgentStore fill_agent_store( const YAML::Node node, const std::string repl, const std::string major_repl, const std::string minor_repl, const std::string patch_repl) {$/;"	f
 fill_device_store	htlog_uap.cpp	/^DeviceStore fill_device_store(const YAML::Node& device_parser) {$/;"	f
 final	GeoLite2PP.hpp	/^  class DB final$/;"	c	namespace:GeoLite2PP
-full_path	htlog_processing.hpp	/^  std::string full_path;$/;"	m	struct:url_parts
-getClientIps	htlog_processing.cpp	/^std::map<unsigned long,int> HttpAccessLogMetrics::getClientIps(){$/;"	f	class:HttpAccessLogMetrics
+find_string_key_by_value	htlog_mysql.cpp	/^std::string find_string_key_by_value( std::map<std::string, unsigned long> str_ids_map, unsigned long search_id ){$/;"	f
+full_path	htlog_processing.hpp	/^  std::string   full_path;$/;"	m	struct:url_parts
+getAllDurations	htlog_timer.cpp	/^std::map<std::string, long long> Timer::getAllDurations(){$/;"	f	class:Timer
+getCountryCode	htlog_containers.cpp	/^std::string HourlyLocationsContainer::getCountryCode() const{$/;"	f	class:HourlyLocationsContainer
 getCountryFromIP	htlog_processing.cpp	/^std::string HttpAccessLogMetrics::getCountryFromIP( std::string client_ip){$/;"	f	class:HttpAccessLogMetrics
-getDomainId	htlog_containers.cpp	/^int HourlyHitsContainer::getDomainId() const{$/;"	f	class:HourlyHitsContainer
-getDomainsId	htlog_mysql.cpp	/^int LogsMysql::getDomainsId(  std::string domain_name ){$/;"	f	class:LogsMysql
+getDomainId	htlog_containers.cpp	/^unsigned long HourlyHitsContainer::getDomainId() const{$/;"	f	class:HourlyHitsContainer
+getDomainId	htlog_processing.cpp	/^unsigned long HttpAccessLogMetrics::getDomainId(){$/;"	f	class:HttpAccessLogMetrics
+getDomainsId	htlog_mysql.cpp	/^unsigned long LogsMysql::getDomainsId(  std::string domain ){$/;"	f	class:LogsMysql
+getElapsedTimeMs	htlog_timer.cpp	/^long long Timer::getElapsedTimeMs( std::string timer_name ){$/;"	f	class:Timer
 getExternalDomain	htlog_containers.cpp	/^std::string TVectorContainer::getExternalDomain() const {$/;"	f	class:TVectorContainer
-getFilesize	htlog_processing.cpp	/^size_t getFilesize(const std::string filename) {$/;"	f
+getFilesize	htlog_analyzer.cpp	/^size_t getFilesize(const std::string filename) {$/;"	f
 getFullPagePath	htlog_containers.cpp	/^std::string ParamsContainer::getFullPagePath() const{$/;"	f	class:ParamsContainer
 getHost	htlog_containers.cpp	/^std::string ParamsContainer::getHost() const{$/;"	f	class:ParamsContainer
 getHostnameFromLogfile	htlog_processing.cpp	/^std::string getHostnameFromLogfile( std::string filename ){$/;"	f
 getHourlyTs	htlog_containers.cpp	/^time_t HourlyHitsContainer::getHourlyTs() const{$/;"	f	class:HourlyHitsContainer
 getIp	htlog_containers.cpp	/^unsigned long HourlyVisitsContainer::getIp() const{$/;"	f	class:HourlyVisitsContainer
 getKey	htlog_containers.cpp	/^std::string KeyValueContainer::getKey() const{$/;"	f	class:KeyValueContainer
-getLinesNumber	htlog_processing.cpp	/^int HttpAccessLogMetrics::getLinesNumber(){$/;"	f	class:HttpAccessLogMetrics
-getLogfileNamesFromDirectory	htlog_processing.cpp	/^std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){$/;"	f
-getNthNode	htlog_mysql.cpp	/^template<typename T> T getNthNode( std::map<T,int> pcs, int n ) {$/;"	f
+getLogfileNamesFromDirectory	htlog_analyzer.cpp	/^std::vector<std::string> getLogfileNamesFromDirectory( std::string directory ){$/;"	f
 getNumericIp	htlog_processing.cpp	/^unsigned long HttpAccessLogMetrics::getNumericIp( std::string addr ){$/;"	f	class:HttpAccessLogMetrics
-getPage	htlog_containers.cpp	/^std::string ParamsContainer::getPage() const{$/;"	f	class:ParamsContainer
+getPagePath	htlog_containers.cpp	/^std::string HourlyBandwidthContainer::getPagePath() const{$/;"	f	class:HourlyBandwidthContainer
 getPagePath	htlog_containers.cpp	/^std::string HourlyPageviewsContainer::getPagePath() const{$/;"	f	class:HourlyPageviewsContainer
 getPagePathA	htlog_containers.cpp	/^std::string TVectorContainer::getPagePathA() const {$/;"	f	class:TVectorContainer
 getPagePathB	htlog_containers.cpp	/^std::string TVectorContainer::getPagePathB() const{$/;"	f	class:TVectorContainer
+getPagePathFull	htlog_containers.cpp	/^std::string HourlySearchTermsContainer::getPagePathFull() const{$/;"	f	class:HourlySearchTermsContainer
 getPageType	htlog_containers.cpp	/^int ParamsContainer::getPageType() const{$/;"	f	class:ParamsContainer
+getRefererDomain	htlog_containers.cpp	/^std::string HourlyReferersContainer::getRefererDomain() const {$/;"	f	class:HourlyReferersContainer
+getRefererPathFull	htlog_containers.cpp	/^std::string HourlyReferersContainer::getRefererPathFull() const {$/;"	f	class:HourlyReferersContainer
+getSearchEngineDomain	htlog_containers.cpp	/^std::string HourlySearchTermsContainer::getSearchEngineDomain() const{$/;"	f	class:HourlySearchTermsContainer
+getSearchTerm	htlog_containers.cpp	/^std::string HourlySearchTermsContainer::getSearchTerm() const{$/;"	f	class:HourlySearchTermsContainer
+getSizeInKb	htlog_containers.cpp	/^unsigned long HourlyBandwidthContainer::getSizeInKb() const{$/;"	f	class:HourlyBandwidthContainer
 getStringIP	htlog_processing.cpp	/^std::string HttpAccessLogMetrics::getStringIP( unsigned long ip ){$/;"	f	class:HttpAccessLogMetrics
 getTimestamp	htlog_processing.cpp	/^time_t HttpAccessLogMetrics::getTimestamp( std::string dateTime ){$/;"	f	class:HttpAccessLogMetrics
+getTomorrowMidnight	htlog_mysql.cpp	/^time_t LogsMysql::getTomorrowMidnight( time_t ts_full) {$/;"	f	class:LogsMysql
 getTsHour	htlog_containers.cpp	/^std::string HourlyHitsContainer::getTsHour( ){$/;"	f	class:HourlyHitsContainer
 getTsMysql	htlog_containers.cpp	/^std::string HourlyHitsContainer::getTsMysql( ){$/;"	f	class:HourlyHitsContainer
-getUrlParts	htlog_processing.cpp	/^url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string ){$/;"	f	class:HttpAccessLogMetrics
-getUrlPartsFromReqPath	htlog_processing.cpp	/^url_parts HttpAccessLogMetrics::getUrlPartsFromReqPath( std::string requestPath, std::string proto, std::string hostname ){$/;"	f	class:HttpAccessLogMetrics
-getUserId	htlog_mysql.cpp	/^int LogsMysql::getUserId( int real_did ){$/;"	f	class:LogsMysql
+getTsMysql	htlog_mysql.cpp	/^std::string LogsMysql::getTsMysql( time_t ts ){$/;"	f	class:LogsMysql
+getUrlParts	htlog_processing.cpp	/^url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string, bool is_referer ){$/;"	f	class:HttpAccessLogMetrics
+getUserAgentEntityName	htlog_containers.cpp	/^std::string HourlyUserAgentEntityContainer::getUserAgentEntityName() const {$/;"	f	class:HourlyUserAgentEntityContainer
+getUserAgentEntityType	htlog_containers.cpp	/^std::string HourlyUserAgentEntityContainer::getUserAgentEntityType() const {$/;"	f	class:HourlyUserAgentEntityContainer
+getUserHostnames	htlog_mysql.cpp	/^std::vector<std::string> LogsMysql::getUserHostnames( unsigned long real_did ){$/;"	f	class:LogsMysql
+getUserId	htlog_mysql.cpp	/^unsigned long LogsMysql::getUserId( unsigned long real_did ){$/;"	f	class:LogsMysql
 getValue	htlog_containers.cpp	/^std::string KeyValueContainer::getValue() const {$/;"	f	class:KeyValueContainer
 get_all_fields	GeoLite2PP.cpp	/^GeoLite2PP::MStr GeoLite2PP::DB::get_all_fields( const std::string &ip_address, const std::string &language )$/;"	f	class:GeoLite2PP::DB
 get_field	GeoLite2PP.cpp	/^std::string GeoLite2PP::DB::get_field( MMDB_lookup_result_s *lookup, const std::string &language, const VCStr &v )$/;"	f	class:GeoLite2PP::DB
@@ -137,38 +167,45 @@ get_lib_version_geolite2pp	GeoLite2PP.cpp	/^std::string GeoLite2PP::DB::get_lib_
 get_lib_version_mmdb	GeoLite2PP.cpp	/^std::string GeoLite2PP::DB::get_lib_version_mmdb( void ) const$/;"	f	class:GeoLite2PP::DB
 get_metadata	GeoLite2PP.cpp	/^std::string GeoLite2PP::DB::get_metadata( void )$/;"	f	class:GeoLite2PP::DB
 get_metadata_raw	GeoLite2PP.cpp	/^MMDB_metadata_s GeoLite2PP::DB::get_metadata_raw( void )$/;"	f	class:GeoLite2PP::DB
-handler	htlog_mysql.hpp	/^    struct st_worker_thread_param * handler;$/;"	m	class:LogsMysql	typeref:struct:LogsMysql::st_worker_thread_param
-hits	htlog_processing.hpp	/^    std::map<HourlyHitsContainer,int> hits;$/;"	m	class:HttpAccessLogMetrics
+handler	htlog_mysql.hpp	/^    struct st_worker_thread_param handler;$/;"	m	class:LogsMysql	typeref:struct:LogsMysql::st_worker_thread_param
+hits_per_hour	htlog_processing.hpp	/^    std::map<HourlyHitsContainer,int> hits_per_hour;$/;"	m	class:HttpAccessLogMetrics
 host	htlog_mysql.hpp	/^    std::string host;$/;"	m	class:LogsMysql
+hostname	htlog_analyzer.hpp	/^  std::string hostname;$/;"	m	struct:SearchEngineContainer
 hostname	htlog_containers.hpp	/^    std::string hostname;$/;"	m	class:ParamsContainer
-hostname	htlog_processing.hpp	/^  std::string  hostname;$/;"	m	struct:logline
-hostname	htlog_processing.hpp	/^  std::string hostname;$/;"	m	struct:url_parts
+hostname	htlog_processing.hpp	/^  std::string   hostname;$/;"	m	struct:logline
+hostname	htlog_processing.hpp	/^  std::string   hostname;$/;"	m	struct:url_parts
 hour_ts	htlog_containers.hpp	/^    time_t hour_ts;$/;"	m	class:HourlyHitsContainer
-incrementCount	htlog_processing.cpp	/^template<typename T> void HttpAccessLogMetrics::incrementCount( std::map<T,int> *kvmap, T key ){$/;"	f	class:HttpAccessLogMetrics
+inc_nc	htlog_processing.cpp	/^void inc_nc( int & ncompleted ) {$/;"	f
+inc_tid	htlog_processing.cpp	/^void inc_tid( int & tid ) {$/;"	f
+incrementCount	htlog_processing.cpp	/^template<typename T> void HttpAccessLogMetrics::incrementCount( std::map<T,int> *kvmap, T key ) {$/;"	f	class:HttpAccessLogMetrics
+incrementCount	htlog_processing.cpp	/^template<typename T> void HttpAccessLogMetrics::incrementCount( std::map<T,unsigned long> *kvmap, T key ) {$/;"	f	class:HttpAccessLogMetrics
 initThread	htlog_mysql.cpp	/^void LogsMysql::initThread(){$/;"	f	class:LogsMysql
-insertClientIps	htlog_mysql.cpp	/^void LogsMysql::insertClientIps(std::map<unsigned long,int> &client_ips_ids, std::map<unsigned long, int> client_ips) {$/;"	f	class:LogsMysql
+inner	htlog_containers.hpp	/^    bool inner;$/;"	m	class:HourlyReferersContainer
+insertAllPerDay	htlog_mysql.cpp	/^void LogsMysql::insertAllPerDay( unsigned long real_did, time_t ts ){$/;"	f	class:LogsMysql
+insertBandwidthPerHour	htlog_mysql.cpp	/^void LogsMysql::insertBandwidthPerHour( std::map<HourlyBandwidthContainer,int> bandwidth, unsigned long real_did, std::map<std::string,unsigned long> page_paths_full_ids){$/;"	f	class:LogsMysql
+insertClientIps	htlog_mysql.cpp	/^void LogsMysql::insertClientIps(std::map<unsigned long,unsigned long> &client_ips_ids, std::map<unsigned long, int> client_ips) {$/;"	f	class:LogsMysql
 insertEntities	htlog_processing.cpp	/^void HttpAccessLogMetrics::insertEntities(){$/;"	f	class:HttpAccessLogMetrics
-insertExternalDomains	htlog_mysql.cpp	/^void LogsMysql::insertExternalDomains(std::map<std::string,int> &referer_hostnames_ids, std::map<std::string, int> referer_hostnames) {$/;"	f	class:LogsMysql
-insertHitsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, int real_did){$/;"	f	class:LogsMysql
-insertNameVersionEntities	htlog_mysql.cpp	/^void LogsMysql::insertNameVersionEntities(std::string database, std::string table, std::map<KeyValueContainer,int> &entity_ids_map, std::map<KeyValueContainer, int> entities) {$/;"	f	class:LogsMysql
-insertPageviewsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> pageviews, int real_did, std::map<unsigned long, int> client_ips_ids, std::map<std::string,int> page_paths_full_ids ){$/;"	f	class:LogsMysql
-insertParamsEntities	htlog_mysql.cpp	/^void LogsMysql::insertParamsEntities(std::map<ParamsContainer,int> &entity_ids_map, std::map<ParamsContainer,int> entities, std::map<std::string,int> page_paths_ids, std::map<std::string,int> page_paths_full_ids) {$/;"	f	class:LogsMysql
-insertSearchTerms	htlog_mysql.cpp	/^void LogsMysql::insertSearchTerms(std::map<KeyValueContainer,int> &entity_ids_map, std::map<KeyValueContainer, int> entities, std::map<std::string,int> referer_hostnames_ids) {$/;"	f	class:LogsMysql
-insertStringEntities	htlog_mysql.cpp	/^void LogsMysql::insertStringEntities(std::string database, std::string table, std::map<std::string,int> &entity_ids_map, std::map<std::string, int> entities ) {$/;"	f	class:LogsMysql
-insertTrafficVectors	htlog_mysql.cpp	/^void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,int> &tvectors_ids, std::map<TVectorContainer,int> tvectors, std::map<std::string,int> referer_hostnames_ids, std::map<std::string,int> page_paths_full_ids){$/;"	f	class:LogsMysql
-insertVisitsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits, int real_did, std::map<unsigned long, int> client_ips_ids ){$/;"	f	class:LogsMysql
-internal_domains	htlog_processing.hpp	/^    std::map<std::string,int> internal_domains;             \/\/ domain_id ( imported, not inserted )$/;"	m	class:HttpAccessLogMetrics
+insertExternalDomains	htlog_mysql.cpp	/^void LogsMysql::insertExternalDomains(std::map<std::string,unsigned long> &referer_hostnames_ids, std::map<std::string, int> referer_hostnames) {$/;"	f	class:LogsMysql
+insertHitsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertHitsPerHour(std::map<HourlyHitsContainer,int> hits, unsigned long real_did) {$/;"	f	class:LogsMysql
+insertLocationsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertLocationsPerHour( std::map<HourlyLocationsContainer,int> locations, unsigned long real_did, std::map<std::string,unsigned long> locations_ids ){$/;"	f	class:LogsMysql
+insertNameVersionEntities	htlog_mysql.cpp	/^void LogsMysql::insertNameVersionEntities(std::string database, std::string table, std::map<KeyValueContainer,unsigned long> &entity_ids_map, std::map<KeyValueContainer, int> entities) {$/;"	f	class:LogsMysql
+insertPageviewsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertPageviewsPerHour( std::map<HourlyPageviewsContainer,int> pageviews, unsigned long real_did, std::map<unsigned long, unsigned long> client_ips_ids, std::map<std::string,unsigned long> page_paths_full_ids){$/;"	f	class:LogsMysql
+insertReferersPerHour	htlog_mysql.cpp	/^void LogsMysql::insertReferersPerHour( std::map<HourlyReferersContainer,int> referers, unsigned long real_did, std::map<std::string,unsigned long> page_paths_full_ids, std::map<std::string,unsigned long> referer_hostnames_ids ){$/;"	f	class:LogsMysql
+insertSearchTerms	htlog_mysql.cpp	/^void LogsMysql::insertSearchTerms( std::map<KeyValueContainer,unsigned long> &search_terms_ids, std::map<KeyValueContainer, int> search_terms, std::map<std::string,unsigned long> referer_hostnames_ids ) {$/;"	f	class:LogsMysql
+insertSearchTermsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertSearchTermsPerHour( std::map<HourlySearchTermsContainer,int> search_terms, unsigned long real_did, std::map<std::string,unsigned long> page_paths_full_ids, std::map<KeyValueContainer,unsigned long> search_terms_ids, std::map<std::string,unsigned long> referer_hostnames_ids ){$/;"	f	class:LogsMysql
+insertStringEntities	htlog_mysql.cpp	/^void LogsMysql::insertStringEntities(std::string database, std::string table, std::map<std::string,unsigned long> &entity_ids_map, std::map<std::string, int> entities ) {$/;"	f	class:LogsMysql
+insertTVCPerHour	htlog_mysql.cpp	/^void LogsMysql::insertTVCPerHour( bool is_inner, std::map<HourlyTVContainer,int> tvectors, unsigned long real_did, std::map<TVectorContainer,unsigned long> tvectors_ids ){$/;"	f	class:LogsMysql
+insertTrafficVectors	htlog_mysql.cpp	/^void LogsMysql::insertTrafficVectors(bool inner, std::map<TVectorContainer,unsigned long> &tvectors_ids, std::map<TVectorContainer,int> tvectors, std::map<std::string,unsigned long> referer_hostnames_ids, std::map<std::string,unsigned long> page_paths_full_ids, std::string domain_name){$/;"	f	class:LogsMysql
+insertUserAgentEntitiesPerHour	htlog_mysql.cpp	/^void LogsMysql::insertUserAgentEntitiesPerHour( std::map<HourlyUserAgentEntityContainer,int> devices_per_hour, std::map<HourlyUserAgentEntityContainer,int> oses_per_hour, std::map<HourlyUserAgentEntityContainer,int> browsers_per_hour, unsigned long real_did, std::map<KeyValueContainer,unsigned long> client_devices_ids, std::map<KeyValueContainer,unsigned long> client_oses_ids, std::map<KeyValueContainer,unsigned long> client_browsers_ids ){$/;"	f	class:LogsMysql
+insertVisitsPerHour	htlog_mysql.cpp	/^void LogsMysql::insertVisitsPerHour( std::map<HourlyVisitsContainer,int> visits, unsigned long real_did, std::map<unsigned long, unsigned long> client_ips_ids ){$/;"	f	class:LogsMysql
 internal_hostnames	htlog_processing.hpp	/^    std::vector<std::string> internal_hostnames;$/;"	m	class:HttpAccessLogMetrics
-internal_params	htlog_processing.hpp	/^    std::map<ParamsContainer,int> internal_params;$/;"	m	class:HttpAccessLogMetrics
-internal_params_ids	htlog_processing.hpp	/^    std::map<ParamsContainer,int> internal_params_ids;      \/\/ url_param_id$/;"	m	class:HttpAccessLogMetrics
-internal_paths	htlog_processing.hpp	/^    std::map<std::string,int> internal_paths;$/;"	m	class:HttpAccessLogMetrics
-internal_paths_ids	htlog_processing.hpp	/^    std::map<std::string,int> internal_paths_ids;           \/\/ page_id$/;"	m	class:HttpAccessLogMetrics
 invalid_data	GeoLite2PP_error_category.hpp	/^		invalid_data				= MMDB_INVALID_DATA_ERROR					,	\/\/\/<= 7$/;"	m	class:GeoLite2PP::MMDBStatus
 invalid_lookup_path	GeoLite2PP_error_category.hpp	/^		invalid_lookup_path			= MMDB_INVALID_LOOKUP_PATH_ERROR			,	\/\/\/<= 8$/;"	m	class:GeoLite2PP::MMDBStatus
 invalid_metadata	GeoLite2PP_error_category.hpp	/^		invalid_metadata			= MMDB_INVALID_METADATA_ERROR				,	\/\/\/<= 3$/;"	m	class:GeoLite2PP::MMDBStatus
 invalid_node_number	GeoLite2PP_error_category.hpp	/^		invalid_node_number			= MMDB_INVALID_NODE_NUMBER_ERROR			,	\/\/\/<= 10$/;"	m	class:GeoLite2PP::MMDBStatus
 io	GeoLite2PP_error_category.hpp	/^		io							= MMDB_IO_ERROR								,	\/\/\/<= 4$/;"	m	class:GeoLite2PP::MMDBStatus
 ipv6_lookup_in_ipv4_db	GeoLite2PP_error_category.hpp	/^		ipv6_lookup_in_ipv4_db		= MMDB_IPV6_LOOKUP_IN_IPV4_DATABASE_ERROR		\/\/\/<= 11$/;"	m	class:GeoLite2PP::MMDBStatus
+isInnerReferer	htlog_containers.cpp	/^bool HourlyReferersContainer::isInnerReferer() const {$/;"	f	class:HourlyReferersContainer
 isInnerVector	htlog_containers.hpp	/^    bool isInnerVector; \/\/ internal referer to page : true, external referer to page : false$/;"	m	class:TVectorContainer
 isSpider	htlog_uap.hpp	/^  bool isSpider() const { return device.family == "Spider"; }$/;"	f	struct:UserAgent
 is_error_code_enum	GeoLite2PP_error_category.hpp	/^	struct is_error_code_enum<GeoLite2PP::MMDBStatus> : public true_type {};$/;"	s	namespace:GeoLite2PP::std
@@ -177,15 +214,17 @@ key	htlog_containers.hpp	/^    std::string key;$/;"	m	class:ParamsContainer
 lines_failed	htlog_processing.hpp	/^    int lines_failed;$/;"	m	class:HttpAccessLogMetrics
 lines_processed	htlog_processing.hpp	/^    int lines_processed;$/;"	m	class:HttpAccessLogMetrics
 lm	htlog_processing.hpp	/^    LogsMysql lm;$/;"	m	class:HttpAccessLogMetrics
-loadSearchHostnames	htlog_processing.cpp	/^void loadSearchHostnames( std::vector<std::string> &search_engines , std::string filename){$/;"	f
-lock_signal_vars	htlog_processing.cpp	/^std::vector<int> lock_signal_vars;$/;"	v
-logline	htlog_processing.hpp	/^typedef struct logline {$/;"	s
+loadSearchEngines	htlog_analyzer.cpp	/^void loadSearchEngines( std::vector<SearchEngineContainer> &search_engines, std::string filename){$/;"	f
+locations_per_hour	htlog_processing.hpp	/^    std::map<HourlyLocationsContainer,int> locations_per_hour;$/;"	m	class:HttpAccessLogMetrics
+log_ts	htlog_processing.hpp	/^    time_t log_ts;$/;"	m	class:HttpAccessLogMetrics
+logline	htlog_processing.hpp	/^typedef struct  logline {$/;"	s
 logsScan	htlog_processing.cpp	/^int HttpAccessLogMetrics::logsScan( ){$/;"	f	class:HttpAccessLogMetrics
 lookup	GeoLite2PP.cpp	/^std::string GeoLite2PP::DB::lookup( const std::string &ip_address )$/;"	f	class:GeoLite2PP::DB
 lookup_path_does_not_match	GeoLite2PP_error_category.hpp	/^		lookup_path_does_not_match	= MMDB_LOOKUP_PATH_DOES_NOT_MATCH_DATA_ERROR,	\/\/\/<= 9$/;"	m	class:GeoLite2PP::MMDBStatus
 lookup_raw	GeoLite2PP.cpp	/^MMDB_lookup_result_s GeoLite2PP::DB::lookup_raw( const std::string &ip_address )$/;"	f	class:GeoLite2PP::DB
-m	htlog_processing.cpp	/^std::mutex m;$/;"	v
-main	htlog_analyzer.cpp	/^int main(int argc, char** argv) {$/;"	f
+m_nc	htlog_processing.cpp	/^std::mutex m_tid, m_nc;$/;"	v
+m_tid	htlog_processing.cpp	/^std::mutex m_tid, m_nc;$/;"	v
+main	main.cpp	/^int main(int argc, char** argv) {$/;"	f
 major	htlog_uap.hpp	/^  std::string major;$/;"	m	struct:Agent
 majorVersionReplacement	htlog_uap.hpp	/^  std::string majorVersionReplacement;$/;"	m	struct:AgentStore
 make_error_code	GeoLite2PP_error_category.cpp	/^std::error_code GeoLite2PP::make_error_code( GeoLite2PP::MMDBStatus s )$/;"	f	class:GeoLite2PP
@@ -198,55 +237,70 @@ mmdb	GeoLite2PP.hpp	/^      MMDB_s mmdb;$/;"	m	class:GeoLite2PP::final
 model	htlog_uap.hpp	/^  std::string model;$/;"	m	struct:Device
 modelReplacement	htlog_uap.hpp	/^  std::string modelReplacement;$/;"	m	struct:DeviceStore
 modelReplacementMap	htlog_uap.hpp	/^  std::map<std::string::size_type, size_t> modelReplacementMap;$/;"	m	struct:DeviceStore
+mysql_hostname	main.cpp	/^std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, sql_logs_path;$/;"	v
+mysql_password	main.cpp	/^std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, sql_logs_path;$/;"	v
+mysql_port_num	main.cpp	/^std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, sql_logs_path;$/;"	v
 mysql_url	htlog_mysql.hpp	/^    std::string mysql_url;$/;"	m	class:LogsMysql
-name	ht_nodes.h	/^  char  * name;$/;"	m	struct:name_version_node
-name	ht_nodes.h	/^  char  * name;$/;"	m	struct:node
-name_version_node	ht_nodes.h	/^typedef struct name_version_node {$/;"	s
-name_version_node_t	ht_nodes.h	/^} name_version_node_t;$/;"	t	typeref:struct:name_version_node
-node	ht_nodes.h	/^typedef struct node {$/;"	s
-node	ht_nodes.h	/^} node;$/;"	t	typeref:struct:node
+mysql_user	main.cpp	/^std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, sql_logs_path;$/;"	v
+name	htlog_containers.hpp	/^    std::string name;$/;"	m	class:HourlyUserAgentEntityContainer
 noexcept	GeoLite2PP_error_category.hpp	/^			virtual const char *name( void ) const noexcept;$/;"	m	class:GeoLite2PP::MMDBStatus::ErrorCategory
 noexcept	GeoLite2PP_error_category.hpp	/^	const ErrorCategory &get_error_category( void ) noexcept;$/;"	m	class:GeoLite2PP::MMDBStatus
-notify	htlog_processing.cpp	/^void notify( int tid ) {$/;"	f
-nval	ht_nodes.h	/^  size_t nval;$/;"	m	struct:name_version_node
-nval	ht_nodes.h	/^  size_t nval;$/;"	m	struct:node
+operator <	htlog_containers.cpp	/^int HourlyBandwidthContainer::operator < ( const HourlyBandwidthContainer & rhs) const{$/;"	f	class:HourlyBandwidthContainer
 operator <	htlog_containers.cpp	/^int HourlyHitsContainer::operator <( const HourlyHitsContainer & rhs ) const {$/;"	f	class:HourlyHitsContainer
+operator <	htlog_containers.cpp	/^int HourlyLocationsContainer::operator < (const HourlyLocationsContainer& rhs) const{$/;"	f	class:HourlyLocationsContainer
 operator <	htlog_containers.cpp	/^int HourlyPageviewsContainer::operator <(const HourlyPageviewsContainer & rhs) const {$/;"	f	class:HourlyPageviewsContainer
+operator <	htlog_containers.cpp	/^int HourlyReferersContainer::operator <( const HourlyReferersContainer & rhs ) const {$/;"	f	class:HourlyReferersContainer
+operator <	htlog_containers.cpp	/^int HourlySearchTermsContainer::operator <( const HourlySearchTermsContainer & rhs ) const {$/;"	f	class:HourlySearchTermsContainer
+operator <	htlog_containers.cpp	/^int HourlyTVContainer::operator < ( const HourlyTVContainer& rhs) const{$/;"	f	class:HourlyTVContainer
+operator <	htlog_containers.cpp	/^int HourlyUserAgentEntityContainer::operator <( const HourlyUserAgentEntityContainer& rhs ) const {$/;"	f	class:HourlyUserAgentEntityContainer
 operator <	htlog_containers.cpp	/^int HourlyVisitsContainer::operator <(const HourlyVisitsContainer & rhs) const {$/;"	f	class:HourlyVisitsContainer
 operator <	htlog_containers.cpp	/^int KeyValueContainer::operator <( const KeyValueContainer &rhs) const {$/;"	f	class:KeyValueContainer
-operator <	htlog_containers.cpp	/^int ParamsContainer::operator <( const ParamsContainer &rhs) const{$/;"	f	class:ParamsContainer
+operator <	htlog_containers.cpp	/^int ParamsContainer::operator <( const ParamsContainer &rhs) const {$/;"	f	class:ParamsContainer
 operator <	htlog_containers.cpp	/^int TVectorContainer::operator <( const TVectorContainer & rhs ) const {$/;"	f	class:TVectorContainer
 operator <<	htlog_containers.cpp	/^std::ostream &operator<<(std::ostream &os, KeyValueContainer const &m) { $/;"	f
+operator ==	htlog_containers.cpp	/^int HourlyBandwidthContainer::operator == (const HourlyBandwidthContainer & rhs) const{$/;"	f	class:HourlyBandwidthContainer
 operator ==	htlog_containers.cpp	/^int HourlyHitsContainer::operator ==( const HourlyHitsContainer & rhs ) const {$/;"	f	class:HourlyHitsContainer
+operator ==	htlog_containers.cpp	/^int HourlyLocationsContainer::operator == ( const HourlyLocationsContainer & rhs) const{$/;"	f	class:HourlyLocationsContainer
 operator ==	htlog_containers.cpp	/^int HourlyPageviewsContainer::operator ==(const HourlyPageviewsContainer & rhs) const {$/;"	f	class:HourlyPageviewsContainer
+operator ==	htlog_containers.cpp	/^int HourlyReferersContainer::operator ==( const HourlyReferersContainer & rhs ) const {$/;"	f	class:HourlyReferersContainer
+operator ==	htlog_containers.cpp	/^int HourlySearchTermsContainer::operator ==( const HourlySearchTermsContainer & rhs ) const {$/;"	f	class:HourlySearchTermsContainer
+operator ==	htlog_containers.cpp	/^int HourlyTVContainer::operator == ( const HourlyTVContainer & rhs) const{$/;"	f	class:HourlyTVContainer
+operator ==	htlog_containers.cpp	/^int HourlyUserAgentEntityContainer::operator ==( const HourlyUserAgentEntityContainer& rhs ) const {$/;"	f	class:HourlyUserAgentEntityContainer
 operator ==	htlog_containers.cpp	/^int HourlyVisitsContainer::operator ==(const HourlyVisitsContainer & rhs) const {$/;"	f	class:HourlyVisitsContainer
 operator ==	htlog_containers.cpp	/^int KeyValueContainer::operator ==( const KeyValueContainer &rhs) const {$/;"	f	class:KeyValueContainer
 operator ==	htlog_containers.cpp	/^int ParamsContainer::operator ==( const ParamsContainer &rhs) const{$/;"	f	class:ParamsContainer
 operator ==	htlog_containers.cpp	/^int TVectorContainer::operator ==( const TVectorContainer & rhs ) const {$/;"	f	class:TVectorContainer
+operator >	htlog_containers.cpp	/^int HourlyBandwidthContainer::operator > (const HourlyBandwidthContainer & rhs) const{$/;"	f	class:HourlyBandwidthContainer
 operator >	htlog_containers.cpp	/^int HourlyHitsContainer::operator >( const HourlyHitsContainer & rhs ) const {$/;"	f	class:HourlyHitsContainer
+operator >	htlog_containers.cpp	/^int HourlyLocationsContainer::operator > ( const HourlyLocationsContainer & rhs) const{$/;"	f	class:HourlyLocationsContainer
 operator >	htlog_containers.cpp	/^int HourlyPageviewsContainer::operator >(const HourlyPageviewsContainer & rhs) const {$/;"	f	class:HourlyPageviewsContainer
+operator >	htlog_containers.cpp	/^int HourlyReferersContainer::operator >( const HourlyReferersContainer & rhs ) const {$/;"	f	class:HourlyReferersContainer
+operator >	htlog_containers.cpp	/^int HourlySearchTermsContainer::operator >( const HourlySearchTermsContainer & rhs ) const {$/;"	f	class:HourlySearchTermsContainer
+operator >	htlog_containers.cpp	/^int HourlyTVContainer::operator > ( const HourlyTVContainer & rhs) const {$/;"	f	class:HourlyTVContainer
+operator >	htlog_containers.cpp	/^int HourlyUserAgentEntityContainer::operator >( const HourlyUserAgentEntityContainer& rhs ) const {$/;"	f	class:HourlyUserAgentEntityContainer
 operator >	htlog_containers.cpp	/^int HourlyVisitsContainer::operator >(const HourlyVisitsContainer & rhs) const {$/;"	f	class:HourlyVisitsContainer
 operator >	htlog_containers.cpp	/^int KeyValueContainer::operator >( const KeyValueContainer &rhs) const {$/;"	f	class:KeyValueContainer
-operator >	htlog_containers.cpp	/^int ParamsContainer::operator >( const ParamsContainer &rhs) const{$/;"	f	class:ParamsContainer
+operator >	htlog_containers.cpp	/^int ParamsContainer::operator >( const ParamsContainer &rhs) const {$/;"	f	class:ParamsContainer
 operator >	htlog_containers.cpp	/^int TVectorContainer::operator >( const TVectorContainer & rhs ) const {$/;"	f	class:TVectorContainer
 os	htlog_uap.hpp	/^  Agent os;$/;"	m	struct:UserAgent
 osStore	htlog_uap.hpp	/^  std::vector<AgentStore> osStore;$/;"	m	class:UAStore
+oses_per_hour	htlog_processing.hpp	/^    std::map<HourlyUserAgentEntityContainer,int> oses_per_hour;$/;"	m	class:HttpAccessLogMetrics
 out_of_memory	GeoLite2PP_error_category.hpp	/^		out_of_memory				= MMDB_OUT_OF_MEMORY_ERROR					,	\/\/\/<= 5$/;"	m	class:GeoLite2PP::MMDBStatus
+page_path	htlog_containers.hpp	/^    std::string page_path;$/;"	m	class:HourlyBandwidthContainer
 page_path	htlog_containers.hpp	/^    std::string page_path;$/;"	m	class:HourlyPageviewsContainer
 page_path	htlog_containers.hpp	/^    std::string page_path;$/;"	m	class:ParamsContainer
 page_path_a	htlog_containers.hpp	/^    std::string page_path_a;$/;"	m	class:TVectorContainer
 page_path_b	htlog_containers.hpp	/^    std::string page_path_b;$/;"	m	class:TVectorContainer
+page_path_full	htlog_containers.hpp	/^    std::string page_path_full;$/;"	m	class:HourlySearchTermsContainer
 page_path_full	htlog_containers.hpp	/^    std::string page_path_full;$/;"	m	class:ParamsContainer
 page_paths_full	htlog_processing.hpp	/^    std::map<std::string,int> page_paths_full;$/;"	m	class:HttpAccessLogMetrics
-page_paths_full_ids	htlog_processing.hpp	/^    std::map<std::string,int> page_paths_full_ids;          \/\/ full_page_id$/;"	m	class:HttpAccessLogMetrics
+page_paths_full_ids	htlog_processing.hpp	/^    std::map<std::string,unsigned long> page_paths_full_ids;          \/\/ full_page_id$/;"	m	class:HttpAccessLogMetrics
 page_type	htlog_containers.hpp	/^    int page_type;$/;"	m	class:ParamsContainer
-pageviews	htlog_processing.hpp	/^    std::map<HourlyPageviewsContainer,int> pageviews;$/;"	m	class:HttpAccessLogMetrics
-params	htlog_processing.hpp	/^  std::string params;$/;"	m	struct:url_parts
+pageviews_per_hour	htlog_processing.hpp	/^    std::map<HourlyPageviewsContainer,int> pageviews_per_hour;$/;"	m	class:HttpAccessLogMetrics
+params	htlog_processing.hpp	/^  std::string   params;$/;"	m	struct:url_parts
 parse	htlog_uap.cpp	/^UserAgent UserAgentParser::parse(std::string ua) const {$/;"	f	class:UserAgentParser
-parseLine	htlog_processing.cpp	/^int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ){$/;"	f	class:HttpAccessLogMetrics
-parseLogFile	htlog_processing.cpp	/^void HttpAccessLogMetrics::parseLogFile( ){$/;"	f	class:HttpAccessLogMetrics
-parseParamsString	htlog_processing.cpp	/^std::vector<KeyValueContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str ){$/;"	f	class:HttpAccessLogMetrics
-parseParamsString	htlog_processing.cpp	/^std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str, int type, std::string hostname, std::string page_path, std::string page_path_full ){$/;"	f	class:HttpAccessLogMetrics
+parseLine	htlog_processing.cpp	/^int HttpAccessLogMetrics::parseLine( std::string line, parsed_logline &ll ) {$/;"	f	class:HttpAccessLogMetrics
+parseParamsString	htlog_processing.cpp	/^std::vector<ParamsContainer> HttpAccessLogMetrics::parseParamsString( std::string params_str, int type, std::string hostname, std::string page_path_full ){$/;"	f	class:HttpAccessLogMetrics
 parse_browser_impl	htlog_uap.cpp	/^Agent parse_browser_impl(const std::string& ua, const UAStore* ua_store) {$/;"	f
 parse_device_impl	htlog_uap.cpp	/^Device parse_device_impl(const std::string& ua, const UAStore* ua_store) {$/;"	f
 parse_os_impl	htlog_uap.cpp	/^Agent parse_os_impl(const std::string& ua, const UAStore* ua_store) {$/;"	f
@@ -256,50 +310,67 @@ patch	htlog_uap.hpp	/^  std::string patch;$/;"	m	struct:Agent
 patchMinorVersionReplacement	htlog_uap.hpp	/^  std::string patchMinorVersionReplacement;$/;"	m	struct:AgentStore
 patchVersionReplacement	htlog_uap.hpp	/^  std::string patchVersionReplacement;$/;"	m	struct:AgentStore
 patch_minor	htlog_uap.hpp	/^  std::string patch_minor;$/;"	m	struct:Agent
-path	htlog_processing.hpp	/^  std::string path;$/;"	m	struct:url_parts
-per_file_threads	htlog_processing.hpp	/^    std::vector<std::thread*> per_file_threads;$/;"	m	class:HttpAccessLogMetrics
 port	htlog_mysql.hpp	/^    int port;$/;"	m	class:LogsMysql
-printAllIdsMaps	htlog_processing.cpp	/^void HttpAccessLogMetrics::printAllIdsMaps(){$/;"	f	class:HttpAccessLogMetrics
-print_regexp_error	htlog_uap.cpp	/^void print_regexp_error( std::string re_str, std::regex_error e ){$/;"	f
-processRequestUrl	htlog_processing.cpp	/^void HttpAccessLogMetrics::processRequestUrl( std::string requestPath ){$/;"	f	class:HttpAccessLogMetrics
-processTrafficVectors	htlog_processing.cpp	/^void HttpAccessLogMetrics::processTrafficVectors( std::string requestPath, std::string referer ){$/;"	f	class:HttpAccessLogMetrics
-processUserAgent	htlog_processing.cpp	/^void HttpAccessLogMetrics::processUserAgent( std::string uaStr ){$/;"	f	class:HttpAccessLogMetrics
-protocol	htlog_processing.hpp	/^  std::string protocol;$/;"	m	struct:url_parts
-re	htlog_uap.hpp	/^  boost::regex  re;$/;"	m	struct:RegexContainer
+printAllDurations	htlog_timer.cpp	/^void Timer::printAllDurations(){$/;"	f	class:Timer
+printAllDurationsSorted	htlog_timer.cpp	/^void Timer::printAllDurationsSorted(){$/;"	f	class:Timer
+print_url_parts	htlog_processing.cpp	/^void print_url_parts( url_parts up ){$/;"	f
+print_usage_and_exit	htlog_analyzer.cpp	/^void print_usage_and_exit(std::ostream & stream, const int exit_status, std::string program_name ) {$/;"	f
+processHitsHourly	htlog_processing.cpp	/^void HttpAccessLogMetrics::processHitsHourly( int real_did, time_t timestamp ){$/;"	f	class:HttpAccessLogMetrics
+processLocationsHourly	htlog_processing.cpp	/^void HttpAccessLogMetrics::processLocationsHourly( std::string location, time_t timestamp ){$/;"	f	class:HttpAccessLogMetrics
+processPageviewsHourly	htlog_processing.cpp	/^void HttpAccessLogMetrics::processPageviewsHourly(int real_did, unsigned long user_ip, std::string request_str, time_t timestamp) {$/;"	f	class:HttpAccessLogMetrics
+processReferersHourly	htlog_processing.cpp	/^void HttpAccessLogMetrics::processReferersHourly( std::string referer_str, time_t timestamp ){$/;"	f	class:HttpAccessLogMetrics
+processRequestUrlAndBandwidth	htlog_processing.cpp	/^void HttpAccessLogMetrics::processRequestUrlAndBandwidth( time_t timestamp, std::string request, unsigned long size_kb ){$/;"	f	class:HttpAccessLogMetrics
+processSearchTermsHourly	htlog_processing.cpp	/^void HttpAccessLogMetrics::processSearchTermsHourly( std::string referer_str, time_t timestamp  ){$/;"	f	class:HttpAccessLogMetrics
+processTrafficVectors	htlog_processing.cpp	/^void HttpAccessLogMetrics::processTrafficVectors( std::string request, std::string referer, time_t timestamp ){$/;"	f	class:HttpAccessLogMetrics
+processUserAgent	htlog_processing.cpp	/^void HttpAccessLogMetrics::processUserAgent( const UserAgent ua ){$/;"	f	class:HttpAccessLogMetrics
+processUserAgentEntitiesHourly	htlog_processing.cpp	/^void HttpAccessLogMetrics::processUserAgentEntitiesHourly( const UserAgent ua, time_t timestamp ){$/;"	f	class:HttpAccessLogMetrics
+processVisitsHourly	htlog_processing.cpp	/^void HttpAccessLogMetrics::processVisitsHourly(int real_did, unsigned long user_ip, time_t timestamp){$/;"	f	class:HttpAccessLogMetrics
+protocol	htlog_processing.hpp	/^  std::string   protocol;$/;"	m	struct:url_parts
+query_params	htlog_analyzer.hpp	/^  std::vector<std::string> query_params;$/;"	m	struct:SearchEngineContainer
+re	htlog_uap.hpp	/^  boost::regex  re; \/\/std::regex re;$/;"	m	struct:RegexContainer
 re_str	htlog_uap.hpp	/^  std::string re_str;$/;"	m	struct:RegexContainer
-real_did	htlog_processing.hpp	/^    int real_did;$/;"	m	class:HttpAccessLogMetrics
-referer	htlog_processing.hpp	/^  std::string  referer;$/;"	m	struct:logline
+real_did	htlog_processing.hpp	/^    unsigned long real_did;$/;"	m	class:HttpAccessLogMetrics
+referer	htlog_processing.hpp	/^  std::string   referer;$/;"	m	struct:logline
+referer_domain	htlog_containers.hpp	/^    std::string referer_domain;$/;"	m	class:HourlyReferersContainer
 referer_domain	htlog_containers.hpp	/^    std::string referer_domain;$/;"	m	class:TVectorContainer
 referer_hostnames	htlog_processing.hpp	/^    std::map<std::string,int> referer_hostnames;$/;"	m	class:HttpAccessLogMetrics
-referer_hostnames_ids	htlog_processing.hpp	/^    std::map<std::string, int> referer_hostnames_ids;       \/\/ referer_domain_id$/;"	m	class:HttpAccessLogMetrics
-referer_params	htlog_processing.hpp	/^    std::map<ParamsContainer,int> referer_params;$/;"	m	class:HttpAccessLogMetrics
-referer_params_ids	htlog_processing.hpp	/^    std::map<ParamsContainer,int> referer_params_ids;       \/\/ url_param_id$/;"	m	class:HttpAccessLogMetrics
-referer_paths	htlog_processing.hpp	/^    std::map<std::string,int> referer_paths;$/;"	m	class:HttpAccessLogMetrics
-referer_paths_ids	htlog_processing.hpp	/^    std::map<std::string,int> referer_paths_ids;            \/\/ page_id$/;"	m	class:HttpAccessLogMetrics
+referer_hostnames_ids	htlog_processing.hpp	/^    std::map<std::string,unsigned long> referer_hostnames_ids;        \/\/ referer_domain_id$/;"	m	class:HttpAccessLogMetrics
+referer_path_full	htlog_containers.hpp	/^    std::string referer_path_full;$/;"	m	class:HourlyReferersContainer
+referers_per_hour	htlog_processing.hpp	/^    std::map<HourlyReferersContainer,int> referers_per_hour;$/;"	m	class:HttpAccessLogMetrics
 regExpr	htlog_uap.hpp	/^  RegexContainer regExpr;$/;"	m	struct:GenericStore
 regexes_file_path_	htlog_uap.hpp	/^  const std::string regexes_file_path_;$/;"	m	class:UserAgentParser
 replace_all_placeholders	htlog_uap.cpp	/^void replace_all_placeholders( std::string& ua_property, const boost::smatch& result, std::map<std::string::size_type, size_t> replacement_map) {$/;"	f
 replacement	htlog_uap.hpp	/^  std::string replacement;$/;"	m	struct:GenericStore
 replacementMap	htlog_uap.hpp	/^  std::map<std::string::size_type, size_t> replacementMap;$/;"	m	struct:GenericStore
-requestPath	htlog_processing.hpp	/^  std::string  requestPath;$/;"	m	struct:logline
-requestType	htlog_processing.hpp	/^  std::string  requestType;$/;"	m	struct:logline
+requestPath	htlog_processing.hpp	/^  std::string   requestPath;$/;"	m	struct:logline
+requestType	htlog_processing.hpp	/^  std::string   requestType;$/;"	m	struct:logline
+roundTsToDay	htlog_mysql.cpp	/^time_t LogsMysql::roundTsToDay( time_t ts_full) {$/;"	f	class:LogsMysql
 roundTsToHour	htlog_containers.cpp	/^time_t HourlyHitsContainer::roundTsToHour( time_t * ts_full ) {$/;"	f	class:HourlyHitsContainer
-runInsertQuery	htlog_mysql.cpp	/^void LogsMysql::runInsertQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {$/;"	f	class:LogsMysql
+runQuery	htlog_mysql.cpp	/^void LogsMysql::runQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {$/;"	f	class:LogsMysql
 runSelectQuery	htlog_mysql.cpp	/^sql::ResultSet * LogsMysql::runSelectQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string sql) {$/;"	f	class:LogsMysql
-search_hostnames	htlog_processing.hpp	/^    std::vector<std::string> search_hostnames;$/;"	m	class:HttpAccessLogMetrics
-search_hosts	htlog_analyzer.cpp	/^std::vector<std::string> search_hosts;$/;"	v
+search_engine_domain	htlog_containers.hpp	/^    std::string search_engine_domain;$/;"	m	class:HourlySearchTermsContainer
+search_engines	htlog_processing.hpp	/^    std::vector<SearchEngineContainer> search_engines;$/;"	m	class:HttpAccessLogMetrics
+search_hosts	main.cpp	/^std::vector<SearchEngineContainer> search_hosts;$/;"	v
 search_queries	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> search_queries;$/;"	m	class:HttpAccessLogMetrics
-search_queries_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,int> search_queries_ids;     \/\/ search_terms_ids$/;"	m	class:HttpAccessLogMetrics
-signaling_threads	htlog_processing.cpp	/^std::vector<std::thread> signaling_threads;$/;"	v
-sizeBytes	htlog_processing.hpp	/^  long sizeBytes;$/;"	m	struct:logline
-spawn_when_ready	htlog_processing.cpp	/^void spawn_when_ready( int tid, int tpool_size, int tmax, int &ncompleted ) {$/;"	f
-st	htlog_processing.hpp	/^    int st; \/\/ start timestamp$/;"	m	class:HttpAccessLogMetrics
+search_queries_ids	htlog_processing.hpp	/^    std::map<KeyValueContainer,unsigned long> search_queries_ids;     \/\/ search_terms_ids$/;"	m	class:HttpAccessLogMetrics
+search_term	htlog_containers.hpp	/^    std::string search_term;$/;"	m	class:HourlySearchTermsContainer
+search_terms_per_hour	htlog_processing.hpp	/^    std::map<HourlySearchTermsContainer,int> search_terms_per_hour;$/;"	m	class:HttpAccessLogMetrics
+sizeBytes	htlog_processing.hpp	/^  long          sizeBytes;$/;"	m	struct:logline
+size_kb	htlog_containers.hpp	/^    unsigned long size_kb;$/;"	m	class:HourlyBandwidthContainer
+sorted_durations	htlog_timer.hpp	/^    std::vector<std::pair<std::string, long long>> sorted_durations;$/;"	m	class:Timer
+spawn_if_ready	htlog_processing.cpp	/^void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {$/;"	f
+sql_logs_path	main.cpp	/^std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, sql_logs_path;$/;"	v
 st_worker_thread_param	htlog_mysql.hpp	/^struct st_worker_thread_param {$/;"	s
-start_thread_pool	htlog_processing.cpp	/^void start_thread_pool( int tpool_size ){$/;"	f
-statusCode	htlog_processing.hpp	/^  int statusCode;$/;"	m	struct:logline
+start	htlog_timer.cpp	/^long long Timer::start( std::string timer_name ){$/;"	f	class:Timer
+start_thread_pool	htlog_processing.cpp	/^void start_thread_pool( int tpool_size, int ttotal, int &tid, int& ncompleted ){$/;"	f
+start_times	htlog_timer.hpp	/^    std::map<std::string,std::chrono::steady_clock::time_point> start_times;$/;"	m	class:Timer
+statusCode	htlog_processing.hpp	/^  int           statusCode;$/;"	m	struct:logline
 std	GeoLite2PP_error_category.hpp	/^namespace std$/;"	n	namespace:GeoLite2PP
+stop	htlog_timer.cpp	/^long long Timer::stop( std::string timer_name ) {$/;"	f	class:Timer
 success	GeoLite2PP_error_category.hpp	/^		success						= MMDB_SUCCESS								,	\/\/\/<= 0$/;"	m	class:GeoLite2PP::MMDBStatus
-timestamp	htlog_processing.hpp	/^  time_t timestamp;$/;"	m	struct:logline
+threads_timer	htlog_processing.cpp	/^Timer * threads_timer = new Timer();$/;"	v
+timer	htlog_processing.hpp	/^    Timer * timer;$/;"	m	class:HttpAccessLogMetrics
+timestamp	htlog_processing.hpp	/^  time_t        timestamp;$/;"	m	struct:logline
 toFullString	htlog_uap.hpp	/^  std::string toFullString() const { return browser.toString() + "\/" + os.toString(); }$/;"	f	struct:UserAgent
 toString	htlog_containers.cpp	/^std::string KeyValueContainer::toString() const {$/;"	f	class:KeyValueContainer
 toString	htlog_containers.cpp	/^std::string ParamsContainer::toString() const{$/;"	f	class:ParamsContainer
@@ -310,31 +381,39 @@ toVersionString	htlog_uap.hpp	/^  std::string toVersionString() const {$/;"	f	st
 to_json	GeoLite2PP.cpp	/^std::string GeoLite2PP::DB::to_json( MMDB_entry_data_list_s *node )$/;"	f	class:GeoLite2PP::DB
 trim	htlog_uap.cpp	/^void trim(std::string& str) {$/;"	f
 tvectors_incoming	htlog_processing.hpp	/^    std::map<TVectorContainer,int> tvectors_incoming;$/;"	m	class:HttpAccessLogMetrics
-tvectors_incoming_ids	htlog_processing.hpp	/^    std::map<TVectorContainer,int> tvectors_incoming_ids;   \/\/ tvinc_id$/;"	m	class:HttpAccessLogMetrics
+tvectors_incoming_ids	htlog_processing.hpp	/^    std::map<TVectorContainer,unsigned long> tvectors_incoming_ids;   \/\/ tvinc_id$/;"	m	class:HttpAccessLogMetrics
+tvectors_incoming_per_hour	htlog_processing.hpp	/^    std::map<HourlyTVContainer,int> tvectors_incoming_per_hour;$/;"	m	class:HttpAccessLogMetrics
 tvectors_inner	htlog_processing.hpp	/^    std::map<TVectorContainer,int> tvectors_inner;$/;"	m	class:HttpAccessLogMetrics
-tvectors_inner_ids	htlog_processing.hpp	/^    std::map<TVectorContainer,int> tvectors_inner_ids;      \/\/ tvin_id$/;"	m	class:HttpAccessLogMetrics
+tvectors_inner_ids	htlog_processing.hpp	/^    std::map<TVectorContainer,unsigned long> tvectors_inner_ids;      \/\/ tvin_id$/;"	m	class:HttpAccessLogMetrics
+tvectors_inner_per_hour	htlog_processing.hpp	/^    std::map<HourlyTVContainer,int> tvectors_inner_per_hour;$/;"	m	class:HttpAccessLogMetrics
+type	htlog_containers.hpp	/^    std::string type;$/;"	m	class:HourlyUserAgentEntityContainer
 ua_store_	htlog_uap.hpp	/^  const void* ua_store_;$/;"	m	class:UserAgentParser
-uid	htlog_processing.hpp	/^    int uid;$/;"	m	class:HttpAccessLogMetrics
+uid	htlog_processing.hpp	/^    unsigned long uid;$/;"	m	class:HttpAccessLogMetrics
 unknown_db_format	GeoLite2PP_error_category.hpp	/^		unknown_db_format			= MMDB_UNKNOWN_DATABASE_FORMAT_ERROR		,	\/\/\/<= 6$/;"	m	class:GeoLite2PP::MMDBStatus
 url_parts	htlog_processing.hpp	/^typedef struct url_parts {$/;"	s
 url_parts	htlog_processing.hpp	/^} url_parts;$/;"	t	typeref:struct:url_parts
-userIP	htlog_processing.hpp	/^  unsigned long  userIP;$/;"	m	struct:logline
-userIPStr	htlog_processing.hpp	/^  std::string userIPStr;$/;"	m	struct:logline
+userIP	htlog_processing.hpp	/^  unsigned long userIP;$/;"	m	struct:logline
+userIPStr	htlog_processing.hpp	/^  std::string   userIPStr;$/;"	m	struct:logline
 username	htlog_mysql.hpp	/^    std::string username;$/;"	m	class:LogsMysql
 value	htlog_containers.hpp	/^    std::string value;$/;"	m	class:KeyValueContainer
 value	htlog_containers.hpp	/^    std::string value;$/;"	m	class:ParamsContainer
 vectorIsInner	htlog_containers.cpp	/^bool TVectorContainer::vectorIsInner() const {$/;"	f	class:TVectorContainer
-version	ht_nodes.h	/^  char  * version;$/;"	m	struct:name_version_node
-visits	htlog_processing.hpp	/^    std::map<HourlyVisitsContainer,int> visits;$/;"	m	class:HttpAccessLogMetrics
-worker_threads	htlog_processing.cpp	/^std::vector<std::thread> worker_threads;$/;"	v
+visits_per_hour	htlog_processing.hpp	/^    std::map<HourlyVisitsContainer,int> visits_per_hour;$/;"	m	class:HttpAccessLogMetrics
 ~DB	GeoLite2PP.cpp	/^GeoLite2PP::DB::~DB( void )$/;"	f	class:GeoLite2PP::DB
+~HourlyBandwidthContainer	htlog_containers.cpp	/^HourlyBandwidthContainer::~HourlyBandwidthContainer(){$/;"	f	class:HourlyBandwidthContainer
 ~HourlyHitsContainer	htlog_containers.cpp	/^HourlyHitsContainer::~HourlyHitsContainer(){$/;"	f	class:HourlyHitsContainer
+~HourlyLocationsContainer	htlog_containers.cpp	/^HourlyLocationsContainer::~HourlyLocationsContainer(){$/;"	f	class:HourlyLocationsContainer
 ~HourlyPageviewsContainer	htlog_containers.cpp	/^HourlyPageviewsContainer::~HourlyPageviewsContainer(){$/;"	f	class:HourlyPageviewsContainer
+~HourlyReferersContainer	htlog_containers.cpp	/^HourlyReferersContainer::~HourlyReferersContainer(){$/;"	f	class:HourlyReferersContainer
+~HourlySearchTermsContainer	htlog_containers.cpp	/^HourlySearchTermsContainer::~HourlySearchTermsContainer(){$/;"	f	class:HourlySearchTermsContainer
+~HourlyTVContainer	htlog_containers.cpp	/^HourlyTVContainer::~HourlyTVContainer(){$/;"	f	class:HourlyTVContainer
+~HourlyUserAgentEntityContainer	htlog_containers.cpp	/^HourlyUserAgentEntityContainer::~HourlyUserAgentEntityContainer(){$/;"	f	class:HourlyUserAgentEntityContainer
 ~HourlyVisitsContainer	htlog_containers.cpp	/^HourlyVisitsContainer::~HourlyVisitsContainer(){$/;"	f	class:HourlyVisitsContainer
 ~HttpAccessLogMetrics	htlog_processing.cpp	/^HttpAccessLogMetrics::~HttpAccessLogMetrics(){$/;"	f	class:HttpAccessLogMetrics
 ~KeyValueContainer	htlog_containers.cpp	/^KeyValueContainer::~KeyValueContainer() {$/;"	f	class:KeyValueContainer
 ~LogsMysql	htlog_mysql.cpp	/^LogsMysql::~LogsMysql(){$/;"	f	class:LogsMysql
 ~ParamsContainer	htlog_containers.cpp	/^ParamsContainer::~ParamsContainer(){$/;"	f	class:ParamsContainer
 ~TVectorContainer	htlog_containers.cpp	/^TVectorContainer::~TVectorContainer(){$/;"	f	class:TVectorContainer
+~Timer	htlog_timer.cpp	/^Timer::~Timer(){$/;"	f	class:Timer
 ~UAStore	htlog_uap.cpp	/^UAStore::~UAStore(){$/;"	f	class:UAStore
 ~UserAgentParser	htlog_uap.cpp	/^UserAgentParser::~UserAgentParser() {$/;"	f	class:UserAgentParser

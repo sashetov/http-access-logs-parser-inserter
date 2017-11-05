@@ -14,16 +14,11 @@
 #include "htlog_containers.hpp"
 #define LOG_SQL_STMTS 1
 std::string find_string_key_by_value( std::map<std::string, int>, int );
-struct st_worker_thread_param {
-  sql::Driver *driver;
-  sql::Connection *con;
-};
 class LogsMysql {
   public:
     LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password);
     ~LogsMysql();
-    void initThread();
-    void endThread();
+    sql::Connection *con;
     std::string getTsMysql( time_t ts );
     unsigned long getDomainsId(  std::string domain );
     unsigned long getUserId( unsigned long real_did );
@@ -53,8 +48,6 @@ class LogsMysql {
     std::string password;
     std::string mysql_url;
     std::string domain_name;
-    sql::Driver * driver;
-    struct st_worker_thread_param handler;
     void buildAndRunHourlyUAEQuery(std::string aeph_table, std::string entity_id_name, std::map<HourlyUserAgentEntityContainer,int> uae_ph, unsigned long real_did, std::map<KeyValueContainer, unsigned long> user_agent_entity_ids );
     time_t roundTsToDay( time_t ts_full );
     time_t getTomorrowMidnight( time_t ts_full);

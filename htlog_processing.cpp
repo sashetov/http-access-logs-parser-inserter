@@ -3,6 +3,7 @@
 extern std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, dirname, logfile;
 extern std::vector<SearchEngineContainer> search_hosts;
 extern std::vector<std::string> filenames;
+extern sql::Driver * driver;
 //PTHREADS
 std::mutex m_tid, m_nc;
 Timer * threads_timer = new Timer();
@@ -31,7 +32,7 @@ void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {
       hMetrics.logsScan( ); 
       hMetrics.timer->stop("logsScan");
       hMetrics.insertEntities( );
-      hMetrics.timer->printAllDurationsSorted();
+      //hMetrics.timer->printAllDurationsSorted();
     }
     threads_timer->stop(filename);
   }
@@ -51,7 +52,7 @@ void start_thread_pool( int tpool_size, int ttotal, int &tid, int& ncompleted ){
     std::string nc_ineq = (ncompleted == ttotal) ? "==" : (ncompleted < ttotal) ?"<":">";
     std::cerr<<"ncompleted: "<<ncompleted<<nc_ineq<<ttotal<<" tid: "<<tid<<tid_ineq<<ttotal<<std::endl;
   }
-  threads_timer->printAllDurationsSorted();
+  //threads_timer->printAllDurationsSorted();
 }
 std::string getHostnameFromLogfile( std::string filename ){
   std::string hostname = "";
@@ -86,11 +87,11 @@ void print_url_parts( url_parts up ){
     <<std::endl;
 }
 HttpAccessLogMetrics::HttpAccessLogMetrics( std::string user_host, std::vector<SearchEngineContainer> search_hosts, std::string file ) : lm(user_host,mysql_hostname,std::stoi(mysql_port_num),mysql_user,mysql_password){
-  std::cerr<<"thread "<<std::this_thread::get_id()<<":"<<" processing "<<filename<<std::endl;
+  //std::cerr<<"thread "<<std::this_thread::get_id()<<":"<<" processing "<<filename<<std::endl;
   search_engines = search_hosts;
   lines_failed=0;
   lines_processed=0;
-  lm.initThread();
+  driver->threadInit();
   real_did = lm.getDomainsId(user_host);
   internal_hostnames = lm.getUserHostnames( real_did );
   uid = lm.getUserId( real_did );
@@ -98,7 +99,7 @@ HttpAccessLogMetrics::HttpAccessLogMetrics( std::string user_host, std::vector<S
   timer = new Timer();
 }
 HttpAccessLogMetrics::~HttpAccessLogMetrics(){
-  lm.endThread();
+  driver->threadEnd();
   delete timer;
 }
 unsigned long HttpAccessLogMetrics::getDomainId(){

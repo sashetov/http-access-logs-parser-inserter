@@ -38,12 +38,12 @@ void loadSearchEngines( std::vector<SearchEngineContainer> &search_engines, std:
         throw std::runtime_error("badly formatted search engine line:\n"+line);
       }
       se = line.substr(0,found);
-      std::cerr<<"search engine hostname: "<<se<<std::endl;
+      //std::cerr<<"search engine hostname: "<<se<<std::endl;
       qps = line.substr( found+1, line.length()-found-1 );
       while ((found =(int) qps.find_first_of(" ")) != -1){
         qp = qps.substr( 0, found );
         sec.query_params.push_back( qp );
-        std::cerr<<"query params string for "<<se<<": "<<qp<<std::endl;
+        //std::cerr<<"query params string for "<<se<<": "<<qp<<std::endl;
         if( found+1 < (int)qps.length() ){
           qps = qps.substr( found + 1, line.length()-found-1 );
         }
