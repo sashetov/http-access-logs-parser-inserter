@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
   Timer * main_timer = new Timer();
   main_timer->start("main");
   int tid=0, ncompleted=0;
-  start_thread_pool(num_threads,filenames.size(),std::ref(tid), std::ref(ncompleted));
+  start_thread_pool( num_threads, filenames.size(), std::ref(tid), std::ref(ncompleted) );
   main_timer->stop("main");
   main_timer->printAllDurationsSorted();
   return 0;

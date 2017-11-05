@@ -18,7 +18,6 @@ class LogsMysql {
   public:
     LogsMysql(std::string domain, std::string mysql_host, int mysql_port, std::string mysql_user, std::string mysql_password);
     ~LogsMysql();
-    sql::Connection *con;
     std::string getTsMysql( time_t ts );
     unsigned long getDomainsId(  std::string domain );
     unsigned long getUserId( unsigned long real_did );
@@ -41,8 +40,10 @@ class LogsMysql {
     void insertLocationsPerHour( std::map<HourlyLocationsContainer,int> locations, unsigned long real_did, std::map<std::string,unsigned long> locations_ids );
     void insertSearchTermsPerHour( std::map<HourlySearchTermsContainer,int> search_terms, unsigned long real_did, std::map<std::string,unsigned long> page_paths_full_ids, std::map<KeyValueContainer,unsigned long> search_terms_ids, std::map<std::string,unsigned long> referer_hostnames_ids );
     void insertAllPerDay( unsigned long real_did, time_t ts  );
+    void insertCompletedRanges( unsigned long real_did, time_t ts );
   private:
     std::string host;
+    sql::Connection *con;
     int port;
     std::string username;
     std::string password;

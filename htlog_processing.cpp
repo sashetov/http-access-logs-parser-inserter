@@ -4,9 +4,9 @@ extern std::string mysql_hostname, mysql_port_num, mysql_user, mysql_password, d
 extern std::vector<SearchEngineContainer> search_hosts;
 extern std::vector<std::string> filenames;
 extern sql::Driver * driver;
-//PTHREADS
-std::mutex m_tid, m_nc;
 Timer * threads_timer = new Timer();
+//PTHREADS
+std::mutex m_tid, m_nc, m_timer;
 void inc_tid( int & tid ) {
   std::lock(m_tid, m_nc);
   std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
@@ -19,12 +19,20 @@ void inc_nc( int & ncompleted ) {
   std::lock_guard<std::mutex> lk_n(m_nc,  std::adopt_lock);
   ncompleted++;
 }
+void start_shared_timer(std::string name) {
+  std::lock_guard<std::mutex> lk_timer(m_timer, std::adopt_lock);
+  threads_timer->start(name);
+}
+void stop_shared_timer(std::string name) {
+  std::lock_guard<std::mutex> lk_timer(m_timer, std::adopt_lock);
+  threads_timer->stop(name);
+}
 void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {
-  std::thread( inc_tid, std::ref( tid) ).join();
+  std::thread( inc_tid, std::ref(tid) ).join();
   std::lock_guard<std::mutex> lk_id(m_tid, std::adopt_lock);
-  if(tid < ttotal){
+  if( tid < ttotal ){
     std::string filename = dirname+"/"+filenames[tid];
-    threads_timer->start(filename);
+    std::thread( start_shared_timer, filename ).join();
     std::string user_hostname = getHostnameFromLogfile(filename);
     HttpAccessLogMetrics hMetrics = HttpAccessLogMetrics( user_hostname, search_hosts, filename );
     if( hMetrics.getDomainId() != 0 ) {
@@ -34,7 +42,7 @@ void spawn_if_ready(int ttotal, int &tid, int &ncompleted) {
       hMetrics.insertEntities( );
       //hMetrics.timer->printAllDurationsSorted();
     }
-    threads_timer->stop(filename);
+    std::thread( stop_shared_timer, filename ).join();
   }
   std::thread( inc_nc, std::ref(ncompleted) ).join();
   std::lock_guard<std::mutex> lk_n(m_nc, std::adopt_lock);
@@ -48,9 +56,9 @@ void start_thread_pool( int tpool_size, int ttotal, int &tid, int& ncompleted ){
   }
   while( ncompleted < ttotal ) { // wait out in this thread till completion
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    std::string tid_ineq = (tid == ttotal) ? "==" : (tid < ttotal) ?"<":">";
-    std::string nc_ineq = (ncompleted == ttotal) ? "==" : (ncompleted < ttotal) ?"<":">";
-    std::cerr<<"ncompleted: "<<ncompleted<<nc_ineq<<ttotal<<" tid: "<<tid<<tid_ineq<<ttotal<<std::endl;
+    //std::string tid_ineq = (tid == ttotal) ? "==" : (tid < ttotal) ?"<":">";
+    //std::string nc_ineq = (ncompleted == ttotal) ? "==" : (ncompleted < ttotal) ?"<":">";
+    //std::cerr<<"ncompleted: "<<ncompleted<<nc_ineq<<ttotal<<" tid: "<<tid<<tid_ineq<<ttotal<<std::endl;
   }
   //threads_timer->printAllDurationsSorted();
 }
@@ -440,6 +448,7 @@ void HttpAccessLogMetrics::insertEntities(){
   timer->start("insertReferersPerHour"); lm.insertReferersPerHour( referers_per_hour, real_did, page_paths_full_ids, referer_hostnames_ids ); timer->stop("insertReferersPerHour");
   timer->start("insertSearchTermsPerHour"); lm.insertSearchTermsPerHour( search_terms_per_hour, real_did, page_paths_full_ids, search_queries_ids, referer_hostnames_ids); timer->stop("insertSearchTermsPerHour");
   timer->start("insertAllPerDay"); lm.insertAllPerDay( real_did,  log_ts ); timer->stop("insertAllPerDay");
+  timer->start("insertCompletedRanges"); lm.insertCompletedRanges(real_did,log_ts); timer->stop("insertCompletedRanges");
 }
 url_parts HttpAccessLogMetrics::getUrlParts( std::string url_string, bool is_referer ){
   std::string proto,path_noproto,hostname,page_path,params_str;

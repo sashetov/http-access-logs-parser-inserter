@@ -722,6 +722,27 @@ void LogsMysql::insertAllPerDay( unsigned long real_did, time_t ts ){
     std::cerr<< "LogsMysql::insertAllPerDay caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
   }
 }
+void LogsMysql::insertCompletedRanges( unsigned long real_did, time_t ts ){
+  try {
+    std::string database = "httpstats_jobs";
+    std::string table_hours = "stats_completed_ranges_hrs";
+    std::string table_days = "stats_completed_ranges_days";
+    time_t st = roundTsToDay(ts);
+    time_t et = getTomorrowMidnight(ts);
+    std::string st_ts= getTsMysql(st);
+    std::string et_ts= getTsMysql(et);
+    std::string insert_sql_hourly = "INSERT IGNORE INTO "+database+"."+table_hours+"(domains_id,start_ts,end_ts) VALUES( "+std::to_string(real_did)+",'"+st_ts+"','"+et_ts+"');";
+    std::string insert_sql_daily= "INSERT IGNORE INTO "+database+"."+table_days+"(domains_id,start_ts,end_ts) VALUES( "+std::to_string(real_did)+",'"+st_ts+"','"+et_ts+"');";
+    boost::scoped_ptr< sql::Connection > conn(driver->connect(mysql_url, username, password));
+    con = conn.get();
+    boost::scoped_ptr< sql::Statement > stmt(con->createStatement());
+    runQuery(stmt,insert_sql_hourly);
+    runQuery(stmt,insert_sql_daily);
+  }
+  catch (sql::SQLException &e) {
+    std::cerr<< "LogsMysql::insertAllPerDay caught exception: " << e.what() << " (MySQL error code: " << e.getErrorCode() << ", SQLState: " << e.getSQLState() << " )\n";
+  }
+}
 void LogsMysql::buildAndRunHourlyUAEQuery(std::string aeph_table, std::string entity_id_name, std::map<HourlyUserAgentEntityContainer,int> uae_ph, unsigned long real_did, std::map<KeyValueContainer, unsigned long> user_agent_entity_ids ){
   try {
     std::string database = "httpstats_clients";
