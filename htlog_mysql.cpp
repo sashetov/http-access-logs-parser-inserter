@@ -30,28 +30,28 @@ std::string LogsMysql::getTsMysql( time_t ts ){
 }
 unsigned long LogsMysql::getDomainsId(  std::string domain ){
   unsigned long possible_did=0, real_did=0;
-  std::string database = "cluster";
+  std::string database = "httpstats_domains";
   try {
     boost::scoped_ptr< sql::Connection > conn(driver->connect(mysql_url, username, password));
     con = conn.get();
     con->setSchema(database);
     boost::scoped_ptr< sql::Statement > stmt(con->createStatement());
     sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(con);
-    std::string sql= "SELECT did FROM domains where domain_name ='"+ mysql_conn->escapeString(domain) + "' LIMIT 1;";
+    std::string sql= "SELECT id FROM domains where name ='"+ mysql_conn->escapeString(domain) + "' LIMIT 1;";
     boost::scoped_ptr< sql::ResultSet > res( runSelectQuery( stmt, sql ) );
     if (res->next()) {
-      possible_did = (unsigned long)res->getUInt("did");
+      possible_did = (unsigned long)res->getUInt("id");
     }
     else {
-      throw std::runtime_error("could not find a possible did for hostname: '"+domain+"'");
+      throw std::runtime_error("could not find a possible id for hostname: '"+domain+"'");
     }
-    sql = "SELECT d1.did as real_did FROM domains d1 JOIN domains d2 on d1.did=d2.alias_of WHERE d1.alias_of=0 AND d1.did="+std::to_string(possible_did)+" OR d2.did="+std::to_string(possible_did)+" LIMIT 1;";
+    sql = "SELECT d1.id as real_did FROM domains d1 JOIN domains d2 on d1.id=d2.alias_of WHERE d1.alias_of=0 AND d1.id="+std::to_string(possible_did)+" OR d2.id="+std::to_string(possible_did)+" LIMIT 1;";
     res.reset(runSelectQuery(stmt,sql));
     if ( res->next() ) {
       real_did =  (unsigned long)res->getUInt("real_did");
     }
     else {
-      throw std::runtime_error("could not find a real did for hostname: '"+domain+"'"); 
+      throw std::runtime_error("could not find a real id for hostname: '"+domain+"'"); 
     }
   }
   catch (std::exception &e) {
@@ -61,14 +61,14 @@ unsigned long LogsMysql::getDomainsId(  std::string domain ){
 }
 unsigned long LogsMysql::getUserId( unsigned long real_did ){
   unsigned long uid=0;
-  std::string database = "cluster";
+  std::string database = "httpstats_domains";
   try {
     boost::scoped_ptr< sql::Connection > conn(driver->connect(mysql_url, username, password));
     con = conn.get();
     con->setSchema(database);
     boost::scoped_ptr< sql::Statement > stmt(con->createStatement());
     sql::mysql::MySQL_Connection * mysql_conn = dynamic_cast<sql::mysql::MySQL_Connection*>(con);
-    std::string sql= "SELECT uid FROM domains where did ="+ mysql_conn->escapeString(std::to_string(real_did))+ ";";
+    std::string sql= "SELECT uid FROM domains where id ="+ mysql_conn->escapeString(std::to_string(real_did))+ ";";
     boost::scoped_ptr< sql::ResultSet > res(runSelectQuery(stmt,sql));
     while (res->next()) {
       uid = (unsigned long)res->getUInt("uid");
@@ -103,17 +103,17 @@ void LogsMysql::runQuery(boost::scoped_ptr< sql::Statement > & stmt, std::string
   }
 }
 std::vector<std::string> LogsMysql::getUserHostnames( unsigned long real_did ){
-  std::string database = "cluster";
+  std::string database = "httpstats_domains";
   std::vector<std::string> internal_hostnames;
   try {
     boost::scoped_ptr< sql::Connection > conn(driver->connect(mysql_url, username, password));
     con = conn.get();
     con->setSchema(database);
     boost::scoped_ptr< sql::Statement > stmt(con->createStatement());
-    std::string all_domains_real_first_sql = "SELECT domain_name FROM domains WHERE alias_of="+ std::to_string(real_did)+ " OR did="+ std::to_string(real_did)+ " ORDER BY alias_of ASC;";
+    std::string all_domains_real_first_sql = "SELECT name FROM domains WHERE alias_of="+ std::to_string(real_did)+ " OR id="+ std::to_string(real_did)+ " ORDER BY alias_of ASC;";
     boost::scoped_ptr< sql::ResultSet > res( runSelectQuery( stmt, all_domains_real_first_sql) );
     while (res->next()) {
-      std::string domain = res->getString("domain_name");
+      std::string domain = res->getString("name");
       internal_hostnames.push_back(domain);
     }
   } catch (sql::SQLException &e) {
