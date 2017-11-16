@@ -1,4 +1,4 @@
-export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig'
+export PKG_CONFIG_PATH='/opt/mysql-server/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig/'
 LANGUAGE_FLAGS=-std=c++11 -fstrict-aliasing
 FORMAT_FLAGS=-fmessage-length=0 -fdiagnostics-color=always
 STACKTRACE_FLAGS=-fno-omit-frame-pointer -fno-optimize-sibling-calls
@@ -13,11 +13,10 @@ SANITIZE_UNDEF_FLAGS=-fsanitize=undefined -fsanitize=shift -fsanitize=integer-di
 SANITIZE_ADDR_FLAGS=-fsanitize=address
 CXXFLAGS=$(LANGUAGE_FLAGS) $(FORMAT_FLAGS) $(STACKTRACE_FLAGS) $(WARNING_FLAGS) $(COMPILE_FLAGS_DEV) $(DEBUG_FLAGS) $(PTHREAD_FLAGS) $(SANITIZE_UNDEF_FLAGS) $(SANITIZE_ADDR_FLAGS) 
 SANITIZE_ADDR_LDFLAGS=-L/usr/local/lib64/ -Wl,-R/usr/local/lib64/ -lasan
-GEOIP_LDFLAGS=-L/usr/local/lib/ -lgeolite2++ -lmaxminddb
+GEOIP_LDFLAGS=`pkg-config --libs --cflags libmaxminddb`
 UAP_LDFLAGS=-lboost_regex -lyaml-cpp
-#MYSQL_C_INCLUDE=-I/opt/mysql-server/include/
-#MYSQL_C_CONN_LDFLAGS=-L/opt/mysql-server/lib/ -lmysqlclient -lpthread -lz -lm -ldl
-MYSQL_CPP_CONN_LDFLAGS=-lmysqlcppconn
+MYSQL_CPP_CONN_LDFLAGS=-L/usr/local/lib -lmysqlcppconn
+INCLUDEPATH=-I`pwd`/ -I/usr/local/include/cppconn/ -I/usr/local/include/
 LDFLAGS=$(SANITIZE_ADDR_LDFLAGS) $(GEOIP_LDFLAGS) $(UAP_LDFLAGS) $(MYSQL_CPP_CONN_LDFLAGS)
 all: dump_cpp_vars tags clean test_progs test
 readme:
@@ -27,7 +26,7 @@ clean_local:
 tags:
 	ctags --language-force=c++ *.h *.cpp *.hpp
 cloudstats: clean_local tags
-	$(CXX) $(CXXFLAGS) *.cpp -o cloudstats $(LDFLAGS)
+	$(CXX) $(INCLUDEPATH) $(CXXFLAGS) *.cpp -o cloudstats $(LDFLAGS)
 transfer:
 	./tools/transfer.sh
 cloudstats_and_transfer: cloudstats readme transfer

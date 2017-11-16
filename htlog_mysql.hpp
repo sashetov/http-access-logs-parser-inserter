@@ -11,6 +11,7 @@
 #include <chrono>
 #include <string.h>
 #include <time.h>
+#include <vector>
 #include "htlog_containers.hpp"
 #define LOG_SQL_STMTS 1
 std::string find_string_key_by_value( std::map<std::string, int>, int );

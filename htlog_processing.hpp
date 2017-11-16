@@ -5,6 +5,7 @@
 #include <vector>
 #include <thread>
 #include <fstream>
+#include <mutex>
 #include <arpa/inet.h>
 #include <iostream>
 #include <GeoLite2PP.hpp>
